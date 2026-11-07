@@ -1,0 +1,11 @@
+{
+  "boundary": "|=•'CONSULTA'•=|»",
+  "action_word": "CONSULTA",
+  "emisor": "DIRECTOR",
+  "destinatario": "TODOS",
+  "timestamp": "2026-11-05T01:45:00Z",
+  "payload": {
+    "asunto": "Prueba de Integridad Salón v3.0",
+    "contenido": "Mensaje de prueba inicial para validar el ruteo e historial."
+  }
+}

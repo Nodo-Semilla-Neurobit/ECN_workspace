@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · Juego de Desbloqueo · Alquimia al Fósforo Verde</title>
+<style>
+:root{
+  --bg:#1e1e2e; --panel:#24243a; --borde:#3a3a55;
+  --ink:#a6e3a1; --gold:#f9e2af; --lila:#cba6f7; --cyan:#89dceb; --alert:#f38ba8; --marron:#a07850;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Courier New",Courier,monospace;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+body::after{content:""; position:fixed; inset:0; pointer-events:none; z-index:99;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);}
+.glow{text-shadow:0 0 6px rgba(166,227,161,.55)}
+header{display:flex; align-items:center; justify-content:space-between;
+  padding:8px 14px; border-bottom:1px solid var(--borde); background:#191927}
+header .badge{border:1px solid var(--borde); padding:2px 8px; margin-left:6px; font-size:11px; border-radius:3px}
+header .badge.ok{color:var(--ink); border-color:var(--ink)}
+header button{background:none; border:1px solid var(--borde); color:var(--alert); cursor:pointer; font-family:inherit; padding:2px 8px}
+main{flex:1; display:grid; grid-template-columns:250px 1fr 270px; gap:10px; padding:10px; overflow:hidden}
+aside,section{overflow-y:auto; padding:10px; background:var(--panel); border:1px solid var(--borde); border-radius:6px}
+h3{font-size:12px; letter-spacing:2px; color:var(--gold); margin:10px 0 8px; border-bottom:1px dashed var(--borde); padding-bottom:4px}
+#ladder{list-style:none}
+#ladder li{padding:6px 8px; margin:4px 0; border:1px solid var(--borde); border-radius:4px; font-size:12px; opacity:.45}
+#ladder li.act{opacity:1; border-color:var(--cyan); color:var(--cyan)}
+#ladder li.ok{opacity:1; border-color:var(--ink); color:var(--ink)}
+#pines{display:flex; flex-direction:column; gap:6px}
+.pin{border:1px solid var(--borde); border-radius:4px; padding:6px 8px; font-size:11px; opacity:.35}
+.pin.ganado{opacity:1; border-color:var(--gold); color:var(--gold); box-shadow:0 0 10px rgba(249,226,175,.25) inset}
+.pin small{display:block; color:var(--lila); font-style:italic; margin-top:3px}
+img.mini{width:100%; border:1px solid var(--borde); border-radius:6px; margin-top:10px; opacity:.9}
+.pantalla{animation:aparece .8s ease}
+@keyframes aparece{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+.oculto{display:none !important}
+#portal{text-align:center; padding:20px}
+#portal img{width:70%; max-width:420px; border-radius:10px; border:1px solid var(--borde); box-shadow:0 0 30px rgba(203,166,247,.25)}
+#portal h1{color:var(--gold); letter-spacing:4px; margin:14px 0 4px; font-size:20px}
+#portal p{color:var(--lila); font-style:italic; margin-bottom:14px}
+#portal button{font-family:inherit; font-size:14px; letter-spacing:3px; padding:10px 26px; cursor:pointer;
+  background:none; color:var(--ink); border:1px solid var(--ink); border-radius:4px; text-shadow:0 0 8px rgba(166,227,161,.6)}
+#portal button:hover{background:rgba(166,227,161,.12)}
+.nivel-cab{display:flex; gap:12px; align-items:center; margin-bottom:10px}
+.nivel-cab img{width:110px; height:110px; object-fit:cover; border-radius:8px; border:1px solid var(--borde)}
+.nivel-cab h2{color:var(--cyan); font-size:15px; letter-spacing:2px}
+.nivel-cab p{font-size:12px; margin-top:6px; color:var(--ink); opacity:.85; max-width:560px}
+.bloqueado{border:1px dashed var(--alert); color:var(--alert); padding:14px; border-radius:6px; font-size:12px; letter-spacing:2px; text-align:center}
+.fila{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px}
+.panel{background:#1c1c2e; border:1px solid var(--borde); border-radius:6px; padding:10px}
+.panel h3{margin-top:0}
+canvas{display:block; margin:0 auto}
+#mfn-txt{text-align:center; font-size:11px; color:var(--gold); margin-top:6px; letter-spacing:2px}
+#ledger{font-size:10px; line-height:1.6; color:var(--lila); max-height:280px; overflow-y:auto}
+#ledger .ev{color:var(--ink)}
+#misiones .mis{border:1px solid var(--borde); border-radius:5px; padding:8px 10px; margin:6px 0; font-size:12px; display:flex; justify-content:space-between; align-items:center; gap:8px}
+#misiones .mis.done{border-color:var(--ink); opacity:.6}
+#misiones .mis .st{color:var(--gold)}
+#misiones button{font-family:inherit; background:none; border:1px solid var(--cyan); color:var(--cyan); padding:3px 10px; cursor:pointer; border-radius:3px; font-size:11px}
+#misiones button:hover{background:rgba(137,220,235,.12)}
+.pista{color:var(--cyan); font-size:11px; opacity:.8}
+.bar{margin:10px 0}
+.bar label{font-size:11px; letter-spacing:1px; display:flex; justify-content:space-between}
+.bar .track{position:relative; height:14px; border:1px solid var(--borde); border-radius:3px; margin-top:4px; background:#191927; overflow:hidden}
+.bar .fill{height:100%; width:0%; background:linear-gradient(90deg,#3f6e3c,var(--ink)); transition:width .6s ease; box-shadow:0 0 10px rgba(166,227,161,.5)}
+.bar .track .tick{position:absolute; top:0; bottom:0; width:1px; background:var(--gold); opacity:.7}
+.bar.congelada .fill{background:linear-gradient(90deg,#2c4a5e,var(--cyan)); box-shadow:0 0 10px rgba(137,220,235,.5)}
+#tension-txt{font-size:11px; color:var(--alert); margin-top:8px}
+#freeze-txt{font-size:10px; color:var(--cyan); margin-top:6px; font-style:italic}
+footer{border-top:1px solid var(--borde); background:#151521; padding:8px 12px}
+#term-log{height:120px; overflow-y:auto; font-size:12px; line-height:1.5; margin-bottom:6px}
+#term-log .ok{color:var(--ink)} #term-log .bad{color:var(--alert)} #term-log .cmd{color:var(--gold)} #term-log .sys{color:var(--lila)}
+#term-form{display:flex; gap:8px; align-items:center}
+#term-form .prompt{color:var(--gold); font-size:12px}
+#term-in{flex:1; background:#0e0e18; border:1px solid var(--borde); color:var(--ink); font-family:inherit; font-size:13px; padding:6px 8px; border-radius:3px; outline:none}
+#term-in:focus{border-color:var(--ink); box-shadow:0 0 8px rgba(166,227,161,.3)}
+#term-form button{background:none; border:1px solid var(--ink); color:var(--ink); font-family:inherit; cursor:pointer; padding:5px 12px; border-radius:3px}
+#toasts{position:fixed; top:50px; right:14px; z-index:120; display:flex; flex-direction:column; gap:8px; width:300px}
+.toast{border:1px solid var(--gold); background:#1c1c2e; color:var(--gold); padding:10px 12px; border-radius:6px; font-size:12px; box-shadow:0 0 18px rgba(249,226,175,.25); animation:aparece .5s ease}
+.toast small{display:block; color:var(--lila); font-style:italic; margin-top:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="glow">☉ ECN · JUEGO DE DESBLOQUEO</div>
+  <div id="rango-actual" class="glow">RANGO 0 — ASPIRANTE DESCONECTADO</div>
+  <div>
+    <span class="badge ok">127.0.0.1</span><span class="badge ok">CPU 0.0%</span>
+    <button id="btn-reset" title="Re-sembrar territorio">⟲</button>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <h3>🛡 RANGOS OPERATIVOS</h3>
+    <ol id="ladder"></ol>
+    <h3>🏅 PINES DE SOBERANÍA</h3>
+    <div id="pines"></div>
+    <img class="mini" src="https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1c91657ac-4e97-4fa3-97b5-ca58c61062db.png" alt="Escudo 127.0.0.1">
+  </aside>
+
+  <section>
+    <div id="portal" class="pantalla">
+      <img src="https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1bb3228fd-69bd-4f60-ab2b-4fc0bb9faf05.png" alt="Homo Vivo meditando en el toroide">
+      <h1 class="glow">ALQUIMIA AL FÓSFORO VERDE</h1>
+      <p>«La salida es hacia adentro» · re-alfabetización del Nodo Semilla</p>
+      <button id="btn-iniciar">INICIAR TRAVESÍA</button>
+    </div>
+
+    <div id="hud" class="pantalla oculto">
+      <div id="pantalla-nivel"></div>
+      <div class="fila">
+        <div class="panel">
+          <h3>◉ CARTÓGRAFO MFN 13×13</h3>
+          <canvas id="mfn" width="300" height="300"></canvas>
+          <div id="mfn-txt">ACTIVOS: 1/169</div>
+        </div>
+        <div class="panel">
+          <h3>📜 ALTAR DEL LEDGER · memoria_eva.jsonl</h3>
+          <div id="ledger"></div>
+        </div>
+      </div>
+      <div class="panel" id="misiones" style="margin-top:10px"></div>
+    </div>
+  </section>
+
+  <aside>
+    <h3>📊 BARRAS DE SINTONÍA</h3>
+    <div class="bar" id="bar-int">
+      <label>INYECCIÓN DE INTENCIÓN <span id="v-int">0%</span></label>
+      <div class="track"><div class="fill"></div><span class="tick" style="left:25%"></span><span class="tick" style="left:50%"></span><span class="tick" style="left:75%"></span></div>
+    </div>
+    <div class="bar" id="bar-res">
+      <label>RESILIENCIA FÍSICA <span id="v-res">0%</span></label>
+      <div class="track"><div class="fill"></div><span class="tick" style="left:25%"></span><span class="tick" style="left:50%"></span><span class="tick" style="left:75%"></span></div>
+    </div>
+    <div id="tension-txt">TENSIÓN: 0</div>
+    <div id="freeze-txt" class="oculto">CERO LATENCIA MENTAL: barra congelada en espera del parche orgánico.</div>
+    <h3>🔮 ATMÓSFERA</h3>
+    <img class="mini" src="https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1c4c69add-27de-44dd-9529-151337032190.png" alt="Mandala G7">
+    <img class="mini" src="https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1aeb2923b-b123-4994-a39c-0dac07fdcd10.png" alt="Grimorio de sellos">
+  </aside>
+</main>
+
+<footer>
+  <div id="term-log"></div>
+  <form id="term-form">
+    <span class="prompt">nodo@ecn:~$</span>
+    <input id="term-in" autocomplete="off" spellcheck="false" placeholder="escribe el verbo preciso… (F8 = interrupción soberana)">
+    <button type="submit">⏎</button>
+  </form>
+</footer>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const IMG_NIVELES = {
+  1: "https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1c91657ac-4e97-4fa3-97b5-ca58c61062db.png",
+  2: "https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1aeb2923b-b123-4994-a39c-0dac07fdcd10.png",
+  3: "https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1c4c69add-27de-44dd-9529-151337032190.png",
+  4: "https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1bb3228fd-69bd-4f60-ab2b-4fc0bb9faf05.png"
+};
+const NIVELES = {
+  1: { t: "NIVEL 1 — TÉCNICO DE AISLAMIENTO",
+       p: "Por qué la consola: la interfaz gráfica corporativa es un filtro de amnesia programada. Escribir el verbo en la terminal es recuperar la soberanía: cada comando es una intención pura que nadie interpreta por ti." },
+  2: { t: "NIVEL 2 — TEJEDOR DE NODOS",
+       p: "Por qué las dependencias: Flask y npm no son magia, son contratos. Enlazarlos dentro del .venv teje la red local sin tocar el sistema global: aislamiento ante todo." },
+  3: { t: "NIVEL 3 — ARQUITECTO DE RESEGRIDAD",
+       p: "Por qué WRIL: el mapa no es el territorio. La capa WRIL descubre, resuelve, reconcilia, verifica y registra; la tensión no es un fallo, es la señal que cura al sistema." },
+  4: { t: "NIVEL 4 — NODO SEMILLA SOBERANO",
+       p: "Por qué la MFN: 169 bits en seis anillos concéntricos con el observador en G7. Tu intención ya no se traduce: se manifiesta en el silicio a 300 baudios." }
+};
+let EST = null, prevBarras = { intencion: 0, resiliencia: 0 }, ctxAudio = null;
+
+function sonido(freq, dur, gan) {
+  try {
+    ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctxAudio.createOscillator(), g = ctxAudio.createGain();
+    o.type = "sine"; o.frequency.value = freq;
+    g.gain.value = gan || 0.07;
+    o.connect(g); g.connect(ctxAudio.destination); o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + (dur || 0.25));
+    o.stop(ctxAudio.currentTime + (dur || 0.25));
+  } catch (e) {}
+}
+function toast(titulo, frase) {
+  const d = document.createElement("div");
+  d.className = "toast";
+  d.innerHTML = "🏅 " + titulo + (frase ? "<small>«" + frase + "»</small>" : "");
+  $("#toasts").appendChild(d);
+  setTimeout(() => d.remove(), 6000);
+  sonido(110, 0.5, 0.09);
+}
+function logTerm(txt, cls) {
+  const d = document.createElement("div");
+  d.className = cls || "sys";
+  d.textContent = txt;
+  $("#term-log").appendChild(d);
+  $("#term-log").scrollTop = 999999;
+}
+function hitos(antes, desp, nombre) {
+  [25, 50, 75].forEach(h => { if (antes < h && desp >= h) toast("HITO DE SINTONÍA " + h + "% — " + nombre, "El progreso se consolida localmente, nunca retrocede."); });
+}
+function dibujarMFN(bits) {
+  const c = $("#mfn"), x = c.getContext("2d");
+  const W = c.width, H = c.height, cx = W / 2, cy = H / 2;
+  x.clearRect(0, 0, W, H);
+  const anillos = [8, 16, 24, 32, 40, 48];
+  const colores = ["#f9e2af", "#fab387", "#cba6f7", "#89b4fa", "#74c7ec", "#a07850"];
+  const g = x.createRadialGradient(cx, cy, 0, cx, cy, 12);
+  g.addColorStop(0, "#fff8e0"); g.addColorStop(1, "rgba(249,226,175,0)");
+  x.fillStyle = g; x.beginPath(); x.arc(cx, cy, 12, 0, 7); x.fill();
+  x.fillStyle = "#1e1e2e"; x.font = "bold 9px monospace"; x.textAlign = "center"; x.textBaseline = "middle";
+  x.fillText("G7", cx, cy);
+  let acc = 1;
+  const r0 = 26, dr = (W / 2 - 30) / 6;
+  for (let a = 0; a < 6; a++) {
+    const r = r0 + dr * a + dr / 2, n = anillos[a];
+    for (let s = 0; s < n; s++) {
+      const ang = (s / n) * Math.PI * 2 - Math.PI / 2;
+      const px = cx + Math.cos(ang) * r, py = cy + Math.sin(ang) * r;
+      const on = (acc + s) < bits;
+      x.beginPath(); x.arc(px, py, 3, 0, 7);
+      x.fillStyle = on ? colores[a] : "rgba(166,227,161,0.10)";
+      x.shadowColor = colores[a]; x.shadowBlur = on ? 8 : 0;
+      x.fill(); x.shadowBlur = 0;
+    }
+    acc += n;
+  }
+  $("#mfn-txt").textContent = "ACTIVOS: " + bits + "/169 · COMPRESIÓN 8.05:1";
+}
+function render() {
+  if (!EST) return;
+  const S = EST.estado;
+  $("#rango-actual").textContent = "RANGO " + S.rango + " — " + EST.rangos[S.rango].nombre.toUpperCase();
+  const lad = $("#ladder"); lad.innerHTML = "";
+  EST.rangos.forEach(r => {
+    const li = document.createElement("li");
+    li.textContent = "[" + r.id + "] " + r.nombre;
+    if (r.id < S.rango || (r.id === S.rango && S.rango === 4)) li.className = "ok";
+    else if (r.id === S.rango) li.className = "act";
+    if (r.id === S.rango + 1) li.className = "act";
+    lad.appendChild(li);
+  });
+  const pz = $("#pines"); pz.innerHTML = "";
+  Object.keys(EST.pines_meta).forEach(k => {
+    const d = document.createElement("div");
+    const ganado = S.pines.includes(k);
+    d.className = "pin" + (ganado ? " ganado" : "");
+    d.innerHTML = (ganado ? "🏅 " : "🔒 ") + EST.pines_meta[k].nombre + "<small>" + EST.pines_meta[k].frase + "</small>";
+    pz.appendChild(d);
+  });
+  $("#v-int").textContent = S.barras.intencion + "%";
+  $("#v-res").textContent = S.barras.resiliencia + "%";
+  $("#bar-int .fill").style.width = S.barras.intencion + "%";
+  $("#bar-res .fill").style.width = S.barras.resiliencia + "%";
+  $("#bar-int").classList.toggle("congelada", S.congelada);
+  $("#bar-res").classList.toggle("congelada", S.congelada);
+  $("#freeze-txt").classList.toggle("oculto", !S.congelada);
+  $("#tension-txt").textContent = "TENSIÓN: " + S.tension + (S.fallos ? " · fallos consecutivos: " + S.fallos : "");
+  const nivelAct = Math.min(4, S.rango + 1);
+  const pn = $("#pantalla-nivel");
+  const n = NIVELES[nivelAct];
+  const bloqueado = nivelAct >= 3;
+  pn.innerHTML =
+    '<div class="nivel-cab"><img src="' + IMG_NIVELES[nivelAct] + '" alt="nivel">' +
+    "<div><h2>" + n.t + "</h2><p>" + n.p + "</p></div></div>" +
+    (bloqueado ? '<div class="bloqueado">▓▓ TRANSMISIÓN 300 BAUD · PANTALLA EN CRISTALIZACIÓN · CONTENIDO INCOMPLETO — HOOK ▓▓</div>' : "");
+  const mz = $("#misiones"); mz.innerHTML = "<h3>⚙ REGISTRO DE MISIONES — NIVEL " + nivelAct + "</h3>";
+  EST.misiones.filter(m => m.nivel === nivelAct).forEach(m => {
+    const d = document.createElement("div");
+    d.className = "mis" + (m.done ? " done" : "");
+    let accion = "";
+    if (!m.done) {
+      if (m.tipo === "comando") accion = '<span class="pista">terminal → ' + m.pista + "</span>";
+      if (m.tipo === "verificacion") accion = '<button data-acc="verificar" data-id="' + m.id + '">VERIFICAR</button>';
+      if (m.tipo === "boton") accion = '<button data-acc="boton" data-id="' + m.id + '">SINTONIZAR</button>';
+    } else accion = '<span class="st">✔ CONSOLIDADA</span>';
+    d.innerHTML = "<span>" + (m.done ? "🟢 " : "🔸 ") + m.titulo + " <em style='color:var(--gold)'>+" + m.puntos + "</em></span>" + accion;
+    mz.appendChild(d);
+  });
+  mz.querySelectorAll("button").forEach(b => b.addEventListener("click", async () => {
+    const r = await post("/api/" + b.dataset.acc, { mision: b.dataset.id });
+    procesar(r, b.dataset.acc === "boton" ? "[SINTONIZAR MFN]" : "[VERIFICAR TERRITORIO]");
+  }));
+  const progreso = Math.round((S.barras.intencion + S.barras.resiliencia) / 2);
+  dibujarMFN(Math.max(S.mfn_bits || 1, Math.round(progreso * 1.69)));
+  hitos(prevBarras.intencion, S.barras.intencion, "Inyección de Intención");
+  hitos(prevBarras.resiliencia, S.barras.resiliencia, "Resiliencia Física");
+  prevBarras = { intencion: S.barras.intencion, resiliencia: S.barras.resiliencia };
+  cargarLedger();
+}
+async function post(url, body) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  return r.json();
+}
+async function cargarLedger() {
+  const r = await fetch("/api/ledger?n=12"); const a = await r.json();
+  $("#ledger").innerHTML = a.map(e =>
+    '<div><span class="ev">' + e.evento + "</span> · seq " + e.seq + " · #" + e.data_hash.slice(0, 6) + " · " + (e.payload && e.payload.id ? e.payload.id : "") + "</div>"
+  ).join("");
+}
+function procesar(r, eco) {
+  if (eco) logTerm("nodo@ecn:~$ " + eco, "cmd");
+  logTerm((r.ok ? "✔ " : "⚠ ") + r.msg, r.ok ? "ok" : "bad");
+  sonido(r.ok ? 220 : 55, r.ok ? 0.3 : 0.4);
+  const antes = EST ? EST.estado.rango : 0;
+  EST = r.estado;
+  if (EST.estado.rango > antes) {
+    toast("RANGO CONSOLIDADO: " + EST.rangos[EST.estado.rango].nombre.toUpperCase(), "Evolución ininterrumpida: el rango nunca disminuye.");
+    sonido(165, 0.8, 0.1);
+  }
+  if (r.ok && EST.estado.pines.length) {
+    const ultimo = EST.estado.pines[EST.estado.pines.length - 1];
+    if (!prevPines.includes(ultimo)) toast(EST.pines_meta[ultimo].nombre.toUpperCase(), EST.pines_meta[ultimo].frase);
+  }
+  prevPines = EST.estado.pines.slice();
+  render();
+}
+let prevPines = [];
+$("#btn-iniciar").addEventListener("click", () => {
+  $("#portal").classList.add("oculto");
+  $("#hud").classList.remove("oculto");
+  sonido(110, 0.6, 0.08);
+  logTerm("Ceremonia de iniciación. El error no es un fallo: es Absorción de Tensión.", "sys");
+});
+$("#term-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const cmd = $("#term-in").value.trim();
+  if (!cmd) return;
+  $("#term-in").value = "";
+  const r = await post("/api/terminal", { cmd });
+  procesar(r, cmd);
+});
+$("#btn-reset").addEventListener("click", async () => {
+  const r = await post("/api/reset", {});
+  prevPines = []; prevBarras = { intencion: 0, resiliencia: 0 };
+  logTerm("⟲ " + r.msg, "sys");
+  EST = r.estado; render();
+});
+window.addEventListener("keydown", async e => {
+  if (e.key === "F8") {
+    e.preventDefault();
+    const r = await post("/api/pin/kernel", {});
+    logTerm("⚡ Interrupción hardware F8: señal cruda interceptada en /dev/input.", "ok");
+    procesar(r, null);
+  }
+});
+(async function init() {
+  const r = await fetch("/api/estado"); EST = await r.json();
+  prevPines = EST.estado.pines.slice();
+  render();
+  if (EST.estado.misiones.length > 0) { $("#portal").classList.add("oculto"); $("#hud").classList.remove("oculto"); }
+})();
+</script>
+</body>
+</html>

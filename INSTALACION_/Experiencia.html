@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · Dojo del Verbo · Puente al Sistema Real</title>
+<link href="https://cdn.jsdelivr.net/fontsource/css/vt323@latest/index.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#1e1e2e; --panel:#24243a; --panel2:#1c1c2e; --borde:#3a3a55;
+  --ink:#a6e3a1; --gold:#f9e2af; --lila:#cba6f7; --cyan:#89dceb; --alert:#f38ba8; --marron:#a07850;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"VT323","Courier New",monospace;font-size:17px;overflow-x:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
+  padding:10px 16px;border-bottom:1px solid var(--borde);background:#191927}
+header .t{color:var(--gold);letter-spacing:2px;font-size:19px;text-shadow:0 0 10px rgba(249,226,175,.4)}
+.badge{border:1px solid var(--borde);padding:2px 8px;border-radius:3px;font-size:14px}
+.badge.ok{color:var(--ink);border-color:var(--ink)}
+.badge.warn{color:var(--alert);border-color:var(--alert)}
+main{display:grid;grid-template-columns:250px 1fr 280px;gap:10px;padding:10px;max-width:1500px;margin:0 auto}
+aside,section{background:var(--panel);border:1px solid var(--borde);border-radius:6px;padding:12px;overflow-y:auto}
+h3{font-size:15px;letter-spacing:2px;color:var(--gold);border-bottom:1px dashed var(--borde);padding-bottom:4px;margin:10px 0 8px}
+h3:first-child{margin-top:0}
+img.arte{width:100%;border:1px solid var(--borde);border-radius:6px;opacity:.92;margin:6px 0}
+#ladder{list-style:none}
+#ladder li{padding:6px 8px;margin:4px 0;border:1px solid var(--borde);border-radius:4px;opacity:.4}
+#ladder li.act{opacity:1;border-color:var(--cyan);color:var(--cyan)}
+#ladder li.ok{opacity:1;border-color:var(--ink)}
+.pin{border:1px solid var(--borde);border-radius:4px;padding:6px 8px;margin:5px 0;opacity:.35;font-size:14px}
+.pin.ganado{opacity:1;border-color:var(--gold);color:var(--gold);box-shadow:0 0 10px rgba(249,226,175,.2) inset}
+.pin small{display:block;color:var(--lila);font-style:italic}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tabs button{background:none;border:1px solid var(--borde);color:var(--ink);font-family:inherit;font-size:14px;
+  padding:5px 10px;cursor:pointer;border-radius:4px;letter-spacing:1px}
+.tabs button.act{border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 8px rgba(137,220,235,.25)}
+.sec{display:none}.sec.act{display:block}
+.mis{border:1px solid var(--borde);border-radius:5px;padding:10px;margin:8px 0;background:var(--panel2)}
+.mis.done{border-color:var(--ink);opacity:.75}
+.mis h4{color:var(--cyan);font-size:16px;letter-spacing:1px}
+.mis .cmd{display:block;background:#0e0e18;border:1px solid var(--borde);border-radius:4px;padding:6px 8px;margin:6px 0;color:var(--gold)}
+.mis .desc{font-size:14px;color:#cdd6f4;opacity:.85}
+.mis .saber{font-size:13px;color:var(--lila);font-style:italic;margin-top:6px}
+.mis .fila{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.mis button{background:none;border:1px solid var(--cyan);color:var(--cyan);font-family:inherit;font-size:13px;padding:4px 10px;cursor:pointer;border-radius:3px}
+.mis button:hover{background:rgba(137,220,235,.12)}
+.mis textarea{width:100%;margin-top:8px;background:#0e0e18;border:1px solid var(--borde);color:var(--ink);
+  font-family:inherit;font-size:13px;padding:6px;border-radius:4px;min-height:64px}
+.bar{margin:10px 0}
+.bar label{font-size:13px;display:flex;justify-content:space-between;letter-spacing:1px}
+.track{position:relative;height:13px;border:1px solid var(--borde);border-radius:3px;background:#191927;margin-top:4px;overflow:hidden}
+.fill{height:100%;width:0%;background:linear-gradient(90deg,#3f6e3c,var(--ink));transition:width .6s;box-shadow:0 0 10px rgba(166,227,161,.5)}
+.bar.congelada .fill{background:linear-gradient(90deg,#2c4a5e,var(--cyan))}
+.tick{position:absolute;top:0;bottom:0;width:1px;background:var(--gold);opacity:.7}
+#tension-txt{font-size:14px;color:var(--alert);margin-top:8px}
+#freeze{font-size:12px;color:var(--cyan);font-style:italic;margin-top:6px}
+#tipo-target{background:#0e0e18;border:1px solid var(--borde);border-radius:5px;padding:12px;font-size:20px;letter-spacing:1px;min-height:52px;word-break:break-all}
+#tipo-target .okc{color:var(--ink)} #tipo-target .badc{color:var(--alert);text-decoration:underline}
+#tipo-target .curc{background:var(--cyan);color:#11111b}
+#tipo-target .pendc{color:#6c7086}
+#tipo-input{width:100%;margin-top:8px;background:#0e0e18;border:1px solid var(--borde);color:var(--ink);
+  font-family:inherit;font-size:18px;padding:8px;border-radius:4px;outline:none}
+#tipo-input:focus{border-color:var(--ink);box-shadow:0 0 8px rgba(166,227,161,.3)}
+.stats{display:flex;gap:14px;font-size:14px;margin-top:8px;flex-wrap:wrap}
+.stats b{color:var(--gold)}
+#dict-box{border:1px solid var(--borde);border-radius:5px;padding:10px;background:var(--panel2)}
+#dict-buffer{min-height:70px;background:#0e0e18;border:1px solid var(--borde);border-radius:4px;padding:8px;margin-top:8px;color:var(--ink);word-break:break-all}
+#dict-status{font-size:14px}
+#dict-status.on{color:var(--ink);text-shadow:0 0 8px rgba(166,227,161,.6)}
+#ledger{font-size:12px;color:var(--lila);max-height:300px;overflow-y:auto;background:#0e0e18;border:1px solid var(--borde);border-radius:4px;padding:8px}
+#ledger .ev{color:var(--ink)}
+.puente-item{border:1px solid var(--borde);border-radius:4px;padding:7px 9px;margin:6px 0;font-size:13px}
+.puente-item b{color:var(--cyan)}
+.puente-item code{display:block;color:var(--gold);margin-top:3px}
+.probe{display:inline-block;margin-top:4px;font-size:12px;padding:1px 7px;border:1px solid var(--borde);border-radius:3px}
+.probe.up{color:var(--ink);border-color:var(--ink)}
+.probe.down{color:var(--alert);border-color:var(--alert)}
+button.grande{display:block;width:100%;margin:8px 0;background:none;border:1px solid var(--gold);color:var(--gold);
+  font-family:inherit;font-size:15px;letter-spacing:2px;padding:8px;cursor:pointer;border-radius:4px}
+button.grande:hover{background:rgba(249,226,175,.1)}
+#toasts{position:fixed;top:52px;right:14px;z-index:120;display:flex;flex-direction:column;gap:8px;width:320px}
+.toast{border:1px solid var(--gold);background:#1c1c2e;color:var(--gold);padding:10px 12px;border-radius:6px;font-size:14px;
+  box-shadow:0 0 18px rgba(249,226,175,.25);animation:ap .5s ease}
+.toast small{display:block;color:var(--lila);font-style:italic;margin-top:4px}
+@keyframes ap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+footer{padding:8px 16px;border-top:1px solid var(--borde);background:#191927;font-size:13px;color:#6c7086;text-align:center}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="t">☉ ECN · DOJO DEL VERBO · CAMINO DEL ASPIRANTE</p></div>
+  <div>
+    <span class="badge" id="rango-actual">[0] ASPIRANTE DESCONECTADO</span>
+    <span class="badge warn" id="estado-real">ESTACIÓN REAL: SONDEANDO…</span>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <h3>🛡 RANGOS OPERATIVOS</h3>
+    <ol id="ladder"></ol>
+    <h3>🏅 PINES DE SOBERANÍA</h3>
+    <div id="pines"></div>
+    <img class="arte" src="https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1d42d8c5c-0f9b-461b-9234-d6c88c88e4ca.png" alt="Grimorio del Ledger">
+  </aside>
+
+  <section>
+    <div class="tabs">
+      <button data-sec="sec-misiones" class="act">⚙ MISIONES REALES</button>
+      <button data-sec="sec-dojo">⌨ DOJO DE MECANOGRAFÍA</button>
+      <button data-sec="sec-dictafono">⚡ DICTÁFONO F8</button>
+      <button data-sec="sec-mfn">◉ CARTÓGRAFO MFN</button>
+      <button data-sec="sec-ledger">📜 LEDGER</button>
+    </div>
+
+    <div id="sec-misiones" class="sec act">
+      <p style="font-size:14px;opacity:.85">Cada misión exige el comando REAL de tu ECN. Copialo, ejecutalo en tu terminal verdadera, y pegá acá la evidencia. DECLARACIÓN ≠ REALIDAD: el Dojo verifica antes de consolidar.</p>
+      <div id="lista-misiones"></div>
+    </div>
+
+    <div id="sec-dojo" class="sec">
+      <h3>⌨ DOJO DE MECANOGRAFÍA SOBERANA</h3>
+      <p style="font-size:14px;opacity:.85">Calibrá tus dedos sobre el comando de la próxima misión. Precisión ≥ 90% habilita el envío a la terminal real. La escritura cursiva en papel sigue siendo sagrada: imprimí y copiá a mano al menos una vez.</p>
+      <div id="tipo-target"></div>
+      <input id="tipo-input" autocomplete="off" spellcheck="false" placeholder="escribí aquí el comando exacto…">
+      <div class="stats">
+        <span>PPM: <b id="tipo-ppm">0</b></span>
+        <span>PRECISIÓN: <b id="tipo-pre">100%</b></span>
+        <span>ESTADO: <b id="tipo-estado">PENDIENTE</b></span>
+      </div>
+    </div>
+
+    <div id="sec-dictafono" class="sec">
+      <h3>⚡ DICTÁFONO SOBERANO (espejo de neurobit_dictado_evdev.py)</h3>
+      <div id="dict-box">
+        <div id="dict-status">DAEMON EN REPOSO · 0.0% CPU · F8 abre/cierra la sesión</div>
+        <div id="dict-buffer"></div>
+        <p style="font-size:13px;opacity:.8;margin-top:8px">En tu máquina real, este espejo corresponde al daemon que captura /dev/input/by-id/ con tecla F8 y sella cartas en buzon_salida/. Aquí, al cerrar la sesión, tu texto se sella en el Ledger local: anti-pérdida ante cortes de energía.</p>
+      </div>
+    </div>
+
+    <div id="sec-mfn" class="sec">
+      <h3>◉ MATRIZ FRACTAL NEUROBITRÓNICA 13×13</h3>
+      <canvas id="mfn" width="320" height="320" style="display:block;margin:0 auto"></canvas>
+      <div id="mfn-txt" style="text-align:center;color:var(--gold);font-size:14px;margin-top:6px">ACTIVOS: 1/169 · c:G7 = OBSERVADOR</div>
+    </div>
+
+    <div id="sec-ledger" class="sec">
+      <h3>📜 LEDGER INMUTABLE (espejo de memoria_eva.jsonl)</h3>
+      <p style="font-size:14px;opacity:.85">Append-only, encadenado con SHA-256. Un corte de energía no borra: como máximo, queda la última línea sellada.</p>
+      <div id="ledger"></div>
+    </div>
+  </section>
+
+  <aside>
+    <h3>📊 BARRAS DE SINTONÍA</h3>
+    <div class="bar" id="bar-int"><label>INYECCIÓN DE INTENCIÓN <span id="v-int">0%</span></label>
+      <div class="track"><div class="fill" id="fill-int"></div><span class="tick" style="left:25%"></span><span class="tick" style="left:50%"></span><span class="tick" style="left:75%"></span></div></div>
+    <div class="bar" id="bar-res"><label>RESILIENCIA FÍSICA <span id="v-res">0%</span></label>
+      <div class="track"><div class="fill" id="fill-res"></div><span class="tick" style="left:25%"></span><span class="tick" style="left:50%"></span><span class="tick" style="left:75%"></span></div></div>
+    <div id="tension-txt">TENSIÓN: 0</div>
+    <div id="freeze" style="display:none">CERO LATENCIA MENTAL: barras congeladas en espera del parche orgánico.</div>
+    <button class="grande" id="btn-absorber">⚡ ABSORBER TENSIÓN</button>
+    <h3>🔌 PUENTE AL SISTEMA REAL</h3>
+    <div id="puente"></div>
+    <button class="grande" id="btn-probe">📡 SONDEAR ESTACIÓN REAL</button>
+    <img class="arte" src="https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1ef6dc962-3391-4300-bd0a-d5849300602b.png" alt="Homo Vivo en el toroide">
+  </aside>
+</main>
+
+<div id="toasts"></div>
+<footer>ECN v3.2 · localhost-first · 300 baudios · "La poesía de este sistema es su única verdad: sacar belleza de este caos es virtud."</footer>
+
+<script>
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
+var CLAVE="ecn_dojo_v1", CLAVE_LEDGER="ecn_dojo_ledger_v1";
+
+var RANGOS=["ASPIRANTE DESCONECTADO","TÉCNICO DE AISLAMIENTO","TEJEDOR DE NODOS","ARQUITECTO DE RESEGRIDAD","NODO SEMILLA SOBERANO"];
+var PINES={
+  cordon:{n:"Pin del Cordón Sanitario",f:"Entorno localhost aislado, verificado contra 127.0.0.1:5000."},
+  kernel:{n:"Pin Guardián del Kernel",f:"Primera sesión F8 sellada: la pulsación cruda quedó capturada."},
+  cirujano:{n:"Pin Cirujano de Texto",f:"Primer dry-run WRIL interpretado sin plegar el territorio."},
+  silencio:{n:"Pin del Silencio Sagrado",f:"La Estación quedó operando en reposo absoluto."},
+  fenix:{n:"Pin Fénix",f:"Tres caídas seguidas en la aduana: la tensión se volvió aprendizaje."}
+};
+var MISIONES=[
+ {id:"m1",nivel:1,t:"Coordenada de origen",cmd:"pwd",p:8,
+  d:"Todo aspirante debe saber dónde está parado. Ejecutalo en TU terminal.",
+  ev:{i:"Pegá la salida de pwd (una ruta absoluta)",rx:[/^\/.+/m]},
+  s:"No puedo operar un territorio que no sé ubicar."},
+ {id:"m2",nivel:1,t:"Cristalizar .venv",cmd:"python3 -m venv .venv",p:12,
+  d:"El perímetro de aislamiento. Luego verificá con: ls .venv",
+  ev:{i:"Pegá la salida de: ls .venv",rx:[/bin/,/pyvenv\.cfg/]},
+  s:"Mi máquina → mi entorno → mi proceso → mi puerto → mi dato."},
+ {id:"m3",nivel:1,t:"Activar el entorno",cmd:"source .venv/bin/activate",p:10,
+  d:"Dentro del entorno, el sistema global no te toca. Verificá con: which python3",
+  ev:{i:"Pegá la salida de: which python3",rx:[/\/\.venv\//]},
+  s:"El aislamiento no es cárcel: es membrana."},
+ {id:"m4",nivel:2,t:"Enlazar Flask",cmd:"pip install flask",p:12,
+  d:"El Hub Dinámico escuchará en 5000. Verificá con: python3 -c \"import flask; print(flask.__version__)\"",
+  ev:{i:"Pegá la versión impresa por flask",rx:[/\d+\.\d+/]},
+  s:"Un sistema no es un programa: es una red de componentes con contratos."},
+ {id:"m5",nivel:2,t:"Aduana del Hub Dinámico",cmd:"curl -s http://127.0.0.1:5000/health",p:12,
+  d:"Si tu ECN real está despierta, el Hub responde. Si no, pegá el intento y su respuesta.",
+  ev:{i:"Pegá la respuesta del curl (o el error honesto)",rx:[/status|Connection refused|Failed/i]},
+  s:"Tu soberanía es una ilusión si el servidor es de otra persona."},
+ {id:"m6",nivel:3,t:"Saneamiento y ancla",cmd:"bash plan_reconciliacion.sh",p:12,
+  d:"Purga PIDs zombis y ancla la raíz antes de plegar nada.",
+  ev:{i:"Pegá un fragmento de la salida del script",rx:[/SANEAMIENTO|FASE|pid/i]},
+  s:"El territorio primero; el mapa después."},
+ {id:"m7",nivel:3,t:"Bootstrap WRIL",cmd:"python3 wril/wril_bootstrap.py",p:14,
+  d:"La circulación verifica antes de que la matriz despierte.",
+  ev:{i:"Pegá la salida del bootstrap",rx:[/Bootstrap completo|WRIL/i]},
+  s:"WRIL: descubrir, resolver, reconciliar, verificar, registrar."},
+ {id:"m8",nivel:3,t:"Dry-run del pliegue",cmd:"python3 wril/wril_topologia.py",p:16,
+  d:"Mirá el plan de vuelo SIN aplicar. La tensión debe caer a cero antes de --apply.",
+  ev:{i:"Pegá la salida del dry-run",rx:[/DRY-RUN|plegar|tensi|WRIL/i]},
+  s:"DECLARACIÓN ≠ REALIDAD no es un bug: es el detector."},
+ {id:"m9",nivel:4,t:"Sesión de dictado consciente",cmd:"[F8] abrir sesión · escribir ≥ 40 caracteres · [F8] sellar",p:16,
+  d:"Espejo del daemon evdev. Tu Logos queda sellado aunque se corte la luz.",
+  ev:{i:"(automático al sellar la sesión F8)",rx:[]},
+  s:"El producto es una carta sellada, no un log espía."},
+ {id:"m10",nivel:4,t:"Ceremonia de Despertar",cmd:"bash deploy_neurobit_estacion_v3.2.sh",p:20,
+  d:"El gesto único. Ctrl+C pliega todo al origen sin huérfanos.",
+  ev:{i:"Pegá la salida del deploy",rx:[/OPERATIVA|HALT|WRIL/i]},
+  s:"Un buen sistema no es el que más hace, sino el que mejor duerme."}
+];
+
+var S={rango:0,hechas:[],pines:[],intencion:0,resiliencia:0,tension:0,consec:0,calibradas:[]};
+var LEDGER=[];
+try{var s0=localStorage.getItem(CLAVE);if(s0)S=Object.assign(S,JSON.parse(s0));}catch(e){}
+try{var l0=localStorage.getItem(CLAVE_LEDGER);if(l0)LEDGER=JSON.parse(l0);}catch(e){}
+function guardar(){try{localStorage.setItem(CLAVE,JSON.stringify(S));localStorage.setItem(CLAVE_LEDGER,JSON.stringify(LEDGER));}catch(e){}}
+
+function sha(txt){try{if(crypto&&crypto.subtle){return crypto.subtle.digest("SHA-256",new TextEncoder().encode(txt)).then(function(b){var a=new Uint8Array(b),h="";for(var i=0;i<8;i++)h+=a[i].toString(16).padStart(2,"0");return h;});}}catch(e){}return Promise.resolve("00000000");}
+function sellar(ev,det){
+  var prev=LEDGER.length?LEDGER[LEDGER.length-1].h:"00000000";
+  var n=LEDGER.length;
+  sha(n+"|"+ev+"|"+JSON.stringify(det)+"|"+prev).then(function(h){
+    LEDGER.push({n:n,e:ev,d:det,h:h});guardar();renderLedger();
+  });
+}
+
+var AC=null;
+function tono(f,d,g){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type="sine";o.frequency.value=f;v.gain.value=g||0.06;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+(d||0.3));o.stop(AC.currentTime+(d||0.3));}catch(e){}}
+function toast(t,f){var d=document.createElement("div");d.className="toast";d.innerHTML=t+(f?"<small>"+f+"</small>":"");$("#toasts").appendChild(d);setTimeout(function(){d.remove()},6500);}
+
+function nivelCompletado(nv){return MISIONES.filter(function(m){return m.nivel===nv}).every(function(m){return S.hechas.indexOf(m.id)>=0})}
+function recalcRango(){var r=0;for(var i=1;i<=4;i++){if(nivelCompletado(i))r=i;else break;}return r;}
+
+function exitoMision(m){
+  S.hechas.push(m.id);S.consec=0;
+  S.intencion=Math.min(100,S.intencion+m.p);
+  S.resiliencia=Math.min(100,S.resiliencia+Math.round(m.p/2));
+  sellar("MISION_OK",{id:m.id});
+  if(m.id==="m8")otorgar("cirujano");
+  if(m.id==="m10")otorgar("silencio");
+  var nr=recalcRango();
+  if(nr>S.rango){S.rango=nr;sellar("RANGO",{rango:nr});toast("🛡 RANGO CONSOLIDADO: "+RANGOS[nr],"Evolución ininterrumpida: nunca retrocede.");tono(220,0.7,0.08);}
+  tono(330,0.3,0.06);guardar();render();
+}
+function falloMision(m,msg){
+  S.tension++;S.consec++;sellar("TENSION",{id:m.id,consec:S.consec});
+  tono(70,0.4,0.08);
+  if(S.consec>=3)otorgar("fenix");
+  toast("⚠ TENSIÓN ABSORBIDA",msg||"La estación asume que ajustás, no que fallás.");
+  guardar();render();
+}
+function otorgar(id){if(S.pines.indexOf(id)>=0)return;S.pines.push(id);sellar("PIN",{id:id});toast("🏅 "+PINES[id].n,PINES[id].f);tono(440,0.5,0.07);}
+
+/* ---- misiones UI ---- */
+function renderMisiones(){
+  var cont=$("#lista-misiones");cont.innerHTML="";
+  MISIONES.forEach(function(m){
+    var done=S.hechas.indexOf(m.id)>=0;
+    var d=document.createElement("div");d.className="mis"+(done?" done":"");
+    d.innerHTML="<h4>NIVEL "+m.nivel+" · "+(done?"🟢 ":"🔸 ")+m.t+"</h4>"+
+      "<code class=\"cmd\">"+m.cmd+"</code>"+
+      "<div class=\"desc\">"+m.d+"</div>"+
+      "<div class=\"saber\">"+m.s+"</div>"+
+      (done?"":("<div class=\"fila\"><button data-a=\"copy\" data-id=\""+m.id+"\">COPIAR COMANDO</button>"+
+      "<button data-a=\"ev\" data-id=\""+m.id+"\">PEGAR EVIDENCIA</button></div>"+
+      "<textarea id=\"ev-"+m.id+"\" placeholder=\""+m.ev.i+"\" style=\"display:none\"></textarea>"));
+    cont.appendChild(d);
+  });
+  $$("#lista-misiones button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var id=b.dataset.id,m=MISIONES.filter(function(x){return x.id===id})[0];
+      if(b.dataset.a==="copy"){copiar(m.cmd);toast("📋 COMANDO COPIADO","Ejecutalo en tu terminal real y volvé con la evidencia.");}
+      else{var ta=$("#ev-"+id);ta.style.display=ta.style.display==="none"?"block":"none";if(ta.style.display==="block")ta.focus();}
+    });
+  });
+  $$("#lista-misiones textarea").forEach(function(ta){
+    ta.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.ctrlKey){e.preventDefault();verificar(ta.id.replace("ev-",""));}});
+    ta.addEventListener("dblclick",function(){verificar(ta.id.replace("ev-",""));});
+  });
+}
+function verificar(id){
+  var m=MISIONES.filter(function(x){return x.id===id})[0];
+  var ta=$("#ev-"+id);var val=ta?ta.value:"";
+  if(!m.ev.rx.length)return;
+  var ok=m.ev.rx.every(function(r){return r.test(val)});
+  if(ok)exitoMision(m);else falloMision(m,"La evidencia no coincide con lo esperado. Leé la pista y volvé a intentar.");
+}
+function copiar(txt){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).catch(function(){fallbackCopy(txt)});}
+  else fallbackCopy(txt);
+}
+function fallbackCopy(txt){var ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();}
+
+/* ---- dojo mecanografía ---- */
+var tipo={typed:"",errors:0,t0:null,done:false};
+function targetDojo(){var m=MISIONES.filter(function(m){return S.hechas.indexOf(m.id)<0})[0];return m?m.cmd:"bash deploy_neurobit_estacion_v3.2.sh";}
+function renderDojo(){
+  var tgt=targetDojo(),el=$("#tipo-target");el.innerHTML="";
+  for(var i=0;i<tgt.length;i++){
+    var sp=document.createElement("span");sp.textContent=tgt[i];
+    if(i<tipo.typed.length)sp.className=(tipo.typed[i]===tgt[i])?"okc":"badc";
+    else if(i===tipo.typed.length)sp.className="curc";
+    else sp.className="pendc";
+    el.appendChild(sp);
+  }
+}
+$("#tipo-input").addEventListener("keydown",function(e){
+  if(e.key.length!==1&&e.key!=="Backspace")return;
+  e.preventDefault();
+  var tgt=targetDojo();if(tipo.done){tipo={typed:"",errors:0,t0:null,done:false};}
+  if(!tipo.t0)tipo.t0=Date.now();
+  if(e.key==="Backspace"){tipo.typed=tipo.typed.slice(0,-1);}
+  else{
+    var esperado=tgt[tipo.typed.length];
+    if(e.key!==esperado)tipo.errors++;
+    tipo.typed+=e.key;
+  }
+  var pre=Math.round(100*tgt.length/(tgt.length+tipo.errors));
+  $("#tipo-pre").textContent=pre+"%";
+  var min=(Date.now()-tipo.t0)/60000;
+  $("#tipo-ppm").textContent=min>0.02?Math.round((tipo.typed.length/5)/min):0;
+  if(tipo.typed===tgt&&pre>=90){
+    tipo.done=true;$("#tipo-estado").textContent="CALIBRADO ✔";
+    if(S.calibradas.indexOf(tgt)<0){S.calibradas.push(tgt);S.intencion=Math.min(100,S.intencion+3);sellar("CALIBRADO",{cmd:tgt,pre:pre});toast("⌨ CALIBRACIÓN LOGRADA","Precisión "+pre+"%: habilitado el envío a la terminal real.");tono(392,0.4,0.06);guardar();}
+  } else if(tipo.typed.length>=tgt.length){$("#tipo-estado").textContent="REINTENTÁ (precisión "+pre+"%)";}
+  renderDojo();
+});
+
+/* ---- dictáfono F8 ---- */
+var dict={on:false,buf:""};
+window.addEventListener("keydown",function(e){
+  if(e.key==="F8"){e.preventDefault();dict.on=!dict.on;
+    if(dict.on){$("#dict-status").textContent="● SESIÓN ABIERTA · capturando pulsaciones…";$("#dict-status").className="on";tono(220,0.2,0.05);}
+    else{
+      var txt=dict.buf.trim();
+      $("#dict-status").textContent="DAEMON EN REPOSO · 0.0% CPU · F8 abre/cierra la sesión";$("#dict-status").className="";
+      if(txt.length>0){
+        sellar("CARTA_DICTADO",{chars:txt.length,preview:txt.slice(0,60)});
+        toast("📜 CARTA SELLADA EN EL LEDGER",txt.length+" caracteres a salvo del corte de energía.");
+        if(txt.length>=40&&S.hechas.indexOf("m9")<0){S.hechas.push("m9");otorgar("kernel");var nr=recalcRango();if(nr>S.rango){S.rango=nr;sellar("RANGO",{rango:nr});toast("🛡 RANGO CONSOLIDADO: "+RANGOS[nr],"");}tono(330,0.3,0.06);}
+        dict.buf="";$("#dict-buffer").textContent="";guardar();render();
+      }
+    }
+    return;
+  }
+  if(dict.on&&e.key.length===1){dict.buf+=e.key;$("#dict-buffer").textContent=dict.buf+"▌";}
+});
+
+/* ---- puente real ---- */
+var PUENTE=[
+ {mod:"neurobit_api.py",url:"http://127.0.0.1:5000/health",desc:"Hub Dinámico (core/)",cmd:"python3 neurobit_api.py"},
+ {mod:"app_stdlib.py",url:"http://127.0.0.1:5002/",desc:"Cartógrafo MFN (puerto 5002)",cmd:"python3 MFN_Sprite_Cartografo/backend/app_stdlib.py"},
+ {mod:"neurobit_dictado_evdev.py",url:null,desc:"Dictáfono F8 (/dev/input)",cmd:"python3 neurobit_dictado_evdev.py"},
+ {mod:"neurobit_dispatcher.py",url:null,desc:"Oficina de Correos (inotify buzon_salida/)",cmd:"python3 neurobit_dispatcher.py"}
+];
+function renderPuente(){
+  var c=$("#puente");c.innerHTML="";
+  PUENTE.forEach(function(p,i){
+    var d=document.createElement("div");d.className="puente-item";
+    d.innerHTML="<b>"+p.mod+"</b> · "+p.desc+"<code>"+p.cmd+"</code>"+(p.url?"<span class=\"probe\" id=\"probe-"+i+"\">?</span>":"<span class=\"probe down\">VERIFICAR EN TERMINAL</span>");
+    c.appendChild(d);
+  });
+}
+function probe(url){return new Promise(function(res){try{var ctl=new AbortController();var t=setTimeout(function(){ctl.abort();res(false);},1500);
+  fetch(url,{mode:"no-cors",signal:ctl.signal}).then(function(){clearTimeout(t);res(true);}).catch(function(){clearTimeout(t);res(false);});}catch(e){res(false);}});}
+function sondear(){
+  $("#estado-real").textContent="ESTACIÓN REAL: SONDEANDO…";
+  PUENTE.forEach(function(p,i){
+    if(!p.url)return;
+    probe(p.url).then(function(up){
+      var el=$("#probe-"+i);if(el){el.textContent=up?"EN LÍNEA":"EN REPOSO";el.className="probe "+(up?"up":"down");}
+      if(up&&i===0){otorgar("cordon");$("#estado-real").textContent="ESTACIÓN REAL: DETECTADA (5000)";$("#estado-real").className="badge ok";}
+    });
+  });
+  setTimeout(function(){if($("#estado-real").textContent.indexOf("SONDEANDO")>=0)$("#estado-real").textContent="ESTACIÓN REAL: EN REPOSO (MODO SIMULACRO)";},1800);
+}
+
+/* ---- MFN ---- */
+function dibujarMFN(){
+  var c=$("#mfn"),x=c.getContext("2d");x.clearRect(0,0,320,320);
+  var AN=[8,16,24,32,40,48],COL=["#f9e2af","#fab387","#cba6f7","#89b4fa","#74c7ec","#a07850"];
+  var bits=1+Math.round((S.hechas.length/MISIONES.length)*168);
+  var g=x.createRadialGradient(160,160,0,160,160,12);g.addColorStop(0,"#fff8e0");g.addColorStop(1,"rgba(249,226,175,0)");
+  x.fillStyle=g;x.beginPath();x.arc(160,160,11,0,7);x.fill();
+  x.fillStyle="#1e1e2e";x.font="bold 9px monospace";x.textAlign="center";x.textBaseline="middle";x.fillText("G7",160,160);
+  var idx=1,r0=24,dr=(160-28)/6;
+  for(var a=0;a<6;a++){var r=r0+dr*a+dr/2;
+    for(var s=0;s<AN[a];s++){var ang=(s/AN[a])*Math.PI*2-Math.PI/2;
+      var px=160+Math.cos(ang)*r,py=160+Math.sin(ang)*r,on=idx<bits;
+      x.beginPath();x.arc(px,py,3,0,7);
+      x.fillStyle=on?COL[a]:"rgba(166,227,161,.10)";
+      x.shadowColor=COL[a];x.shadowBlur=on?7:0;x.fill();x.shadowBlur=0;idx++;}}
+  $("#mfn-txt").textContent="ACTIVOS: "+bits+"/169 · c:G7 = OBSERVADOR";
+}
+
+function renderLedger(){
+  var el=$("#ledger");el.innerHTML="";
+  LEDGER.slice(-40).reverse().forEach(function(e){
+    var d=document.createElement("div");
+    d.innerHTML="<span class=\"ev\">"+e.e+"</span> n"+e.n+" · #"+e.h+" · "+JSON.stringify(e.d).slice(0,60);
+    el.appendChild(d);
+  });
+}
+function render(){
+  $("#rango-actual").textContent="["+S.rango+"] "+RANGOS[S.rango];
+  var lad=$("#ladder");lad.innerHTML="";
+  RANGOS.forEach(function(r,i){var li=document.createElement("li");li.textContent="["+i+"] "+r;
+    if(i<S.rango)li.className="ok";else if(i===S.rango)li.className="act";lad.appendChild(li);});
+  var pz=$("#pines");pz.innerHTML="";
+  Object.keys(PINES).forEach(function(k){var g=S.pines.indexOf(k)>=0;var d=document.createElement("div");
+    d.className="pin"+(g?" ganado":"");d.innerHTML=(g?"🏅 ":"🔒 ")+PINES[k].n+"<small>"+PINES[k].f+"</small>";pz.appendChild(d);});
+  $("#v-int").textContent=S.intencion+"%";$("#fill-int").style.width=S.intencion+"%";
+  $("#v-res").textContent=S.resiliencia+"%";$("#fill-res").style.width=S.resiliencia+"%";
+  $("#bar-int").classList.toggle("congelada",S.consec>0);
+  $("#bar-res").classList.toggle("congelada",S.consec>0);
+  $("#freeze").style.display=S.consec>0?"block":"none";
+  $("#tension-txt").textContent="TENSIÓN: "+S.tension+(S.consec>0?" · consecutivos: "+S.consec:"");
+  renderMisiones();renderDojo();dibujarMFN();renderLedger();
+}
+
+$$(".tabs button").forEach(function(b){b.addEventListener("click",function(){
+  $$(".tabs button").forEach(function(x){x.classList.remove("act")});b.classList.add("act");
+  $$(".sec").forEach(function(s){s.classList.remove("act")});$("#"+b.dataset.sec).classList.add("act");
+});});
+$("#btn-absorber").addEventListener("click",function(){S.consec=0;sellar("ABSORCION",{});tono(150,0.3,0.05);guardar();render();});
+$("#btn-probe").addEventListener("click",sondear);
+
+cargar0();
+function cargar0(){render();renderPuente();sondear();}
+</script>
+</body>
+</html>

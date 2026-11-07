@@ -1,0 +1,482 @@
+{
+  "api_imports": [
+    "core.module_connector",
+    "core.api_endpoint_manager"
+  ],
+  "modules_status": [
+    {
+      "module": "core.module_connector",
+      "linked_to_api": true,
+      "syntax_ok": true,
+      "path": "core/module_connector.py"
+    },
+    {
+      "module": "core.ecn_parser_extract",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/ecn_parser_extract.py"
+    },
+    {
+      "module": "core.wal_ledger",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/wal_ledger.py"
+    },
+    {
+      "module": "core.gui_ecn_auditor",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/gui_ecn_auditor.py"
+    },
+    {
+      "module": "core.adapter_dashboard",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/adapter_dashboard.py"
+    },
+    {
+      "module": "core.superparser_semilla",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/superparser_semilla.py"
+    },
+    {
+      "module": "core.api_endpoint_manager",
+      "linked_to_api": true,
+      "syntax_ok": true,
+      "path": "core/api_endpoint_manager.py"
+    },
+    {
+      "module": "core.ecn_artifact_check",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/ecn_artifact_check.py"
+    },
+    {
+      "module": "core.gui_ecn_central",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/gui_ecn_central.py"
+    },
+    {
+      "module": "core.port_lighthouse",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/port_lighthouse.py"
+    },
+    {
+      "module": "core.adapters.adapter_correos",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/adapters/adapter_correos.py"
+    },
+    {
+      "module": "core.adapters.adapter_centinela_legacy",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/adapters/adapter_centinela_legacy.py"
+    },
+    {
+      "module": "core.adapters.adapter_centinela",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/adapters/adapter_centinela.py"
+    },
+    {
+      "module": "core.adapters.base",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/adapters/base.py"
+    },
+    {
+      "module": "core.adapters.adapter_mfn_cartografo",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "core/adapters/adapter_mfn_cartografo.py"
+    },
+    {
+      "module": "wril.wril_firma_funcional",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_firma_funcional.py"
+    },
+    {
+      "module": "wril.wril_proc_guard",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_proc_guard.py"
+    },
+    {
+      "module": "wril.wril_reposo",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_reposo.py"
+    },
+    {
+      "module": "wril.wril_batch_ejecutor",
+      "linked_to_api": false,
+      "syntax_ok": false,
+      "path": "wril/wril_batch_ejecutor.py"
+    },
+    {
+      "module": "wril.wril_adapter_c64",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_adapter_c64.py"
+    },
+    {
+      "module": "wril.patch_post_campo",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/patch_post_campo.py"
+    },
+    {
+      "module": "wril.rubrica_parches_pre_v03",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/rubrica_parches_pre_v03.py"
+    },
+    {
+      "module": "wril.wril_integridad_json",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_integridad_json.py"
+    },
+    {
+      "module": "wril.wril_path_resolver",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_path_resolver.py"
+    },
+    {
+      "module": "wril.wril_root_alias",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_root_alias.py"
+    },
+    {
+      "module": "wril.wril_estado_real",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_estado_real.py"
+    },
+    {
+      "module": "wril.wril_integrity_guard",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_integrity_guard.py"
+    },
+    {
+      "module": "wril.wril_sentinel",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_sentinel.py"
+    },
+    {
+      "module": "wril.wril_path_map",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_path_map.py"
+    },
+    {
+      "module": "wril.rubrica_parches",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/rubrica_parches.py"
+    },
+    {
+      "module": "wril.wril_leyes",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_leyes.py"
+    },
+    {
+      "module": "wril.wril_sanea_memoria",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_sanea_memoria.py"
+    },
+    {
+      "module": "wril.wril_self_root",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_self_root.py"
+    },
+    {
+      "module": "wril.wril_adapter_ecn",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_adapter_ecn.py"
+    },
+    {
+      "module": "wril.wril_bootstrap",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_bootstrap.py"
+    },
+    {
+      "module": "wril.patch_raiz_canonica",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/patch_raiz_canonica.py"
+    },
+    {
+      "module": "wril.wril_mfn_registry",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_mfn_registry.py"
+    },
+    {
+      "module": "wril.wril_dynamic_tester",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_dynamic_tester.py"
+    },
+    {
+      "module": "wril.wril_dependency_scanner",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_dependency_scanner.py"
+    },
+    {
+      "module": "wril.wril_patch_resolver",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_patch_resolver.py"
+    },
+    {
+      "module": "wril.wril_backup",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_backup.py"
+    },
+    {
+      "module": "wril.uso_en_parche",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/uso_en_parche.py"
+    },
+    {
+      "module": "wril.wril_topologia",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_topologia.py"
+    },
+    {
+      "module": "wril.wril_version_control",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "wril/wril_version_control.py"
+    },
+    {
+      "module": "tools.indice_compendio",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/indice_compendio.py"
+    },
+    {
+      "module": "tools.neurobit_aula",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_aula.py"
+    },
+    {
+      "module": "tools.neurobit_ram_neuronibble",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_ram_neuronibble.py"
+    },
+    {
+      "module": "tools.sos_module_linker_tester",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/sos_module_linker_tester.py"
+    },
+    {
+      "module": "tools.ecn_menu_builder",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/ecn_menu_builder.py"
+    },
+    {
+      "module": "tools.neurobit_pulso_radial",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_pulso_radial.py"
+    },
+    {
+      "module": "tools.neurobit_puentes_coherencia",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_puentes_coherencia.py"
+    },
+    {
+      "module": "tools.neurobit_salon_vivo",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_salon_vivo.py"
+    },
+    {
+      "module": "tools.neurobit_pesos_binarios",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_pesos_binarios.py"
+    },
+    {
+      "module": "tools.ingest_compendium",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/ingest_compendium.py"
+    },
+    {
+      "module": "tools.polimorfismo_logico",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/polimorfismo_logico.py"
+    },
+    {
+      "module": "tools.mco_reconciler",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/mco_reconciler.py"
+    },
+    {
+      "module": "tools.ecn_orquestador",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/ecn_orquestador.py"
+    },
+    {
+      "module": "tools.neurobit_escala_octal",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_escala_octal.py"
+    },
+    {
+      "module": "tools.visor_informes",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/visor_informes.py"
+    },
+    {
+      "module": "tools.neurobit_mfn_musical",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_mfn_musical.py"
+    },
+    {
+      "module": "tools.neurobit_mfn_unificado",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_mfn_unificado.py"
+    },
+    {
+      "module": "tools.neurobit_pipboy",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_pipboy.py"
+    },
+    {
+      "module": "tools.neurobit_traductor_alfa_omega",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/neurobit_traductor_alfa_omega.py"
+    },
+    {
+      "module": "tools.compilar_compendio_base",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/compilar_compendio_base.py"
+    },
+    {
+      "module": "tools.salon.salon_clasificador_simon_v1",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/salon/salon_clasificador_simon_v1.py"
+    },
+    {
+      "module": "tools.salon.websocket_salon_server",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/salon/websocket_salon_server.py"
+    },
+    {
+      "module": "tools.salon.salon_coordinador",
+      "linked_to_api": false,
+      "syntax_ok": true,
+      "path": "tools/salon/salon_coordinador.py"
+    }
+  ],
+  "orphans": [
+    "core.ecn_parser_extract",
+    "core.wal_ledger",
+    "core.gui_ecn_auditor",
+    "core.adapter_dashboard",
+    "core.superparser_semilla",
+    "core.ecn_artifact_check",
+    "core.gui_ecn_central",
+    "core.port_lighthouse",
+    "core.adapters.adapter_correos",
+    "core.adapters.adapter_centinela_legacy",
+    "core.adapters.adapter_centinela",
+    "core.adapters.base",
+    "core.adapters.adapter_mfn_cartografo",
+    "wril.wril_firma_funcional",
+    "wril.wril_proc_guard",
+    "wril.wril_reposo",
+    "wril.wril_adapter_c64",
+    "wril.patch_post_campo",
+    "wril.rubrica_parches_pre_v03",
+    "wril.wril_integridad_json",
+    "wril.wril_path_resolver",
+    "wril.wril_root_alias",
+    "wril.wril_estado_real",
+    "wril.wril_integrity_guard",
+    "wril.wril_sentinel",
+    "wril.wril_path_map",
+    "wril.rubrica_parches",
+    "wril.wril_leyes",
+    "wril.wril_sanea_memoria",
+    "wril.wril_self_root",
+    "wril.wril_adapter_ecn",
+    "wril.wril_bootstrap",
+    "wril.patch_raiz_canonica",
+    "wril.wril_mfn_registry",
+    "wril.wril_dynamic_tester",
+    "wril.wril_dependency_scanner",
+    "wril.wril_patch_resolver",
+    "wril.wril_backup",
+    "wril.uso_en_parche",
+    "wril.wril_topologia",
+    "wril.wril_version_control",
+    "tools.indice_compendio",
+    "tools.neurobit_aula",
+    "tools.neurobit_ram_neuronibble",
+    "tools.sos_module_linker_tester",
+    "tools.ecn_menu_builder",
+    "tools.neurobit_pulso_radial",
+    "tools.neurobit_puentes_coherencia",
+    "tools.neurobit_salon_vivo",
+    "tools.neurobit_pesos_binarios",
+    "tools.ingest_compendium",
+    "tools.polimorfismo_logico",
+    "tools.mco_reconciler",
+    "tools.ecn_orquestador",
+    "tools.neurobit_escala_octal",
+    "tools.visor_informes",
+    "tools.neurobit_mfn_musical",
+    "tools.neurobit_mfn_unificado",
+    "tools.neurobit_pipboy",
+    "tools.neurobit_traductor_alfa_omega",
+    "tools.compilar_compendio_base",
+    "tools.salon.salon_clasificador_simon_v1",
+    "tools.salon.websocket_salon_server",
+    "tools.salon.salon_coordinador"
+  ],
+  "syntax_errors": [
+    {
+      "file": "wril/wril_batch_ejecutor.py",
+      "error": "File \"/home/gus/workspace_reconstruido/wril/wril_batch_ejecutor.py\", line 63\n    print(\"[✓ BATCH] Secuencia ejecutada; reporte asentado en buzón.\n          ^\nSyntaxError: unterminated string literal (detected at line 63)"
+    }
+  ]
+}

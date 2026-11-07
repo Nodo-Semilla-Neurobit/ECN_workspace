@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · El Dojo del Verbo · Mecanografía Soberana</title>
+<link href="https://cdn.jsdelivr.net/fontsource/css/vt323@latest/index.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#1e1e2e; --panel:#24243a; --borde:#3a3a55;
+  --ink:#a6e3a1; --gold:#f9e2af; --lila:#cba6f7; --cyan:#89dceb; --alert:#f38ba8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"VT323","Courier New",monospace;display:flex;flex-direction:column;overflow:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:97;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+header{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;
+  background:rgba(21,21,33,.92);border-bottom:1px solid var(--borde);font-size:12px;letter-spacing:2px}
+.badge{border:1px solid var(--borde);padding:2px 8px;border-radius:3px;margin-left:6px}
+.badge.ok{color:var(--ink);border-color:var(--ink)}
+main{flex:1;min-height:0;display:grid;grid-template-columns:270px 1fr 280px;gap:10px;padding:10px}
+aside,section{background:var(--panel);border:1px solid var(--borde);border-radius:6px;padding:10px;overflow-y:auto;min-height:0}
+h3{font-size:12px;letter-spacing:2px;color:var(--gold);border-bottom:1px dashed var(--borde);padding-bottom:4px;margin:8px 0}
+h3:first-child{margin-top:0}
+.lecc{border:1px solid var(--borde);border-radius:5px;padding:7px 9px;margin:6px 0;font-size:13px;cursor:pointer;display:flex;justify-content:space-between;gap:6px}
+.lecc.act{border-color:var(--cyan);color:var(--cyan)}
+.lecc.done{border-color:var(--ink);opacity:.6}
+.lecc.lock{opacity:.35;cursor:not-allowed}
+#target{font-size:24px;line-height:1.6;letter-spacing:1px;background:#191927;border:1px solid var(--borde);
+  border-radius:6px;padding:14px 16px;min-height:86px;white-space:pre-wrap;margin-bottom:10px}
+#target .ok{color:var(--ink)}
+#target .bad{color:var(--alert);text-decoration:underline}
+#target .cur{background:var(--cyan);color:#11111b;border-radius:3px}
+#target .pend{color:#6c7086}
+#stats{display:flex;gap:14px;font-size:14px;letter-spacing:1px;margin-bottom:8px;flex-wrap:wrap}
+#stats b{color:var(--gold)}
+#saber{font-size:13px;color:var(--lila);font-style:italic;min-height:20px;margin-bottom:8px}
+#manos{display:flex;justify-content:center;gap:26px;margin:6px 0 10px}
+.mano{display:flex;gap:5px;align-items:flex-end}
+.dedo{width:16px;height:64px;border:1px solid var(--borde);border-radius:9px;background:#191927;transition:all .12s}
+.dedo:nth-child(1){height:46px}.dedo:nth-child(2){height:58px}.dedo:nth-child(3){height:64px}.dedo:nth-child(4){height:58px}
+.mano.der .dedo:nth-child(2){height:58px}.mano.der .dedo:nth-child(3){height:64px}.mano.der .dedo:nth-child(4){height:58px}.mano.der .dedo:nth-child(5){height:46px}
+.dedo.pulgar{height:34px;transform:rotate(18deg)}
+.mano.der .dedo.pulgar{transform:rotate(-18deg)}
+.dedo.act{box-shadow:0 0 12px currentColor;background:currentColor}
+#teclado{display:flex;flex-direction:column;gap:5px;align-items:center}
+.fila{display:flex;gap:5px}
+.tecla{min-width:34px;height:36px;border:1px solid var(--borde);border-radius:5px;background:#191927;
+  display:flex;align-items:center;justify-content:center;font-size:14px;padding:0 6px;position:relative}
+.tecla.next{border-color:var(--cyan);color:#11111b;background:var(--cyan);box-shadow:0 0 14px var(--cyan)}
+.tecla.esp{min-width:260px}
+.bar{margin:8px 0}
+.bar label{font-size:11px;display:flex;justify-content:space-between;letter-spacing:1px}
+.track{height:12px;border:1px solid var(--borde);border-radius:3px;background:#191927;margin-top:3px;overflow:hidden}
+.fill{height:100%;width:0%;background:linear-gradient(90deg,#3f6e3c,var(--ink));transition:width .5s}
+#ledger{font-size:10px;color:var(--lila);line-height:1.7;max-height:180px;overflow-y:auto}
+#ledger .ev{color:var(--ink)}
+.overlay{position:fixed;inset:0;z-index:110;background:rgba(14,14,22,.95);display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.oculto{display:none !important}
+.caja{max-width:720px;background:var(--panel);border:1px solid var(--borde);border-radius:8px;padding:26px 30px;animation:ap .7s ease}
+@keyframes ap{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.caja h1{color:var(--gold);letter-spacing:4px;font-size:26px;margin-bottom:4px;text-shadow:0 0 14px rgba(249,226,175,.4)}
+.caja .sub{color:var(--lila);letter-spacing:2px;font-size:12px;margin-bottom:16px}
+.caja p{font-size:15px;line-height:1.65;margin:8px 0}
+.caja p b{color:var(--cyan)}
+.caja p .no{color:var(--alert)}
+.btn{background:none;border:1px solid var(--ink);color:var(--ink);font-family:inherit;letter-spacing:2px;
+  padding:10px 22px;cursor:pointer;border-radius:4px;margin:14px 8px 0 0;font-size:14px}
+.btn:hover{background:rgba(166,227,161,.12)}
+.btn.oro{border-color:var(--gold);color:var(--gold)}
+.btn.oro:hover{background:rgba(249,226,175,.1)}
+#decl-in{background:#0e0e18;border:1px solid var(--borde);color:var(--ink);font-family:inherit;font-size:16px;padding:6px 10px;border-radius:4px;width:120px;outline:none}
+#toasts{position:fixed;top:52px;right:14px;z-index:120;display:flex;flex-direction:column;gap:8px;width:310px}
+.toast{border:1px solid var(--gold);background:#1c1c2e;color:var(--gold);padding:10px 12px;border-radius:6px;font-size:12px;box-shadow:0 0 18px rgba(249,226,175,.25);animation:ap .5s ease}
+.toast small{display:block;color:var(--lila);font-style:italic;margin-top:4px}
+@media(max-width:980px){body{overflow:auto}main{grid-template-columns:1fr;height:auto}}
+</style>
+</head>
+<body>
+<header>
+  <div style="text-shadow:0 0 8px rgba(166,227,161,.6)">☉ ECN · EL DOJO DEL VERBO · MECANOGRAFÍA SOBERANA</div>
+  <div><span class="badge ok">127.0.0.1</span><span class="badge ok">CPU 0.0%</span><span class="badge">300 BAUD</span></div>
+</header>
+
+<main>
+  <aside>
+    <h3>⌨ LECCIONES DEL TERRITORIO</h3>
+    <div id="lista"></div>
+    <h3>🎓 PINES DEL ESCRIBA</h3>
+    <div id="pines"></div>
+  </aside>
+
+  <section>
+    <div id="stats">
+      <span>PPM: <b id="st-ppm">0</b></span>
+      <span>PRECISIÓN: <b id="st-pre">100%</b></span>
+      <span>TENSIÓN: <b id="st-ten">0</b></span>
+      <span>CADENCIA: <b id="st-cad">0 cpm</b></span>
+    </div>
+    <div id="target"></div>
+    <div id="saber"></div>
+    <div id="manos">
+      <div class="mano izq">
+        <div class="dedo" data-dedo="0"></div><div class="dedo" data-dedo="1"></div>
+        <div class="dedo" data-dedo="2"></div><div class="dedo" data-dedo="3"></div>
+        <div class="dedo pulgar" data-dedo="8"></div>
+      </div>
+      <div class="mano der">
+        <div class="dedo pulgar" data-dedo="8"></div><div class="dedo" data-dedo="4"></div>
+        <div class="dedo" data-dedo="5"></div><div class="dedo" data-dedo="6"></div>
+        <div class="dedo" data-dedo="7"></div>
+      </div>
+    </div>
+    <div id="teclado"></div>
+  </section>
+
+  <aside>
+    <h3>📊 BARRAS DE SINTONÍA</h3>
+    <div class="bar"><label>INYECCIÓN DE INTENCIÓN <span id="v-int">0%</span></label>
+      <div class="track"><div class="fill" id="f-int"></div></div></div>
+    <div class="bar"><label>RESILIENCIA FÍSICA <span id="v-res">0%</span></label>
+      <div class="track"><div class="fill" id="f-res"></div></div></div>
+    <h3>📜 LEDGER · memoria_eva.jsonl</h3>
+    <div id="ledger"></div>
+  </aside>
+</main>
+
+<div id="toasts"></div>
+
+<div id="ov-portal" class="overlay">
+  <div class="caja">
+    <h1>EL DOJO DEL VERBO</h1>
+    <div class="sub">DICTAMEN DEL PAR DE PROGRAMACIÓN · MECANOGRAFÍA COMO RE-ALFABETIZACIÓN</div>
+    <p><b>Opción 1 — Conectar los avances de edclub.com:</b> <span class="no">RECHAZADA como fuente de verdad.</span> TypingClub vive en la nube corporativa: exige cuenta, emite telemetría y depende de la benevolencia del transporte (amnesia programada). Enlazarla violaría el cordón sanitario de 127.0.0.1.</p>
+    <p><b>Opción 2 — Recrear el curso en la Estación:</b> ACEPTADA, con una mejora sustancial. El dojo no enseña frases neutras: enseña los verbos reales del territorio (pwd, .venv, WRIL). La mecanografía se vuelve memoria muscular del Logos: tipear es practicar la consola.</p>
+    <p><b>Síntesis —</b> El progreso externo no se descarta: se DECLARA como experiencia reportada (Principio del Informante), jamás como evidencia verificada. La evidencia nace en localhost.</p>
+    <button class="btn" id="btn-dojo">⌨ ENTRAR AL DOJO</button>
+    <button class="btn oro" id="btn-decl">📜 DECLARAR PROGRESO EXTERNO</button>
+  </div>
+</div>
+
+<div id="ov-decl" class="overlay oculto">
+  <div class="caja">
+    <h1>DECLARACIÓN DEL INFORMANTE</h1>
+    <div class="sub">PRINCIPIO DEL INFORMANTE · EXPERIENCIA REPORTADA ≠ EVIDENCIA VERIFICADA</div>
+    <p>Si recorriste lecciones del curso de edclub.com, declará cuántas completaste. El asentamiento quedará lacrado en el Ledger como <b>experiencia reportada</b>, otorgará el Pin del Informante y sumará Intención, pero la Estación te invitará a verificarla aquí, en el silicio local.</p>
+    <p>Lecciones completadas en el curso externo (0–521): <input id="decl-in" type="number" min="0" max="521" value="0"></p>
+    <button class="btn oro" id="btn-decl-ok">SELLAR DECLARACIÓN</button>
+    <button class="btn" id="btn-decl-no">VOLVER</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var CLAVE="ecn_dojo_verbo_v1";
+var COLORES=["#f38ba8","#fab387","#f9e2af","#a6e3a1","#89dceb","#74c7ec","#cba6f7","#f5c2e7","#9399b2"];
+var FILAS=[
+ ["1","2","3","4","5","6","7","8","9","0","'","¡"],
+ ["q","w","e","r","t","y","u","i","o","p","`","+"],
+ ["a","s","d","f","g","h","j","k","l","ñ","´","ç"],
+ ["<","z","x","c","v","b","n","m",",",".","-"],
+ [" "]
+];
+var DEDOS={"1":0,"q":0,"a":0,"z":0,"<":0,"2":1,"w":1,"s":1,"x":1,"3":2,"e":2,"d":2,"c":2,
+"4":3,"5":3,"r":3,"t":3,"f":3,"g":3,"v":3,"b":3,"6":4,"7":4,"y":4,"u":4,"h":4,"j":4,"n":4,"m":4,
+"8":5,"i":5,"k":5,",":5,"9":6,"o":6,"l":6,".":6,"0":7,"'":7,"¡":7,"p":7,"`":7,"+":7,"ñ":7,"´":7,"ç":7,"-":7," ":8};
+var ALIAS={"á":"a","é":"e","í":"i","ó":"o","ú":"u","ü":"v","¿":"¡","?":"'","Á":"a","É":"e","Í":"i","Ó":"o","Ú":"u"};
+var LECCIONES=[
+ {id:1,nombre:"01 · FILA GUÍA — EL ANCLA",frases:["asdf jklñ asdf jklñ","la falda salda","añada la sala","dad jaña sal"],saber:"La fila guía es tu ancla táctil, como el relieve del 5 numérico: el centro G7 de tus dedos."},
+ {id:2,nombre:"02 · FILA SUPERIOR",frases:["qwert yuiop","pero quiero trigo","puerto y torre","repetir sin mirar"],saber:"Los dedos se estiran hacia arriba y vuelven al ancla. Tensión cero: postura antes que velocidad."},
+ {id:3,nombre:"03 · FILA INFERIOR",frases:["zxcv bnm","zona baja y cima","cambio de nube","baja la marea"],saber:"La fila inferior exige disciplina: un dedo a la vez, el pulso no se acelera."},
+ {id:4,nombre:"04 · COMBINADAS",frases:["el dedo del jefe","la caja del reloj","bruma y trino verde","fósforo sobre silicio"],saber:"Las tres filas conversan. La cadencia humana vale más que la prisa del estadio."},
+ {id:5,nombre:"05 · ACENTUADOS",frases:["ñandú ágil","¿qué habrá?","¡acción genuina!","la cigüeña veloz"],saber:"El Logos en español porta tildes: soberanía también es escribir íntegro, sin cortar palabras."},
+ {id:6,nombre:"06 · NÚMEROS",frases:["127 0 0 1","300 baudios","169 bits 6 anillos","5 7 4 7 4 4 7"],saber:"127.0.0.1: el número sagrado del cordón sanitario. Tus dedos ya lo conocen de memoria."},
+ {id:7,nombre:"07 · SÍMBOLOS",frases:["MFN_LOCATION: wril/","--dry-run",".venv/bin/activate","sha-256 :: append-only"],saber:"Los símbolos son la puntuación del código: un guion bajo mal tipeado es una tensión en el mapa."},
+ {id:8,nombre:"08 · VERBOS DEL TERRITORIO",frases:["pwd","ls -la","cd wril","cat manifiesto.txt"],saber:"Primer acto de soberanía: no puedo operar un territorio que no sé ubicar."},
+ {id:9,nombre:"09 · ENSAMBLE .venv",frases:["python3 -m venv .venv","source .venv/bin/activate","pip install flask","npm install"],saber:"Mi máquina, mi entorno, mi proceso, mi puerto, mi dato."},
+ {id:10,nombre:"10 · CEREMONIA DE DESPERTAR",frases:["bash plan_reconciliacion.sh","python3 wril/wril_bootstrap.py --dry-run","bash deploy_neurobit_estacion_v3.2.sh","La salida es hacia adentro."],saber:"La poesía de este sistema es su única verdad: sacar belleza de este caos es virtud."}
+];
+var PINES={
+ escriba:{nombre:"Pin Escriba del Logos",frase:"El verbo preciso es la primera soberanía."},
+ silicio:{nombre:"Pin Dedos de Silicio",frase:"La mecanografía es memoria muscular del Logos."},
+ informante:{nombre:"Pin del Informante",frase:"La experiencia reportada se declara; la evidencia se verifica en localhost."}
+};
+var S={hechas:[],pines:[],intencion:0,resiliencia:0,ledger:[],seq:0,decl:null};
+function guardar(){try{localStorage.setItem(CLAVE,JSON.stringify(S));}catch(e){}}
+function cargar(){try{var r=localStorage.getItem(CLAVE);if(r){var o=JSON.parse(r);if(o)S=Object.assign(S,o);}}catch(e){}}
+function cyrb(str){var h1=0xdeadbeef,h2=0x41c6ce57,i,ch;for(i=0;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return(((h2>>>0)*4294967296+(h1>>>0)).toString(16)).padStart(16,"0");}
+function sellar(ev,det){var prev=S.ledger.length?S.ledger[S.ledger.length-1].h:"0000";var h=cyrb("ECN|"+S.seq+"|"+ev+"|"+JSON.stringify(det||{})+"|"+prev);S.ledger.push({n:S.seq,e:ev,d:det||{},h:h});S.seq++;guardar();renderLedger();}
+var AC=null;
+function blip(f,d,g){if(!AC)return;try{var o=AC.createOscillator(),v=AC.createGain();o.type="square";o.frequency.value=f;v.gain.value=g||0.012;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+(d||0.03));o.stop(AC.currentTime+(d||0.03));}catch(e){}}
+function unlock(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}}
+function toast(t,f){var d=document.createElement("div");d.className="toast";d.innerHTML=t+(f?"<small>"+f+"</small>":"");$("#toasts").appendChild(d);setTimeout(function(){d.remove()},6500);}
+
+/* ---------- teclado visual ---------- */
+function construirTeclado(){
+  var tk=$("#teclado");tk.innerHTML="";
+  FILAS.forEach(function(f){
+    var fr=document.createElement("div");fr.className="fila";
+    f.forEach(function(k){
+      var d=document.createElement("div");
+      d.className="tecla"+(k===" "?" esp":"");
+      d.dataset.k=k;
+      d.textContent=k===" "?"␣":k;
+      var dd=DEDOS[k];if(dd!==undefined)d.style.borderColor=COLORES[dd];
+      fr.appendChild(d);
+    });
+    tk.appendChild(fr);
+  });
+}
+function dedoDe(ch){
+  var c=ch.toLowerCase();
+  if(DEDOS[c]!==undefined)return DEDOS[c];
+  if(ALIAS[ch]!==undefined&&DEDOS[ALIAS[ch]]!==undefined)return DEDOS[ALIAS[ch]];
+  return 7;
+}
+function iluminar(ch){
+  document.querySelectorAll(".tecla.next").forEach(function(t){t.classList.remove("next")});
+  document.querySelectorAll(".dedo.act").forEach(function(t){t.classList.remove("act");t.style.background="#191927";t.style.color="";});
+  if(!ch)return;
+  var c=ch.toLowerCase();var alias=ALIAS[ch];
+  var sel=(alias!==undefined)?alias:c;
+  var t=document.querySelector('.tecla[data-k="'+(sel===" "?" ":sel)+'"]');
+  if(t)t.classList.add("next");
+  var dd=dedoDe(ch);
+  var dg=document.querySelector('.dedo[data-dedo="'+dd+'"]');
+  if(dg){dg.classList.add("act");dg.style.color=COLORES[dd];dg.style.background=COLORES[dd];}
+}
+
+/* ---------- estado de sesión ---------- */
+var leccionIdx=0, fraseIdx=0, charIdx=0, oks=0, bads=0, t0=null;
+function leccionActual(){return LECCIONES[Math.min(leccionIdx,LECCIONES.length-1)];}
+function desbloqueada(i){return i===0||S.hechas.indexOf(LECCIONES[i-1].id)>=0;}
+function renderLista(){
+  var lz=$("#lista");lz.innerHTML="";
+  LECCIONES.forEach(function(l,i){
+    var done=S.hechas.indexOf(l.id)>=0;
+    var d=document.createElement("div");
+    d.className="lecc"+(done?" done":"")+(i===leccionIdx?" act":"")+(!done&&!desbloqueada(i)?" lock":"");
+    d.innerHTML="<span>"+(done?"🟢 ":(desbloqueada(i)?"🔸 ":"🔒 "))+l.nombre+"</span><span>"+(done?"✔":"")+"</span>";
+    d.addEventListener("click",function(){
+      if(!done&&!desbloqueada(i))return;
+      leccionIdx=i;fraseIdx=0;charIdx=0;oks=0;bads=0;t0=null;
+      renderLista();renderTarget();iluminar(null);
+      $("#saber").textContent="";
+    });
+    lz.appendChild(d);
+  });
+}
+function renderTarget(){
+  var l=leccionActual();var frase=l.frases[fraseIdx]||"";
+  var tz=$("#target");tz.innerHTML="";
+  for(var i=0;i<frase.length;i++){
+    var sp=document.createElement("span");
+    sp.textContent=frase[i];
+    if(i<charIdx)sp.className="ok";
+    else if(i===charIdx)sp.className="cur";
+    else sp.className="pend";
+    tz.appendChild(sp);
+  }
+  iluminar(frase[charIdx]);
+}
+function renderPines(){
+  var pz=$("#pines");pz.innerHTML="";
+  Object.keys(PINES).forEach(function(k){
+    var g=S.pines.indexOf(k)>=0;
+    var d=document.createElement("div");
+    d.className="lecc"+(g?" done":" lock");
+    d.innerHTML="<span>"+(g?"🏅 ":"🔒 ")+PINES[k].nombre+"</span>";
+    pz.appendChild(d);
+  });
+}
+function renderBarras(){
+  $("#v-int").textContent=S.intencion+"%";$("#v-res").textContent=S.resiliencia+"%";
+  $("#f-int").style.width=S.intencion+"%";$("#f-res").style.width=S.resiliencia+"%";
+}
+function renderLedger(){
+  var lz=$("#ledger");lz.innerHTML="";
+  S.ledger.slice(-12).forEach(function(e){
+    var d=document.createElement("div");
+    d.innerHTML="<span class=\"ev\">"+e.e+"</span> seq "+e.n+" · #"+e.h.slice(0,8);
+    lz.appendChild(d);
+  });
+  lz.scrollTop=lz.scrollHeight;
+}
+function otorgarPin(id){
+  if(S.pines.indexOf(id)>=0)return;
+  S.pines.push(id);sellar("PIN",{id:id});
+  toast("🏅 "+PINES[id].nombre,"«"+PINES[id].frase+"»");
+  renderPines();
+}
+
+/* ---------- captura de tipeo ---------- */
+window.addEventListener("keydown",function(e){
+  unlock();
+  if(!$("#ov-portal").classList.contains("oculto"))return;
+  if(!$("#ov-decl").classList.contains("oculto"))return;
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key==="Shift"||e.key==="CapsLock"||e.key==="Tab"||e.key==="Escape")return;
+  var l=leccionActual();var frase=l.frases[fraseIdx]||"";
+  if(charIdx>=frase.length)return;
+  if(e.key.length!==1)return;
+  e.preventDefault();
+  if(!t0)t0=Date.now();
+  var espero=frase[charIdx];
+  var spans=$("#target").children;
+  if(e.key===espero){
+    oks++;
+    if(spans[charIdx])spans[charIdx].className="ok";
+    blip(300+Math.random()*40,0.02,0.008);
+  }else{
+    bads++;
+    if(spans[charIdx])spans[charIdx].className="bad";
+    blip(90,0.05,0.02);
+  }
+  charIdx++;
+  if(charIdx<frase.length){if(spans[charIdx])spans[charIdx].className="cur";iluminar(frase[charIdx]);}
+  else iluminar(null);
+  actualizarStats();
+  if(charIdx>=frase.length)setTimeout(fraseTerminada,350);
+});
+function actualizarStats(){
+  var total=oks+bads;
+  var pre=total?Math.round(oks/total*100):100;
+  var min=t0?(Date.now()-t0)/60000:0;
+  var ppm=min>0.02?Math.round((oks/5)/min):0;
+  var cpm=min>0.02?Math.round(oks/min):0;
+  $("#st-ppm").textContent=ppm;
+  $("#st-pre").textContent=pre+"%";
+  $("#st-ten").textContent=bads;
+  $("#st-cad").textContent=cpm+" cpm";
+}
+function fraseTerminada(){
+  var l=leccionActual();
+  var total=oks+bads;var pre=total?Math.round(oks/total*100):100;
+  if(pre<90){
+    toast("⚠ TENSIÓN "+(100-pre)+"% — La estación absorbe el ajuste.","Reintentá la frase: postura antes que velocidad.");
+    sellar("TENSION",{leccion:l.id,precision:pre});
+    charIdx=0;oks=0;bads=0;t0=null;renderTarget();actualizarStats();
+    return;
+  }
+  sellar("FRASE_OK",{leccion:l.id,precision:pre});
+  fraseIdx++;charIdx=0;oks=0;bads=0;t0=null;
+  if(fraseIdx>=l.frases.length){
+    leccionCompletada(l);
+    return;
+  }
+  renderTarget();actualizarStats();
+}
+function leccionCompletada(l){
+  if(S.hechas.indexOf(l.id)<0)S.hechas.push(l.id);
+  S.intencion=Math.min(100,S.intencion+6);
+  S.resiliencia=Math.min(100,S.resiliencia+3);
+  sellar("LECCION_OK",{id:l.id});
+  $("#saber").textContent="saber → "+l.saber;
+  toast("✔ "+l.nombre+" consolidada","«"+l.saber+"»");
+  if(S.hechas.length>=6)otorgarPin("escriba");
+  if(S.hechas.length>=LECCIONES.length)otorgarPin("silicio");
+  var siguiente=LECCIONES.findIndex(function(x){return S.hechas.indexOf(x.id)<0});
+  leccionIdx=siguiente>=0?siguiente:LECCIONES.length-1;
+  fraseIdx=0;charIdx=0;oks=0;bads=0;t0=null;
+  guardar();renderLista();renderBarras();renderTarget();actualizarStats();
+}
+
+/* ---------- overlays ---------- */
+$("#btn-dojo").addEventListener("click",function(){
+  unlock();
+  $("#ov-portal").classList.add("oculto");
+  if(!S.seq){sellar("INICIO_DOJO",{});toast("⌨ Dojo abierto.","La mecanografía es la re-alfabetización del Nodo Semilla.");}
+});
+$("#btn-decl").addEventListener("click",function(){$("#ov-decl").classList.remove("oculto");});
+$("#btn-decl-no").addEventListener("click",function(){$("#ov-decl").classList.add("oculto");});
+$("#btn-decl-ok").addEventListener("click",function(){
+  var n=parseInt($("#decl-in").value||"0",10);
+  if(isNaN(n)||n<0)n=0;if(n>521)n=521;
+  S.decl={lecciones:n,ts:new Date().toISOString()};
+  S.intencion=Math.min(100,S.intencion+Math.round(n/521*20));
+  sellar("EXPERIENCIA_REPORTADA",{lecciones_externas:n});
+  otorgarPin("informante");
+  $("#ov-decl").classList.add("oculto");
+  renderBarras();guardar();
+  toast("📜 Declaración sellada: "+n+" lecciones externas.","Reportado ≠ verificado: la Estación te invita a demostrarlo en el dojo local.");
+});
+
+/* ---------- arranque ---------- */
+cargar();
+construirTeclado();
+renderLista();renderPines();renderBarras();renderLedger();renderTarget();actualizarStats();
+</script>
+</body>
+</html>

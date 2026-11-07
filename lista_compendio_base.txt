@@ -1,0 +1,59 @@
+# L0 ANCLA
+wril/wril_self_root.py
+wril_leyes.py
+# L1 CENSO
+tools/indice_compendio.py
+tools/ingest_compendium.py
+# L2 SANIDAD WRIL
+wril/wril_backup.py
+wril/wril_path_map.py
+wril/wril_path_resolver.py
+wril/wril_mfn_registry.py
+wril/wril_sentinel.py
+wril/wril_topologia.py
+wril/wril_bootstrap.py
+wril/wril_dependency_scanner.py
+wril/wril_estado_real.py
+wril/wril_patch_resolver.py
+wril/wril_root_alias.py
+inbox/wril_firma_funcional.py
+wril/wril_integrity_guard.py
+# L3 NUCLEO
+neurobit_api.py
+core/module_connector.py
+core/api_endpoint_manager.py
+core/adapters/base.py
+core/adapters/adapter_correos.py
+INSTALACION_/modulos/neurobit_dispatcher.py
+neurobit_clipboard_core.py
+neurobit_epistemic_validator.py
+# L4 RED Y PERIMETRO
+port_lighthouse.py
+INSTALACION_/levantar_puente_v2.4.sh
+INSTALACION_/Parches/patch_core_v33.sh
+INSTALACION_/Parches/patch_post_campo.py
+# L5 INTERFAZ Y DICTADO
+neurobit_gnome_widget.py
+INSTALACION_/modulos/neurobit_dictado_evdev.py
+# L6 DESPLIEGUE
+deploy_neurobit_estacion_v3.2.sh
+deploy_neurobit_perms.sh
+INSTALACION_/Parches/plan_reconciliacion.sh
+INSTALACION_/test_integracion_matriz.sh
+ensamble_primario.sh
+self_root.sh
+# L7 PEDAGOGIA Y RENDER
+tools/neurobit_aula.py
+INSTALACION_/consola_verde_ws_v2.6.html
+INSTALACION_/pantalla_2.html
+INSTALACION_/awaken_ceremony.html
+INSTALACION_/observatorio_integracion_v3.html
+INSTALACION_/aduana_evidencia_v1.html
+INSTALACION_/MANUAL_SANEAMIENTO_WRIL.md
+boot_payload_v2.md
+guia_pasos_ejecucion_local.md
+wril/wril_proc_guard.py
+data/MD/flujo_arranque_v1.md
+INSTALACION_/ecn_misiones_bridge.js
+data/MD/como_leer_compendios_v1.md
+ACTA_ESTADO_ACTUAL_20260908.md

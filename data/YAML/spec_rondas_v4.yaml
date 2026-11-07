@@ -1,0 +1,18 @@
+# ECN v4.0 — Rondas de Co-Depuración (spec de la escuela)
+ronda:
+  numero: 1
+  modulo_objetivo: neurobit_dispatcher.py
+  pregunta: "¿se comporta como declara?"
+  pasos:
+    - {orden: 1, nombre: matricula,        herramienta: module_spec_v1.1.yaml}
+    - {orden: 2, nombre: test,             herramienta: wril_dynamic_tester.py}
+    - {orden: 3, nombre: depuracion_grupal, herramienta: salon (sala_app / estado_real.json)}
+    - {orden: 4, nombre: parche,           herramienta: wril_patch_resolver.py (dry-run primero)}
+    - {orden: 5, nombre: expansion,        herramienta: declaracion_adaptadores.yaml (radio nuevo)}
+    - {orden: 6, nombre: version,          herramienta: neurobit_version_control (+0.1)}
+    - {orden: 7, nombre: asiento,          herramienta: Arca (memoria_eva.jsonl)}
+  roles:
+    - {rol: NODO_SEMILLA, funcion: "director y observador c:G7; última palabra"}
+    - {rol: nodo_reflejo, funcion: "propone y verifica; nunca impone"}
+    - {rol: newbie,       funcion: "aporta un radio por ronda; así crece el perímetro"}
+  regla_de_oro: "ningún módulo se muda sin backup; ninguna versión sin test."

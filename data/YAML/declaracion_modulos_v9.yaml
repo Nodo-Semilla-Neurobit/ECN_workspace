@@ -1,0 +1,22 @@
+#=====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL v9.0
+# Novedad: Centinela legacy (Message Builder) registrado como radio
+#          de mensajería (mfn_sector 13). Puerto 5003.
+#=====================================================================
+adapters_registry_append:
+  - adapter_name: "centinela_legacy"
+    domain: "mensajeria_legacy"
+    script_path: "core/adapters/adapter_centinela_legacy.py"
+    runtime: "python3"
+    trigger: "HTTP_localhost"
+    provides: "carta_centinela"
+    backend: "MECANISMO/centinela_websocket_server.py"
+    backend_port: 5003
+    mfn_sector: 13
+modules_append:
+  - module_name: "centinela_websocket_server"
+    script_path: "MECANISMO/centinela_websocket_server.py"
+    runtime: "python3"
+    type: "capa_mensajeria"
+    puerto: 5003
+    soberania: {local_only: true, no_remote_transmission: true}

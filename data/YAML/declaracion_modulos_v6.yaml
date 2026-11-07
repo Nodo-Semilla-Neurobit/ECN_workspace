@@ -1,0 +1,21 @@
+# =====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL v6.0
+# Novedad: capa WRIL registrada en el sector 12 (la reserva es infraestructura)
+# =====================================================================
+wril_registry:
+  principio: "cada modulo responde una pregunta distinta; jamas un supermodulo"
+  pipeline: "Discover -> Resolve -> Reconcile -> Verify -> Record"
+  secuencia_inicial: ["wril_path_map", "wril_patch_resolver"]  # logica declarada pendiente de transmision del NODO
+  inbox: "inbox/"
+  historial: "wril_historial.jsonl"
+  modules:
+    - {name: wril_sentinel,          pregunta: "donde debe vivir lo nuevo",   funcion: ROUTE,     mfn_sector: 12}
+    - {name: wril_path_map,          pregunta: "cual es la topologia actual", funcion: DISCOVER,  mfn_sector: 12}
+    - {name: wril_path_resolver,     pregunta: "donde esta X",                funcion: RESOLVE,   mfn_sector: 12}
+    - {name: wril_mfn_registry,      pregunta: "que declara ser",             funcion: INTERPRET, mfn_sector: 12}
+    - {name: wril_patch_resolver,    pregunta: "que referencia esta rota",    funcion: REPAIR,    mfn_sector: 12}
+    - {name: wril_dependency_scanner,pregunta: "que necesita para funcionar", funcion: REQUIRE,   mfn_sector: 12}
+    - {name: wril_dynamic_tester,    pregunta: "se comporta como declara",    funcion: VERIFY,    mfn_sector: 12}
+    - {name: wril_batch_executor,    pregunta: "como ejecuto la secuencia",   funcion: EXECUTE,   mfn_sector: 12}
+    - {name: wril_backup,            pregunta: "como preservo antes de mutar",funcion: RECORD,    mfn_sector: 12}
+

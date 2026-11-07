@@ -1,0 +1,30 @@
+|=•'superparser'•=|»|['m:S2:P1'.]
+modulo: wril_path_resolver.py
+lineas: 408-483
+firma_ok: True
+Archivo: ('wril_path_resolver.py');
+Carpeta de ubicación: ('~/wril');
+función: ('ver módulo');
+Variables del entorno: (ninguna)
+-------------------------------------------------Inicio:
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Ecosistema Neurobit - WRIL
+Módulo: wril_path_resolver.py
+Función: CONSULTA el índice (direccionamiento lógico). Si falla, regenera
+         hasta [n] intentos; agotados, reporta por end-point y por carta.
+MFN_LOCATION: wril/  |  MFN_LEVEL: 2
+VERSION: v0.2 (depuracion [n]_intentos canonizada)
+"""
+import sys as _ws
+from pathlib import Path as _wp
+_ws.path.insert(0, str(_wp(__file__).resolve().parent))  # WRIL::SELF_PATH::v1
+
+import json
+from pathlib import Path
+from datetime import datetime
+from wril_path_map import generar_mapa
+from wril_root_alias import re
+[.'m:S2:P1']|«|=•'superparser'•=|

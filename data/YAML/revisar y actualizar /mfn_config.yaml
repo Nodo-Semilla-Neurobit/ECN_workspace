@@ -1,0 +1,27 @@
+# mfn_config.yaml
+headers:
+  location: "MFN_LOCATION:\\s*([^\\s\\\"',]+)"
+  level: "MFN_LEVEL:\\s*(\\d+)"
+  coord: "MFN_COORD:\\s*\\((\\d+),\\s*(\\d+)\\)"
+  # Puede agregar patrones personalizados, ej:
+  # author: "AUTOR:\\s*(.+)"
+
+extensions:
+  python: [".py", ".pyw"]
+  shell: [".sh", ".bash", ".zsh"]
+  c_code: [".c", ".h", ".cpp"]
+  javascript: [".js", ".ts", ".jsx"]
+  yaml: [".yaml", ".yml"]
+  markdown: [".md", ".markdown"]
+  json: [".json", ".jsonl"]
+  log: [".log", ".txt"]
+
+ignore_dirs:
+  - ".git"
+  - "__pycache__"
+  - ".venv"
+  - "node_modules"
+  - "backups_wril"
+  - "buzon_salida"
+  - "pids"
+  - "archive" # Agregado para ignorar el historial ya resguardado

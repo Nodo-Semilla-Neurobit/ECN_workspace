@@ -1,0 +1,168 @@
+# ============================================================================
+# NEUROBIT KEYLOGGER — Archivo de Configuración
+# Autor: NODO_SEMILLA
+# Fecha: 27 de marzo de 2026
+# ============================================================================
+
+keylogger:
+  # Comportamiento de batching
+  batch_size: 20
+    # Cantidad de eventos antes de hacer commit
+    # Rango recomendado: 10-100 eventos
+    # Valores bajos = más I/O pero latencia menor
+    # Valores altos = menos I/O pero latencia mayor
+  
+  flush_interval: 30
+    # Intervalo máximo entre commits (segundos)
+    # Incluso si no alcanza batch_size, se commitea después de esto
+    # Rango recomendado: 10-60 segundos
+  
+  # Dispositivos de entrada a monitorear
+  input_devices:
+    - /dev/input/event0
+    - /dev/input/event1
+    - /dev/input/event2
+    # Nota: Se detectan automáticamente si están disponibles
+  
+  # Teclas a ignorar (no registrar)
+  ignore_keys:
+    - Escape
+    - F1
+    - F2
+    - F3
+    - F4
+    - F5
+    - F6
+    - F7
+    - F8
+    - F9
+    - F10
+    - F11
+    - F12
+    - Scroll_Lock
+    - Pause
+    - PrintScreen
+  
+  # Nivel de verbosidad de logs
+  log_level: INFO
+    # Opciones: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    # DEBUG = muy verbose (no recomendado en producción)
+    # INFO = información importante
+    # WARNING = solo warnings y errores
+  
+  # Archivo de logs principal
+  log_file: "data/logs/keylog_main.jsonl"
+  
+  # Archivo temporal (WAL - Write-Ahead Log)
+  temp_log_file: "data/logs/keylog_temp.jsonl"
+
+dispatcher:
+  # Configuración de integración con Event Dispatcher
+  
+  api_url: "http://127.0.0.1:5000"
+    # URL base del API
+  
+  queue_endpoint: "/dispatch/queue"
+    # Endpoint para encolar eventos
+    # URL completa: {api_url}{queue_endpoint}
+  
+  status_endpoint: "/dispatch/status"
+    # Endpoint para verificar status
+  
+  timeout_seconds: 5
+    # Timeout para requests al dispatcher
+    # Si dispatcher no responde en este tiempo, usar fallback local
+  
+  max_retries: 3
+    # Cantidad de reintentos en caso de error
+  
+  retry_delay_ms: 100
+    # Delay entre reintentos (milisegundos)
+  
+  fallback_to_local: true
+    # Si true: usar archivos locales si dispatcher no disponible
+    # Si false: buffering en memoria (riesgo de pérdida si crash)
+
+permissions:
+  # Configuración de permisos requeridos
+  
+  required_group: "input"
+    # Grupo necesario para acceder a /dev/input
+    # Agregar con: sudo usermod -a -G input $USER
+  
+  use_sudo: false
+    # Si false: requiere pertenencia al grupo 'input'
+    # Si true: ejecutar con sudo (menos recomendado)
+
+monitoring:
+  # Configuración de monitoreo y estadísticas
+  
+  enabled: true
+  
+  stats_file: "data/logs/keylog_stats.json"
+    # Archivo para guardar estadísticas
+  
+  stats_update_interval: 60
+    # Intervalo para actualizar estadísticas (segundos)
+
+recovery:
+  # Configuración de recuperación ante fallos
+  
+  enabled: true
+  
+  recover_on_startup: true
+    # Recuperar eventos no comprometidos al iniciar
+  
+  checkpoint_interval: 300
+    # Crear checkpoint cada N segundos
+    # Para recuperación más rápida ante crash
+
+# ============================================================================
+# PERFILES DE CONFIGURACIÓN
+# ============================================================================
+
+profiles:
+  development:
+    batch_size: 5
+    flush_interval: 5
+    log_level: DEBUG
+    fallback_to_local: true
+  
+  production:
+    batch_size: 50
+    flush_interval: 60
+    log_level: WARNING
+    fallback_to_local: true
+  
+  testing:
+    batch_size: 3
+    flush_interval: 5
+    log_level: DEBUG
+    fallback_to_local: true
+
+# ============================================================================
+# NOTAS DE IMPLEMENTACIÓN
+# ============================================================================
+
+# 1. PERMISOS REQUERIDOS:
+#    - Opción A (recomendada):
+#      sudo usermod -a -G input $USER
+#      newgrp input
+#
+#    - Opción B (no recomendada):
+#      Ejecutar con sudo (requiere password)
+#
+# 2. CAMBIOS EN RUNTIME:
+#    - Recargar config sin reiniciar: SIGHUP
+#    - signal.signal(signal.SIGHUP, handle_config_reload)
+#
+# 3. MONITOREO:
+#    - Ver logs: tail -f data/logs/keylog_*.log
+#    - Ver estadísticas: jq . data/logs/keylog_stats.json
+#    - Monitor dispatcher: watch -n 2 'curl http://127.0.0.1:5000/dispatch/status | jq'
+#
+# 4. TROUBLESHOOTING:
+#    - "Permission denied" → Verificar permisos de grupo 'input'
+#    - "No events" → Verificar dispositivos disponibles (ls /dev/input/event*)
+#    - "Dispatcher unavailable" → Verificar que API está corriendo
+#    - "High CPU" → Aumentar batch_size y flush_interval

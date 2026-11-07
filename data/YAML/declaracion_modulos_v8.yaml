@@ -1,0 +1,22 @@
+#=====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL v8.0
+# Novedad: MFN Sprite Cartógrafo registrado como radio visual (mfn_sector 12).
+# Hereda adapters_registry, postmans_registry, dispatch_center y topologia de v7.
+#=====================================================================
+adapters_registry_append:
+  - adapter_name: "mfn_cartografo"
+    domain: "visual_mfn"
+    script_path: "core/adapters/adapter_mfn_cartografo.py"
+    runtime: "python3"
+    trigger: "HTTP_localhost"
+    provides: "estado_radial_169"
+    backend: "MFN_Sprite_Cartografo/backend/app.py"
+    backend_port: 5002
+    mfn_sector: 12
+modules_append:
+  - module_name: "mfn_sprite_cartografo"
+    script_path: "MFN_Sprite_Cartografo/backend/app.py"
+    runtime: "python3"
+    type: "capa_presentacion"
+    puerto: 5002
+    soberania: {local_only: true, no_remote_transmission: true}

@@ -1,0 +1,59 @@
+# Declaración MFN del Salón Soberano v3.0
+# Para integrar con wril_path_map.py y wril_mfn_registry.py
+
+modulo:
+  id: "salon_soberano_v3"
+  nombre: "Salón Soberano v3.0"
+  version: "3.0.0"
+  
+mfn_location:
+  path: "tools/salon/"
+  level: 2
+  coord: [3, 5]
+  categoria: "COMUNICACION_SOBERANA"
+
+archivos_canonicos:
+  - path: "tools/salon/salon_coordinador.py"
+    tipo: "daemon"
+    funcion: "Coordinador local (inotify + ruteo + sellado)"
+  - path: "tools/salon/salon_frontend.html"
+    tipo: "frontend"
+    funcion: "Visor del historial centralizado"
+  - path: "tools/salon/test_salon.sh"
+    tipo: "test"
+    funcion: "Verificación no destructiva (6 puntos)"
+  - path: "tools/salon/deploy_salon_v3.sh"
+    tipo: "deploy"
+    funcion: "Despliegue idempotente"
+  - path: "tools/salon/README_SALON.md"
+    tipo: "documentacion"
+    funcion: "Documentación completa del módulo"
+  - path: "tools/salon/agentes/*.yaml"
+    tipo: "configuracion"
+    funcion: "Configuración de agentes (7SO, 9SE, LLE)"
+
+dependencias:
+  python:
+    - "watchdog>=2.0"
+  sistema:
+    - "python3>=3.8"
+
+protocolo:
+  nombre: "Neurobit Protocol v1.1"
+  action_words:
+    - "INIT"
+    - "TASK"
+    - "DISPATCH"
+    - "CONSULTA"
+    - "INFORME"
+    - "POESIA"
+    - "LINGUISTICA"
+    - "RESPUESTA"
+    - "COMUNICADO"
+
+soberania:
+  local_only: true
+  no_remote_transmission: true
+  sin_api_externa: true
+  sin_postman_humano: true
+  historial_inmutable: true

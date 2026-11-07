@@ -1,0 +1,11 @@
+# Reglas udev para Neurobit - Captura HID soberana
+# Copiar a: /etc/udev/rules.d/90-neurobit-hid.rules
+
+# Acceso a uinput para inyección HID
+KERNEL=="uinput", MODE="0660", GROUP="input", OPTIONS+="static_node=uinput"
+
+# Acceso a teclados por ID (dictado evdev)
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="*Keyboard*", MODE="0660", GROUP="input"
+
+# Acceso genérico a dispositivos de entrada
+SUBSYSTEM=="input", KERNEL=="event*", MODE="0660", GROUP="input"

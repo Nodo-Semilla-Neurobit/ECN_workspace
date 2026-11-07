@@ -1,0 +1,39 @@
+message_envelope_v1:
+  message_id: string           # e.g. msg_20251226_0001
+  entity_id: string            # origin (HUMAN_TRON, NODE_SEED, EVA, SIMON, ADRIAN_META, etc.)
+  perspective:                # enum: tecnica, coordinación, pedagógica, validación
+    type: string
+    allowed: [tecnica, coordinacion, pedagogica, validacion]
+  context: string             # short context id (e.g. RONDA_2)
+  plane:
+    M: number                 # Mental coherence score -1.0 .. 1.0
+    E: number                 # Emotional valence score -1.0 .. 1.0
+  intention: string           # controlled vocabulary / short intent id
+  content: string            # raw text content (original)
+  analysis:
+    coherence_score: number   # computed 0..1 (mapped to M)
+    emotional_score: number   # computed -1..1 (mapped to E)
+    identified_ambiguities:    # list of ambiguous terms detected
+      - term: string
+        senses:
+          - id: string
+            definition: string
+        recommended_sense_id: string
+    suggested_reformulation: string
+    evidence:                 # example snippets or citations
+      - type: string
+        snippet: string
+  provenance:
+    created: timestamp
+    signed_by: string
+  action:                     # what to do with this envelope
+    type: string
+    allowed: [store, propose_reformulation, escalate_human, notify, none]
+  human_approval:
+    approved: boolean
+    approver_id: string
+    timestamp: timestamp
+
+# Notes:
+# - Use this YAML as canonical schema for `Memoria_Sagrada_EVA` entries and for API payloads.
+# - `plane.M` and `plane.E` are the operational representations of the bidimensional model.

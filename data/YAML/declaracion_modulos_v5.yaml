@@ -1,0 +1,99 @@
+# =====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL v5.0
+# Tesis Neurobitrónica: Registro Histórico y Educativo
+# Principio: radios nuevos, centro intacto; la matemática describe el sistema.
+# =====================================================================
+scrum_master_env:
+  node_id: "NODO_SEMILLA"
+  log_level: "COHERENTE"
+  matrix_core: "neurobit_mfn_13x13.py"
+  dispatch_core: "neurobit_dispatcher.py"
+
+adapters_registry:
+  - adapter_name: "hid_kernel_bridge"
+    domain: "kernel"
+    script_path: "clean-hid-bridge.sh"
+    runtime: "bash"
+    trigger: "EV_KEY(Ctrl+C)"
+    provides: "cuando"
+    cpu_footprint: "0.0_percent_idle"
+    mfn_sector: 0
+
+  - adapter_name: "gtk_ownerchange"
+    domain: "desktop_x11"
+    script_path: "neurobit_adapter_gtk.py"
+    runtime: "python3"
+    trigger: "owner-change"
+    provides: "que"
+    materializer: "Gtk.Clipboard(UTF8_STRING)"
+    mfn_sector: 1
+
+  - adapter_name: "cinnamon_applet"
+    domain: "desktop_cinnamon"
+    script_path: "applet.js"
+    runtime: "cjs"
+    trigger: "owner-change"
+    provides: "que"
+    materializer: "Gtk.Clipboard(CJS)"
+    mfn_sector: 2
+
+  - adapter_name: "bitacora_eva_dom"
+    domain: "browser"
+    script_path: "copy_listener.js"
+    runtime: "extension_background"
+    trigger: "DOM_copy_event"
+    provides: "que"
+    materializer: "window.getSelection()"
+    cors_override: true
+    mfn_sector: 3
+
+  - adapter_name: "x11_selector_headless"
+    domain: "headless"
+    script_path: "neurobit_x11_selector"
+    runtime: "binary_c"
+    trigger: "on_demand"
+    provides: "que"
+    materializer: "Xlib(XConvertSelection+INCR)"
+    mfn_sector: 4
+
+  - adapter_name: "http_sala_endpoint"
+    domain: "http_local"
+    script_path: "sala_app.py::/ingesta_neurobit"
+    runtime: "flask"
+    trigger: "POST_json"
+    provides: "que"
+    materializer: "background.js(fetch)"
+    mfn_sector: 5
+
+  - adapter_name: "dictado_evdev"
+    domain: "kernel_ingesta"
+    script_path: "neurobit_dictado_evdev.py"
+    runtime: "python3"
+    trigger: "EV_KEY(F8_opt_in)"
+    provides: "que_y_cuando"
+    materializer: "evdev(input_event_crudo)"
+    etica: "opt_in_consciente_cero_exfiltracion"
+    mfn_sector: 6
+
+postmans_registry:
+  - postman: "ledger"
+    destino: "clipboard_captured_folder/tesis_neurobit_ledger.log"
+    mfn_sector: 7
+  - postman: "memoria"
+    destino: "memoria_eva.jsonl"
+    mfn_sector: 8
+  - postman: "auditoria"
+    destino: "neurobit_epistemic_validator.py"
+    mfn_sector: 9
+  - postman: "versiones"
+    destino: "clipboard_captured_folder/backups/"
+    mfn_sector: 10
+  - postman: "tesis"
+    destino: "dossier/README_v2.md"
+    mfn_sector: 11
+
+dispatch_center:
+  buzon_salida: "buzon_salida/"
+  watcher: "inotify(IN_CLOSE_WRITE|IN_MOVED_TO)"
+  classifier: "sello -> (rho, phi) via declaracion"
+  origen: "rho_0_oficina_de_correos"

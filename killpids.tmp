@@ -1,0 +1,5 @@
+gus        46830  0.0  0.0  27168  5504 pts/0    S+   nov06   0:00 python3 wril/wril_sentinel.py
+gus        46832  0.0  0.0  27056  4924 pts/0    S+   nov06   0:00 python3 neurobit_dispatcher.py
+gus        46836  0.0  0.0  24912  4828 pts/0    S+   nov06   0:00 python3 neurobit_dictado_evdev.py
+gus        47203  0.0  0.0  25204  9184 pts/2    S+   nov06   0:00 python3 core/port_lighthouse.py
+gus        57969  0.0  0.0 256812  8892 pts/4    Sl   nov06   0:01 python3 -u tools/salon/salon_coordinador.py

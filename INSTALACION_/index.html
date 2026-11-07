@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · Salón del Fósforo · Última Capa v3.2</title>
+<link href="https://jsdelivr.net" rel="stylesheet">
+<style>
+:root{
+  --bg:#1e1e2e; --panel:#24243a; --borde:#3a3a55;
+  --ink:#a6e3a1; --gold:#f9e2af; --lila:#cba6f7; --cyan:#89dceb; --alert:#f38ba8;
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html,body{height:100%; background:var(--bg); color:var(--ink); font-family:"VT323", "Courier New", monospace; overflow:hidden}
+body::after{content:""; position:fixed; inset:0; pointer-events:none; z-index:99; background:repeating-linear-gradient(0deg, rgba(0,0,0,.2) 0 1px, transparent 1px 3px)}
+header{display:flex; align-items:center; justify-content:space-between; padding:8px 14px; border-bottom:1px solid var(--borde); background:#191927; font-size:14px; letter-spacing:2px}
+header .badge{border:1px solid var(--borde); padding:2px 8px; margin-left:6px; border-radius:3px}
+header .badge.ok{color:var(--ink); border-color:var(--ink)}
+header .badge.warn{color:var(--alert); border-color:var(--alert)}
+main{flex:1; display:grid; grid-template-columns:280px 1fr 280px; gap:10px; padding:10px; height:calc(100vh - 40px); overflow:hidden}
+aside,section{overflow-y:auto; padding:12px; background:var(--panel); border:1px solid var(--borde); border-radius:6px; height:100%}
+h3{font-size:14px; letter-spacing:2px; color:var(--gold); border-bottom:1px dashed var(--borde); padding-bottom:4px; margin-bottom:8px}
+#ladder{list-style:none}
+#ladder li{padding:6px 8px; margin:4px 0; border:1px solid var(--borde); border-radius:4px; opacity:.4}
+#ladder li.act{opacity:1; border-color:var(--cyan); color:var(--cyan)}
+#ladder li.ok{opacity:1; border-color:var(--ink); color:var(--ink)}
+.pin{border:1px solid var(--borde); border-radius:4px; padding:6px 8px; margin:5px 0; opacity:.3}
+.pin.ganado{opacity:1; border-color:var(--gold); color:var(--gold); box-shadow:0 0 10px rgba(249,226,175,.2) inset}
+.pin small{display:block; color:var(--lila); font-style:italic}
+.mis{border:1px solid var(--borde); border-radius:5px; padding:8px 10px; margin:6px 0; background:#1c1c2e; font-size:13px}
+.mis.done{border-color:var(--ink); opacity:.6}
+.mis code{display:block; background:#0e0e18; border:1px solid var(--borde); border-radius:4px; padding:4px 6px; margin:4px 0; color:var(--gold)}
+.bar{margin:8px 0}
+.bar label{font-size:12px; display:flex; justify-content:space-between; letter-spacing:1px}
+.track{position:relative; height:12px; border:1px solid var(--borde); border-radius:3px; background:#191927; margin-top:3px; overflow:hidden}
+.fill{height:100%; width:0%; background:linear-gradient(90deg, #3f6e3c, var(--ink)); transition:width .6s}
+.tick{position:absolute; top:0; bottom:0; width:1px; background:var(--gold); opacity:.5}
+#canvas-mfn{display:block; margin:10px auto}
+#term-log{height:140px; overflow-y:auto; background:#0e0e18; border:1px solid var(--borde); border-radius:6px; padding:10px; font-size:14px; line-height:1.4; margin-bottom:8px}
+#term-log .ok{color:var(--ink)} #term-log .bad{color:var(--alert)} #term-log .cmd{color:var(--gold)} #term-log .sys{color:var(--lila)}
+#term-form{display:flex; gap:6px; align-items:center}
+#term-form .prompt{color:var(--gold)}
+#term-in{flex:1; background:#0e0e18; border:1px solid var(--borde); color:var(--ink); font-family:inherit; font-size:15px; padding:6px; border-radius:4px; outline:none}
+#term-in:focus{border-color:var(--ink)}
+#term-form button{background:none; border:1px solid var(--ink); color:var(--ink); font-family:inherit; padding:5px 12px; border-radius:4px; cursor:pointer}
+button.acc{width:100%; margin:4px 0; background:none; border:1px solid var(--cyan); color:var(--cyan); font-family:inherit; font-size:13px; padding:6px; border-radius:4px; cursor:pointer}
+button.acc.oro{border-color:var(--gold); color:var(--gold)}
+#toasts{position:fixed; top:50px; right:14px; z-index:140; display:flex; flex-direction:column; gap:8px; width:300px}
+.toast{border:1px solid var(--gold); background:#1c1c2e; color:var(--gold); padding:8px 12px; border-radius:6px; font-size:12px; box-shadow:0 0 16px rgba(249,226,175,.2)}
+.toast small{display:block; color:var(--lila); font-style:italic; margin-top:2px}
+</style>
+</head>
+<body>
+<header>
+  <div class="glow">☉ ECN · PANEL CENTRAL DE RE-ALFABETIZACIÓN</div>
+  <div><span class="badge ok">127.0.0.1</span><span class="badge" id="st-faro">FARO: ACTIVE</span></div>
+</header>
+
+<main>
+  <aside>
+    <h3>🛡️ RANGOS OPERATIVOS</h3>
+    <ol id="ladder"></ol>
+    <h3>🏅 PINES DE SOBERANÍA</h3>
+    <div id="pines"></div>
+  </aside>
+
+  <section style="display:flex; flex-direction:column; justify-content:space-between">
+    <div id="term-log"></div>
+    <form id="term-form">
+      <span class="prompt">nodo@ecn:~$</span>
+      <input id="term-in" autocomplete="off" spellcheck="false" placeholder="escribe el verbo preciso o @toggle-echo...">
+      <button type="submit">⏎</button>
+    </form>
+    <div id="misiones-box" style="margin-top:10px">
+      <h3>⚙️ REGISTRO DE MISIONES ACTIVAS</h3>
+      <div id="lista-misiones"></div>
+    </div>
+  </section>
+
+  <aside>
+    <h3>📊 BARRAS DE SINTONÍA</h3>
+    <div class="bar"><label>INYECCIÓN DE INTENCIÓN <span id="v-int">0%</span></label><div class="track"><div class="fill" id="f-int"></div><span class="tick" style="left:25%"></span><span class="tick" style="left:50%"></span><span class="tick" style="left:75%"></span></div></div>
+    <div class="bar"><label>RESILIENCIA FÍSICA <span id="v-res">0%</span></label><div class="track"><div class="fill" id="f-res"></div><span class="tick" style="left:25%"></span><span class="tick" style="left:50%"></span><span class="tick" style="left:75%"></span></div></div>
+    <div id="tension-txt">TENSIÓN ACUMULADA: 0</div>
+    <h3>◉ CARTÓGRAFO MFN 13×13</h3>
+    <canvas id="canvas-mfn" width="220" height="220"></canvas>
+    <div id="mfn-txt">ACTIVOS: 1/169</div>
+    <button class="acc oro" id="btn-export">EXPORTAR PAYLOAD SANITIZADO</button>
+  </aside>
+</main>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+const _ = s => document.querySelector(s);
+const RANGOS = ["Aspirante Desconectado", "Técnico de Aislamiento", "Tejedor de Nodos", "Arquitecto de Resegridad", "Nodo Semilla Soberano"];
+const PINES = {
+  cordon: { n: "Pin del Cordón Sanitario", f: "Aislamiento verificado en 127.0.0.1." },
+  kernel: { n: "Pin Guardián del Kernel", f: "Señal cruda F8 capturada por interrupción." },
+  cirujano: { n: "Pin Cirujano de Texto", f: "El mapa del territorio se cura en seco." },
+  silencio: { n: "Pin del Silencio Sagrado", f: "Operando al 0.0% de CPU en estado durmiente." }
+};
+
+let ws = null, inputBuf = "";
+const logTerm = (t, c) => { const d = document.createElement("div"); d.className = c || "sys"; d.textContent = t; _("#term-log").appendChild(d); _("#term-log").scrollTop = 999999; };
+
+function conectarPuente() {
+  ws = new WebSocket("ws://127.0.0.1:8080");
+  ws.onopen = () => { logTerm("[✓ PUENTE] Canal WebSocket sincronizado en 8080.", "ok"); sintonizarEstacion(); };
+  ws.onmessage = e => { if (e.data.startsWith("[SISTEMA]")) logTerm(e.data, "sys"); else logTerm(e.data, "ok"); };
+  ws.onclose = () => { logTerm("[⚠ PUENTE] Canal caído. Modo simulacro activo.", "bad"); setTimeout(conectarPuente, 3000); };
+}
+
+async function sintonizarEstacion() {
+  try {
+    const res = await fetch("http://127.0.0.1:5000/estado");
+    const data = await res.json();
+    actualizarUI(data);
+  } catch (err) {
+    logTerm("[⚠ ADUANA] neurobit_api en :5000 duerme profundamente. Despierta el muelle.", "bad");
+  }
+}
+
+function actualizarUI(data) {
+  _("#v-int").textContent = data.rango * 10 + "%";
+  _("#f-int").style.width = data.rango * 10 + "%";
+  _("#tension-txt").textContent = "TENSIÓN ACUMULADA: 0 | COHERENCIA OK";
+
+  // Render de Rangos
+  const lad = _("#ladder"); lad.innerHTML = "";
+  RANGOS.forEach((r, i) => {
+    const li = document.createElement("li"); li.textContent = "[" + i + "] " + r;
+    if (i <= data.rango) li.className = "ok";
+    lad.appendChild(li);
+  });
+  dibujarMFN(data.rango * 15 + 1);
+}
+
+function dibujarMFN(bits) {
+  const c = _("#canvas-mfn"), x = c.getContext("2d"), W = c.width, cx = W/2, cy = W/2;
+  x.clearRect(0, 0, W, W);
+  const anillos = [8, 16, 24, 32, 40, 48], colores = ["#f9e2af", "#fab387", "#cba6f7", "#89b4fa", "#74c7ec", "#a07850"];
+  x.fillStyle = "#fff8e0"; x.beginPath(); x.arc(cx, cy, 6, 0, 7); x.fill();
+  let acc = 1; const r0 = 18, dr = (cx - 20) / 6;
+  for (let a = 0; a < 6; a++) {
+    const r = r0 + dr * a, n = anillos[a];
+    for (let s = 0; s < n; s++) {
+      const ang = (s / n) * Math.PI * 2 - Math.PI / 2;
+      x.beginPath(); x.arc(cx + Math.cos(ang) * r, cy + Math.sin(ang) * r, 2, 0, 7);
+      x.fillStyle = (acc + s) < bits ? colores[a] : "rgba(166,227,161,0.1)";
+      x.fill();
+    }
+    acc += n;
+  }
+  _("#mfn-txt").textContent = "ACTIVOS: " + bits + "/169 | c:G7 = OBSERVADOR";
+}
+
+_("#term-form").addEventListener("submit", e => {
+  e.preventDefault(); const val = _("#term-in").value.trim(); _("#term-in").value = "";
+  if (!val) return; logTerm("nodo@ecn:~$ " + val, "cmd");
+  if (ws && ws.readyState === 1) ws.send(val); else logTerm("[X] Fallo de bus: puente desconectado.", "bad");
+});
+
+_("#btn-export").addEventListener("click", () => {
+  const p = { protocol: "NEUROBIT_STATE_PAYLOAD_v1", sanitized: true, bits_activos: 57, centro: "c:G7", ts: new Date().toISOString() };
+  copiarTexto(JSON.stringify(p)); toastLocal("PAYLOAD SANITIZADO COPIADO A PORTAPAPELES");
+});
+
+_("#screen").addEventListener("click", unlockAudio);
+function unlockAudio() { sonido(440, 0.05, 0.01); }
+
+function sonido(f, d, g) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)(), o = ctx.createOscillator(), gain = ctx.createGain();
+     o.type = "sine";
+     o.frequency.value = f;
+     gain.gain.value = g;
+     o.connect(gain);
+
+    gain.connect(ctx.destination);
+     o.start();
+     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + d);
+     o.stop(ctx.currentTime + d);
+     } catch(e){} }
+
+setTimeout(conectarPuente, 600);

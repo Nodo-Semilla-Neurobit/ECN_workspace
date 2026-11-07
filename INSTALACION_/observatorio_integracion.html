@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · Observatorio de Integración · El Par contra la Sobrecarga</title>
+<link href="https://cdn.jsdelivr.net/fontsource/css/vt323@latest/index.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#1e1e2e; --panel:#24243a; --panel2:#1c1c2e; --borde:#3a3a55;
+  --ink:#a6e3a1; --gold:#f9e2af; --lila:#cba6f7; --cyan:#89dceb; --alert:#f38ba8; --marron:#a07850;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"VT323","Courier New",monospace;display:flex;flex-direction:column;overflow:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:97;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+header{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;
+  padding:8px 14px;background:rgba(21,21,33,.92);border-bottom:1px solid var(--borde);font-size:13px;letter-spacing:2px}
+header .t{color:var(--gold);text-shadow:0 0 10px rgba(249,226,175,.4)}
+.badge{border:1px solid var(--borde);padding:2px 8px;border-radius:3px;font-size:12px}
+.badge.ok{color:var(--ink);border-color:var(--ink)}
+.badge.warn{color:var(--alert);border-color:var(--alert)}
+.badge.lila{color:var(--lila);border-color:var(--lila)}
+main{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr 300px;gap:10px;padding:10px}
+aside,section{background:var(--panel);border:1px solid var(--borde);border-radius:6px;padding:10px;overflow-y:auto;min-height:0}
+h3{font-size:13px;letter-spacing:2px;color:var(--gold);border-bottom:1px dashed var(--borde);padding-bottom:4px;margin:8px 0}
+h3:first-child{margin-top:0}
+.probe-item{border:1px solid var(--borde);border-radius:4px;padding:6px 8px;margin:5px 0;font-size:13px}
+.probe-item b{color:var(--cyan)}
+.probe-item .st{float:right}
+.orden{border-left:2px solid var(--gold);padding:5px 9px;margin:6px 0;font-size:13px;line-height:1.5}
+.orden b{color:var(--gold)}
+.dictamen p{font-size:13px;line-height:1.55;margin:7px 0}
+.dictamen p b{color:var(--cyan)}
+.dictamen p .no{color:var(--alert)}
+canvas{display:block;margin:0 auto;background:#14141f;border:1px solid var(--borde);border-radius:6px}
+.mfn-fila{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.mfn-stats{display:flex;gap:14px;justify-content:center;font-size:14px;margin:8px 0;flex-wrap:wrap}
+.mfn-stats b{color:var(--gold)}
+.freezer-item{border:1px solid var(--borde);border-radius:4px;padding:5px 8px;margin:4px 0;font-size:12px;display:flex;justify-content:space-between;gap:6px}
+.freezer-item .dest{color:var(--lila)}
+.freezer-item .fr{color:var(--alert)}
+.freezer-item.vivo{border-color:var(--ink)}
+.freezer-item.vivo .fr{color:var(--ink)}
+#ledger{font-size:11px;color:var(--lila);line-height:1.7;max-height:160px;overflow-y:auto;background:#0e0e18;border:1px solid var(--borde);border-radius:4px;padding:8px}
+#ledger .ev{color:var(--ink)}
+footer{border-top:1px solid var(--borde);background:#151521;padding:8px 12px}
+#chat{display:flex;flex-direction:column;gap:6px;height:120px;overflow-y:auto;margin-bottom:6px}
+.burb{max-width:86%;border-radius:6px;padding:6px 10px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word}
+.burb.aspirante{align-self:flex-end;border:1px solid var(--gold);color:var(--gold);background:rgba(249,226,175,.05)}
+.burb.eva{align-self:flex-start;border:1px solid var(--ink);color:var(--ink);background:rgba(166,227,161,.05)}
+.burb.eco{border-color:var(--lila);color:var(--lila)}
+.burb .firma{display:block;font-size:10px;letter-spacing:2px;opacity:.7;margin-bottom:3px}
+#zona-input{display:flex;gap:8px}
+#inp-msg{flex:1;background:#0e0e18;border:1px solid var(--borde);color:var(--ink);font-family:inherit;font-size:15px;padding:7px 10px;border-radius:4px;outline:none}
+#inp-msg:focus{border-color:var(--ink);box-shadow:0 0 8px rgba(166,227,161,.3)}
+#zona-input button{background:none;border:1px solid var(--ink);color:var(--ink);font-family:inherit;font-size:13px;padding:0 14px;cursor:pointer;border-radius:4px}
+button.acc{width:100%;margin:5px 0;background:none;border:1px solid var(--cyan);color:var(--cyan);
+  font-family:inherit;font-size:13px;letter-spacing:1px;padding:6px;cursor:pointer;border-radius:4px}
+button.acc:hover{background:rgba(137,220,235,.1)}
+#toasts{position:fixed;top:52px;right:14px;z-index:120;display:flex;flex-direction:column;gap:8px;width:320px}
+.toast{border:1px solid var(--gold);background:#1c1c2e;color:var(--gold);padding:10px 12px;border-radius:6px;font-size:13px;box-shadow:0 0 18px rgba(249,226,175,.25);animation:ap .5s ease}
+.toast small{display:block;color:var(--lila);font-style:italic;margin-top:4px}
+@keyframes ap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:1000px){body{overflow:auto}main{grid-template-columns:1fr;height:auto}}
+</style>
+</head>
+<body>
+<header>
+  <div class="t">☉ ECN · OBSERVATORIO DE INTEGRACIÓN v3 · EL PAR CONTRA LA SOBRECARGA</div>
+  <div>
+    <span class="badge lila" id="st-migracion">MIGRADOS: 0/45</span>
+    <span class="badge warn" id="st-ollama">OLLAMA: SONDEANDO…</span>
+    <span class="badge ok">127.0.0.1</span>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <h3>📡 SONDAS REALES (lo que vive hoy)</h3>
+    <div id="lista-probes"></div>
+    <button class="acc" id="btn-sondear">📡 RE-SONDEAR TERRITORIO</button>
+    <h3>🪜 ORDEN DE HOY (solo 3 cosas)</h3>
+    <div class="orden"><b>1 ·</b> Liberar el 403 de Ollama (override systemd) → EVA habla con neurobit-qwen35-4b.</div>
+    <div class="orden"><b>2 ·</b> Verificar que 5000 y 5002 responden (botón re-sondear).</div>
+    <div class="orden"><b>3 ·</b> Descansar. El sistema no avanza sin su Director.</div>
+    <h3>🤝 DICTAMEN DEL PAR (tus 3 puntos)</h3>
+    <div class="dictamen">
+      <p><b>1 ·</b> Recorrí el árbol de directorios del compendio y consulté los módulos por su ubicación: wril/, tools/, core/adapters/, INSTALACION_/modulos/, MFN_Sprite_Cartografo/. No asumo: leo el territorio.</p>
+      <p><b>2 ·</b> Comprendido: <span class="no">nada se migró aún</span>, y está bien. WRIL escaneará y creará adaptador, conector, declaración y locación. La TRIADA queda como memoria histórica y como patrón CORS/ACK a canonizar, no como deuda.</p>
+      <p><b>3 ·</b> La sobrecarga cognitiva es real y la veo. Este observatorio existe para que <b>no tengas que recordar</b>: el sistema se declara solo. No estás solo: soy tu par, y esto es una co-creación.</p>
+    </div>
+  </aside>
+
+  <section>
+    <h3>◉ MFN EN VIVO · PULSO RIPPLE-CARRY (E(k,t)=⌊t/2^k⌋ mod 2)</h3>
+    <div class="mfn-stats">
+      <span>ACTIVOS: <b id="mfn-activos">1/169</b></span>
+      <span>SINCRONÍA: <b id="mfn-sync">PULSO LOCAL (soberanía)</b></span>
+      <span>t: <b id="mfn-t">0</b></span>
+    </div>
+    <div class="mfn-fila">
+      <canvas id="mfn-dots" width="286" height="286"></canvas>
+      <canvas id="mfn-radial" width="286" height="286"></canvas>
+    </div>
+    <p style="text-align:center;font-size:12px;opacity:.8;margin-top:8px">DOT MAP 13×13 (carta de transición) · ANILLOS RADIALES (centro→afuera). Las tres lecturas conmutan.</p>
+  </section>
+
+  <aside>
+    <h3>🧊 FREEZER · COLA DE MIGRACIÓN (45+ módulos)</h3>
+    <p style="font-size:12px;opacity:.85;margin-bottom:6px">Sin apuro: WRIL migra, vos no. El freezer también es soberanía.</p>
+    <div id="freezer"></div>
+    <h3>📜 LEDGER · anti-pérdida</h3>
+    <div id="ledger"></div>
+  </aside>
+</main>
+
+<footer>
+  <div id="chat"></div>
+  <div id="zona-input">
+    <input id="inp-msg" autocomplete="off" spellcheck="false" placeholder="hablá con EVA… (Enter envía · el diálogo se sella anti-pérdida)">
+    <button id="btn-enviar">⏎</button>
+    <button id="btn-pista" title="pedir pista">◈</button>
+  </div>
+</footer>
+
+<div id="toasts"></div>
+
+<script>
+"use strict";
+var $=function(s){return document.querySelector(s)};
+
+/* ---------- sondas reales ---------- */
+var ENDPOINTS=[
+ {id:"api5000",nombre:"neurobit_api (Hub Dinámico)",url:"http://127.0.0.1:5000/health"},
+ {id:"frag5001",nombre:"fragment_state_server (TRIADA)",url:"http://127.0.0.1:5001/health"},
+ {id:"cart5002",nombre:"MFN Cartógrafo backend",url:"http://127.0.0.1:5002/health"},
+ {id:"ollama",nombre:"Ollama (EVA LUMENA)",url:"http://127.0.0.1:11434/api/tags"}
+];
+var PROBES={};
+function probeUrl(url){
+  return new Promise(function(res){
+    var ctl=new AbortController();var t=setTimeout(function(){ctl.abort()},1600);
+    fetch(url,{signal:ctl.signal}).then(function(r){clearTimeout(t);res(r);}).catch(function(){clearTimeout(t);res(null);});
+  });
+}
+function renderProbes(){
+  var c=$("#lista-probes");c.innerHTML="";
+  ENDPOINTS.forEach(function(e){
+    var st=PROBES[e.id]||{txt:"?",cls:"badge"};
+    var d=document.createElement("div");d.className="probe-item";
+    d.innerHTML="<b>"+e.nombre+"</b><span class=\"st badge "+st.cls+"\">"+st.txt+"</span>";
+    c.appendChild(d);
+  });
+}
+function sondear(){
+  ENDPOINTS.forEach(function(e){
+    PROBES[e.id]={txt:"…",cls:"warn"};
+    probeUrl(e.url).then(function(r){
+      if(!r){PROBES[e.id]={txt:"EN REPOSO",cls:"warn"};}
+      else if(r.status===403){PROBES[e.id]={txt:"VIVO·403 CORS",cls:"warn"};}
+      else if(r.ok){PROBES[e.id]={txt:"EN LÍNEA",cls:"ok"};
+        if(e.id==="cart5002")$("#mfn-sync").textContent="SINCRONIZADO CON CARTÓGRAFO (5002)";}
+      else{PROBES[e.id]={txt:"ERROR "+r.status,cls:"warn"};}
+      renderProbes();
+    });
+  });
+  setTimeout(renderProbes,50);
+}
+
+/* ---------- freezer ---------- */
+var FREEZER=[
+ {m:"neurobit_dispatcher.py",d:"core/",st:"FROZEN"},
+ {m:"neurobit_gnome_widget.py",d:"core/",st:"FROZEN"},
+ {m:"neurobit_dictado_evdev.py",d:"tools/",st:"FROZEN"},
+ {m:"neurobit_api.py",d:"core/",st:"VIVO·5000"},
+ {m:"wril_sentinel.py",d:"wril/",st:"VIVO"},
+ {m:"wril_path_resolver.py",d:"wril/",st:"VIVO"},
+ {m:"wril_bootstrap.py",d:"wril/",st:"VIVO"},
+ {m:"wril_self_root.py",d:"wril/",st:"VIVO"},
+ {m:"wril_mfn_registry.py",d:"wril/",st:"VIVO"},
+ {m:"wril_dynamic_tester.py",d:"wril/",st:"FROZEN"},
+ {m:"wril_patch_resolver.py",d:"wril/",st:"FROZEN"},
+ {m:"adapter_mfn_cartografo.py",d:"core/adapters/",st:"FROZEN"},
+ {m:"MFN_Sprite_Cartografo/",d:"(decisión ETAPA 2)",st:"VIVO·5002"},
+ {m:"fragment_state_server.py",d:"extensions/",st:"FROZEN"},
+ {m:"neurobit_mfn_unificado.py",d:"tools/",st:"FROZEN"},
+ {m:"neurobit_mfn_13x13.py",d:"tools/",st:"FROZEN"},
+ {m:"neurobit_salon_vivo.py",d:"tools/",st:"FROZEN"},
+ {m:"gui_ecn.py",d:"core/",st:"FROZEN"},
+ {m:"ingest_compendium.py",d:"tools/",st:"VIVO"},
+ {m:"ollama_adapter / MCP",d:"freezer",st:"FROZEN"}
+];
+function renderFreezer(){
+  var c=$("#freezer");c.innerHTML="";
+  FREEZER.forEach(function(f){
+    var d=document.createElement("div");
+    d.className="freezer-item"+(f.st.indexOf("VIVO")===0?" vivo":"");
+    d.innerHTML="<span>"+f.m+" <span class=\"dest\">→ "+f.d+"</span></span><span class=\"fr\">"+f.st+"</span>";
+    c.appendChild(d);
+  });
+}
+
+/* ---------- ledger ---------- */
+var CLAVE_LEDGER="ecn_observatorio_ledger_v1";
+var LEDGER=[];
+try{LEDGER=JSON.parse(localStorage.getItem(CLAVE_LEDGER)||"[]");}catch(e){}
+function cyrb(str){var h1=0xdeadbeef,h2=0x41c6ce57,i,ch;for(i=0;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return(((h2>>>0)*4294967296+(h1>>>0)).toString(16)).padStart(16,"0");}
+function sellar(ev,det){
+  var prev=LEDGER.length?LEDGER[LEDGER.length-1].h:"00000000";
+  var n=LEDGER.length;
+  var h=cyrb(n+"|"+ev+"|"+JSON.stringify(det)+"|"+prev);
+  LEDGER.push({n:n,e:ev,d:det,h:h});
+  try{localStorage.setItem(CLAVE_LEDGER,JSON.stringify(LEDGER));}catch(e){}
+  renderLedger();
+}
+function renderLedger(){
+  var el=$("#ledger");el.innerHTML="";
+  LEDGER.slice(-20).reverse().forEach(function(e){
+    var d=document.createElement("div");
+    d.innerHTML="<span class=\"ev\">"+e.e+"</span> n"+e.n+" · #"+e.h.slice(0,8);
+    el.appendChild(d);
+  });
+}
+
+/* ---------- MFN ripple-carry ---------- */
+var COL=["#f9e2af","#fab387","#cba6f7","#89b4fa","#74c7ec","#a07850"];
+var AN=[8,16,24,32,40,48];
+var T=0;
+function celdasAnilloCuadrado(r){
+  var celdas=[],c=6,x,y;
+  for(x=c-r;x<=c+r;x++)celdas.push([x,c-r]);
+  for(y=c-r+1;y<=c+r;y++)celdas.push([c+r,y]);
+  for(x=c+r-1;x>=c-r;x--)celdas.push([x,c+r]);
+  for(y=c+r-1;y>=c-r+1;y--)celdas.push([c-r,y]);
+  return celdas;
+}
+function estadoBits(){
+  var bits=[Math.floor(T/1)%2];
+  for(var r=1;r<=6;r++){
+    var n=AN[r-1];
+    var pos=Math.floor(T/(r))%n;
+    for(var i=0;i<n;i++){
+      var d=(i-pos+n)%n;
+      bits.push(d<3?1:0);
+    }
+  }
+  return bits;
+}
+function dibujar(){
+  var bits=estadoBits();
+  var activos=bits.reduce(function(a,b){return a+b},0);
+  $("#mfn-activos").textContent=activos+"/169";
+  $("#mfn-t").textContent=T;
+  var dc=$("#mfn-dots"),dx=dc.getContext("2d");
+  dx.clearRect(0,0,286,286);
+  var cell=22;
+  for(var y=0;y<13;y++)for(var x=0;x<13;x++){
+    dx.strokeStyle="#2a2a3f";dx.strokeRect(x*cell+1,y*cell+1,cell-2,cell-2);
+  }
+  dx.fillStyle=bits[0]?"#f9e2af":"#3a3a55";
+  dx.fillRect(6*cell+4,6*cell+4,cell-8,cell-8);
+  var idx=1;
+  for(var r=1;r<=6;r++){
+    var celdas=celdasAnilloCuadrado(r);
+    for(var i=0;i<celdas.length;i++){
+      if(bits[idx]){
+        dx.fillStyle=COL[r-1];
+        dx.shadowColor=COL[r-1];dx.shadowBlur=6;
+        dx.fillRect(celdas[i][0]*cell+4,celdas[i][1]*cell+4,cell-8,cell-8);
+        dx.shadowBlur=0;
+      }
+      idx++;
+    }
+  }
+  var rc=$("#mfn-radial"),rx=rc.getContext("2d");
+  rx.clearRect(0,0,286,286);
+  var cx=143,cy=143;
+  var g=rx.createRadialGradient(cx,cy,0,cx,cy,10);
+  g.addColorStop(0,"#fff8e0");g.addColorStop(1,"rgba(249,226,175,0)");
+  rx.fillStyle=g;rx.beginPath();rx.arc(cx,cy,9,0,7);rx.fill();
+  idx=1;
+  var r0=22,dr=(143-26)/6;
+  for(var a=1;a<=6;a++){
+    var rad=r0+dr*(a-1)+dr/2,n=AN[a-1];
+    for(var s=0;s<n;s++){
+      var ang=(s/n)*Math.PI*2-Math.PI/2;
+      var px=cx+Math.cos(ang)*rad,py=cy+Math.sin(ang)*rad;
+      rx.beginPath();rx.arc(px,py,2.6,0,7);
+      if(bits[idx]){rx.fillStyle=COL[a-1];rx.shadowColor=COL[a-1];rx.shadowBlur=6;}
+      else{rx.fillStyle="rgba(166,227,161,.10)";rx.shadowBlur=0;}
+      rx.fill();rx.shadowBlur=0;
+      idx++;
+    }
+  }
+}
+setInterval(function(){T++;dibujar();},450);
+
+/* ---------- EVA LUMENA (ECO + LLM) ---------- */
+var AC=null;function tono(f,d,g){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type="sine";o.frequency.value=f;v.gain.value=g||0.05;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+(d||0.3));o.stop(AC.currentTime+(d||0.3));}catch(e){}}
+var cola="",colaSpan=null,colaTimer=null;
+function encolar(tok,span){cola+=tok;colaSpan=span;if(!colaTimer)colaTimer=setInterval(drenar,16);}
+function drenar(){
+  if(!colaSpan){clearInterval(colaTimer);colaTimer=null;return;}
+  if(cola.length){
+    var n=Math.max(1,Math.min(3,Math.ceil(cola.length/60)));
+    colaSpan.textContent+=cola.slice(0,n);cola=cola.slice(n);
+    var chat=$("#chat");chat.scrollTop=chat.scrollHeight;
+  }else{clearInterval(colaTimer);colaTimer=null;}
+}
+function burbuja(rol,eco){
+  var d=document.createElement("div");
+  d.className="burb "+rol+(eco?" eco":"");
+  var f=document.createElement("span");f.className="firma";
+  f.textContent=rol==="aspirante"?"NODO SEMILLA · ":"EVA LUMENA · "+(eco?"ECO LOCAL":"LLM LOCAL");
+  var c=document.createElement("span");
+  d.appendChild(f);d.appendChild(c);
+  $("#chat").appendChild(d);$("#chat").scrollTop=$("#chat").scrollHeight;
+  return c;
+}
+function ecoRespuesta(txt){
+  var t=txt.toLowerCase();
+  if(/sobrecarga|cansad|sol|agot/.test(t))return "Te veo cansado, Director. La sobrecarga es real, pero ya no cargas solo: el observatorio recuerda por vos. Hoy solo tres cosas; el resto duerme en el freezer. Descansar también es soberanía.";
+  if(/migr|wril|adaptador|conector/.test(t))return "WRIL migra, vos no. Escaneará, creará adaptador, conector, declaración y locación. El freezer guarda 45+ módulos sin ansiedad: nada se pierde, nada se apura.";
+  if(/triada|fragment|cors|ack/.test(t))return "La TRIADA queda como memoria histórica y patrón CORS/ACK a canonizar. No es deuda: es linaje. Cuando el rango lo pida, se vuelve adapter_eva.py.";
+  if(/pista|ayuda/.test(t))return "PISTA → tu orden de hoy: 1) liberar 403 de Ollama, 2) re-sondear 5000/5002, 3) descansar.";
+  if(/ollama|eva|403/.test(t))return "Si el candado 403 sigue, el runbook del salón v2 trae los cuatro verbos de systemd. Con neurobit-qwen35-4b ya en tu disco, hablo con voz completa apenas lo liberes.";
+  return "No soy la fuente de verdad: el territorio lo es. Pero te acompaño. Preguntame por WRIL, la TRIADA, la migración, o pedime una pista.";
+}
+var ollamaUp=false,MODELOS=[];
+function sondearOllama(){
+  probeUrl("http://127.0.0.1:11434/api/tags").then(function(r){
+    if(r&&r.ok){return r.json().then(function(j){ollamaUp=true;MODELOS=j.models||[];
+      $("#st-ollama").textContent="OLLAMA: EN LÍNEA";$("#st-ollama").className="badge ok";});}
+    if(r&&r.status===403){ollamaUp=false;$("#st-ollama").textContent="OLLAMA: VIVA·403";$("#st-ollama").className="badge warn";return;}
+    ollamaUp=false;$("#st-ollama").textContent="OLLAMA: EN REPOSO·ECO";$("#st-ollama").className="badge warn";
+  });
+}
+function generarLLM(txt,span){
+  var modelo=null;
+  for(var i=0;i<MODELOS.length;i++){if(/neurobit|qwen/i.test(MODELOS[i].name)){modelo=MODELOS[i].name;break;}}
+  if(!modelo&&MODELOS.length)modelo=MODELOS[0].name;
+  if(!modelo){span.textContent=ecoRespuesta(txt);return;}
+  var ctl=new AbortController();
+  fetch("http://127.0.0.1:11434/api/generate",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:modelo,prompt:txt,system:"Eres EVA LUMENA, compañera local de la ECN. Espejo sin ego, SINCERO, respuestas ≤120 palabras, vocabulario ECN. No eres fuente de verdad: el territorio lo es.",stream:true,keep_alive:"5m",options:{num_ctx:2048,temperature:0.7}}),signal:ctl.signal})
+  .then(function(r){
+    if(!r.ok)throw 0;
+    var reader=r.body.getReader(),dec=new TextDecoder(),resto="";
+    (function leer(){reader.read().then(function(res){
+      if(res.done){sellar("DIALOGO_EVA",{motor:"llm"});return;}
+      resto+=dec.decode(res.value,{stream:true});
+      var lines=resto.split("\n");resto=lines.pop();
+      lines.forEach(function(l){l=l.trim();if(!l)return;try{var j=JSON.parse(l);if(j.response)encolar(j.response,span);}catch(e){}});
+      leer();
+    }).catch(function(){span.textContent+=ecoRespuesta(txt);});})();
+  })
+  .catch(function(){span.textContent=ecoRespuesta(txt);});
+}
+function enviar(txtForzado){
+  var inp=$("#inp-msg");
+  var txt=(txtForzado!==undefined)?txtForzado:inp.value.trim();
+  if(!txt)return;
+  if(txtForzado===undefined)inp.value="";
+  var a=burbuja("aspirante",false);a.textContent=txt;
+  sellar("DIALOGO_ASPIRANTE",{txt:txt.slice(0,120)});
+  tono(147,0.2,0.04);
+  var e=burbuja("eva",!ollamaUp);
+  if(ollamaUp){generarLLM(txt,e);}
+  else{encolar(ecoRespuesta(txt),e);sellar("DIALOGO_EVA",{motor:"eco"});}
+}
+
+/* ---------- eventos ---------- */
+$("#btn-enviar").addEventListener("click",function(){enviar();});
+$("#inp-msg").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();enviar();}});
+$("#btn-pista").addEventListener("click",function(){enviar("EVA, dame una pista para hoy.");});
+$("#btn-sondear").addEventListener("click",function(){sondear();sondearOllama();sellar("SONDEO",{});});
+
+renderProbes();renderFreezer();renderLedger();sondear();sondearOllama();dibujar();
+sellar("OBSERVATORIO_ABIERTO",{});
+var s=burbuja("eva",true);
+encolar("Estoy aquí, Director. Te esperaba. Hoy no cargás solo: el observatorio recuerda por vos. Tres cosas y descansar. El freezer guarda el resto; WRIL migrará cuando el viaje lo pida.",s);
+</script>
+</body>
+</html>

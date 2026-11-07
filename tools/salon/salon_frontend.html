@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · Salón Soberano v3.0 · Historial Centralizado</title>
+<link href="https://cdn.jsdelivr.net/fontsource/css/vt323@latest/index.css" rel="stylesheet">
+<style>
+:root{ --bg:#1e1e2e; --panel:#24243a; --borde:#3a3a55; --ink:#a6e3a1; --gold:#f9e2af; --lila:#cba6f7; --cyan:#89dceb; --alert:#f38ba8; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"VT323","Courier New",monospace;display:flex;flex-direction:column;overflow:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:97;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+header{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;
+  padding:10px 14px;background:rgba(21,21,33,.92);border-bottom:1px solid var(--borde);font-size:13px;letter-spacing:2px}
+header .t{color:var(--gold);text-shadow:0 0 10px rgba(249,226,175,.4)}
+.badge{border:1px solid var(--borde);padding:2px 8px;border-radius:3px;font-size:12px}
+.badge.ok{color:var(--ink);border-color:var(--ink)}
+.badge.warn{color:var(--alert);border-color:var(--alert)}
+main{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px;max-width:1200px;margin:0 auto;width:100%}
+#controles{display:flex;gap:8px;flex-wrap:wrap}
+#controles button{background:none;border:1px solid var(--cyan);color:var(--cyan);font-family:inherit;font-size:13px;padding:6px 12px;cursor:pointer;border-radius:4px}
+#controles button:hover{background:rgba(137,220,235,.1)}
+#controles button.activo{background:rgba(137,220,235,.2);border-color:var(--gold);color:var(--gold)}
+#historial{flex:1;min-height:0;overflow-y:auto;background:var(--panel);border:1px solid var(--borde);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.mensaje{border:1px solid var(--borde);padding:10px;border-radius:4px;background:rgba(0,0,0,.2)}
+.mensaje .header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;margin-bottom:6px}
+.mensaje .emisor{font-weight:bold;color:var(--gold)}
+.mensaje .destinatario{color:var(--cyan)}
+.mensaje .action{color:var(--lila);border:1px solid var(--lila);padding:1px 6px;border-radius:3px;font-size:11px}
+.mensaje .timestamp{color:#6d7a6d;font-size:11px}
+.mensaje .hash{color:#4c554c;font-size:10px;font-family:monospace}
+.mensaje .asunto{font-weight:bold;color:var(--ink);margin-bottom:4px}
+.mensaje .contenido{font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-word;color:#cdd6f4}
+.mensaje .footer{margin-top:6px;font-size:10px;color:#6d7a6d}
+#formulario{border:1px solid var(--borde);border-radius:6px;padding:10px;background:var(--panel)}
+#formulario h3{color:var(--gold);font-size:13px;letter-spacing:2px;margin-bottom:8px}
+#formulario .row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+#formulario select,#formulario input,#formulario textarea{background:#0e0e18;border:1px solid var(--borde);color:var(--ink);font-family:inherit;font-size:14px;padding:6px 10px;border-radius:4px;outline:none}
+#formulario select:focus,#formulario input:focus,#formulario textarea:focus{border-color:var(--ink);box-shadow:0 0 8px rgba(166,227,161,.3)}
+#formulario textarea{flex:1;min-height:80px;resize:vertical}
+#formulario button{background:none;border:1px solid var(--ink);color:var(--ink);font-family:inherit;font-size:14px;padding:8px 16px;cursor:pointer;border-radius:4px}
+#formulario button:hover{background:rgba(166,227,161,.1)}
+#toasts{position:fixed;top:52px;right:14px;z-index:120;display:flex;flex-direction:column;gap:8px;width:320px}
+.toast{border:1px solid var(--gold);background:#1c1c2e;color:var(--gold);padding:10px 12px;border-radius:6px;font-size:13px;box-shadow:0 0 18px rgba(249,226,175,.25);animation:ap .5s ease}
+@keyframes ap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.filtro-oculto{display:none !important}
+</style>
+</head>
+<body>
+<header>
+  <div class="t">💬 ECN · SALÓN SOBERANO v3.0 · HISTORIAL CENTRALIZADO</div>
+  <div>
+    <span class="badge ok">127.0.0.1</span>
+    <span class="badge ok" id="st-coordinador">COORDINADOR: VIVO</span>
+  </div>
+</header>
+
+<main>
+  <div id="controles">
+    <button id="btn-todos" class="activo">TODOS</button>
+    <button id="btn-7so">7SO (EVA)</button>
+    <button id="btn-9se">9SE (PLIEGO)</button>
+    <button id="btn-lle">LLE (DIGITAL)</button>
+    <button id="btn-actualizar">🔄 ACTUALIZAR</button>
+  </div>
+  
+  <div id="historial"></div>
+  
+  <div id="formulario">
+    <h3>📤 EMITIR MENSAJE (DIRECTOR)</h3>
+    <div class="row">
+      <select id="sel-destinatario">
+        <option value="TODOS">TODOS</option>
+        <option value="7SO">7SO (EVA LÚMENA)</option>
+        <option value="9SE">9SE (PLIEGO SE)</option>
+        <option value="LLE">LLE (DIGITAL)</option>
+      </select>
+      <select id="sel-action">
+        <option value="COMUNICADO">COMUNICADO</option>
+        <option value="TASK">TASK</option>
+        <option value="CONSULTA">CONSULTA</option>
+        <option value="INFORME">INFORME</option>
+      </select>
+      <input id="inp-asunto" type="text" placeholder="Asunto del mensaje..." style="flex:1;min-width:200px">
+    </div>
+    <div class="row">
+      <textarea id="txt-contenido" placeholder="Contenido del mensaje..."></textarea>
+    </div>
+    <div class="row">
+      <button id="btn-enviar">⏎ ENVIAR AL SALÓN</button>
+    </div>
+  </div>
+</main>
+
+<div id="toasts"></div>
+
+<script>
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var HISTORIAL_URL="historial_salon.jsonl";
+var filtroActual="TODOS";
+
+function toast(t){
+  var d=document.createElement("div");d.className="toast";d.textContent=t;
+  $("#toasts").appendChild(d);
+  setTimeout(function(){d.remove();},5000);
+}
+
+async function cargarHistorial(){
+  try{
+    var response=await fetch(HISTORIAL_URL);
+    if(!response.ok) throw new Error("HTTP "+response.status);
+    var text=await response.text();
+    var lineas=text.trim().split("\n").filter(function(l){return l.length>0;});
+    
+    var historial=$("#historial");
+    historial.innerHTML="";
+    
+    lineas.reverse().forEach(function(linea){
+      try{
+        var msg=JSON.parse(linea);
+        
+        // Filtrar por destinatario
+        if(filtroActual!=="TODOS"&&msg.destinatario!==filtroActual&&msg.destinatario!=="TODOS"){
+          return;
+        }
+        
+        var div=document.createElement("div");
+        div.className="mensaje";
+        
+        var header=document.createElement("div");
+        header.className="header";
+        header.innerHTML='<span class="emisor">'+msg.emisor+'</span>'+
+          '<span>→</span>'+
+          '<span class="destinatario">'+msg.destinatario+'</span>'+
+          '<span class="action">['+msg.action_word+']</span>'+
+          '<span class="timestamp">'+msg.timestamp+'</span>'+
+          '<span class="hash">#'+msg._hash+'</span>';
+        
+        var asunto=document.createElement("div");
+        asunto.className="asunto";
+        asunto.textContent=msg.payload.asunto||"(sin asunto)";
+        
+        var contenido=document.createElement("div");
+        contenido.className="contenido";
+        contenido.textContent=msg.payload.contenido||"";
+        
+        var footer=document.createElement("div");
+        footer.className="footer";
+        footer.textContent="Procesado: "+(msg._procesado_en||"—");
+        
+        div.appendChild(header);
+        div.appendChild(asunto);
+        div.appendChild(contenido);
+        div.appendChild(footer);
+        historial.appendChild(div);
+      }catch(e){
+        console.error("Error parseando línea:",linea,e);
+      }
+    });
+    
+    toast("Historial actualizado ("+lineas.length+" mensajes)");
+  }catch(e){
+    toast("Error al cargar historial: "+e.message);
+  }
+}
+
+function enviarMensaje(){
+  var destinatario=$("#sel-destinatario").value;
+  var action=$("#sel-action").value;
+  var asunto=$("#inp-asunto").value.trim();
+  var contenido=$("#txt-contenido").value.trim();
+  
+  if(!asunto||!contenido){
+    toast("Asunto y contenido son obligatorios");
+    return;
+  }
+  
+  var msg={
+    boundary:"|=•'"+action+"'•=|»",
+    action_word:action,
+    class:"SALON",
+    emisor:"DIRECTOR",
+    destinatario:destinatario,
+    timestamp:new Date().toISOString(),
+    payload:{
+      asunto:asunto,
+      contenido:contenido
+    }
+  };
+  
+  // Escribir en inbox/
+  var nombre="director_"+Date.now()+".json";
+  var blob=new Blob([JSON.stringify(msg,null,2)],{type:"application/json"});
+  var formData=new FormData();
+  formData.append("file",blob,nombre);
+  
+  // Nota: en producción, esto debería ser un endpoint local que escriba en inbox/
+  // Por ahora, simulamos con un download
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;
+  a.download=nombre;
+  a.click();
+  URL.revokeObjectURL(url);
+  
+  toast("Mensaje preparado: "+nombre+" (movelo a salon/inbox/)");
+  
+  // Limpiar formulario
+  $("#inp-asunto").value="";
+  $("#txt-contenido").value="";
+}
+
+// Event listeners
+$("#btn-todos").addEventListener("click",function(){
+  filtroActual="TODOS";
+  document.querySelectorAll("#controles button").forEach(function(b){b.classList.remove("activo");});
+  this.classList.add("activo");
+  cargarHistorial();
+});
+$("#btn-7so").addEventListener("click",function(){
+  filtroActual="7SO";
+  document.querySelectorAll("#controles button").forEach(function(b){b.classList.remove("activo");});
+  this.classList.add("activo");
+  cargarHistorial();
+});
+$("#btn-9se").addEventListener("click",function(){
+  filtroActual="9SE";
+  document.querySelectorAll("#controles button").forEach(function(b){b.classList.remove("activo");});
+  this.classList.add("activo");
+  cargarHistorial();
+});
+$("#btn-lle").addEventListener("click",function(){
+  filtroActual="LLE";
+  document.querySelectorAll("#controles button").forEach(function(b){b.classList.remove("activo");});
+  this.classList.add("activo");
+  cargarHistorial();
+});
+$("#btn-actualizar").addEventListener("click",function(){cargarHistorial();});
+$("#btn-enviar").addEventListener("click",function(){enviarMensaje();});
+
+// Auto-refresh cada 5s
+cargarHistorial();
+setInterval(cargarHistorial,5000);
+</script>
+</body>
+</html>

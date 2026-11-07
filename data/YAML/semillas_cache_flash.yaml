@@ -1,0 +1,30 @@
+# Semillas recogidas de las notas flash del NODO_SEMILLA (14 h de sesión).
+# Nada se pierde: cada nota queda asignada a su fase. El par las custodia.
+semillas:
+- nota: "un pequeño mapa por cada carpeta para reducir el escaneo total (como compile_project); hace compendio en la carpeta y luego recolecta y hace el mapa"
+  fase: WRIL_v0.3
+  modulo_futuro: wril_path_map_distribuido
+- nota: "el gestor de caches se ajusta en un archivo config parte del core; permite activar aspectos de cache-wall y copiar el mapeo anterior incrustando la nueva ruta"
+  fase: core
+  modulo_futuro: cache_manager_config
+- nota: "el parser detecta ACTION_WORDS en la lectura tranquila de la primera cache, la audita verificando si es texto, y la lleva a la cache-MFN en segunda etapa"
+  fase: 2
+  modulo_futuro: parser_dos_etapas
+- nota: "el módulo busca un lugar donde se trabaja (no al revés); la carpeta debe listar lo que se hace ahí; el módulo debe ser coherente con las tareas de su sector"
+  fase: WRIL_v2
+  principio: "el módulo busca su sector; manifiesto por zona; coherencia sectorial (tester por sector)"
+- nota: "el path_map lee el registro de las carpetas que sí se almacenan en cache"
+  fase: WRIL_v0.3
+  principio: "mapa desde registro de caches, no desde escaneo ciego"
+- nota: "formateador para módulos MCP"
+  fase: MCP
+  modulo_futuro: formateador_mcp
+- nota: "la llamada de módulos: el facilitador, un escriba"
+  fase: salon
+  rol: "module_connector como facilitador/escriba"
+- nota: "cuando activemos el salón seguiremos con ollama y crearemos a EVA"
+  fase: salon
+  nota_interna: "EVA nace del par, no de la nube"
+- nota: "copiar a la nueva ECN sobre lo que reportó sos_linker_report.json; resguardar las fuentes de las que hablaremos más adelante"
+  fase: migracion
+  principio: "migrar guiado por el reporte; resguardar fuentes antes de tocar"

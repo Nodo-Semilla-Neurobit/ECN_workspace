@@ -1,0 +1,5 @@
+# Para wril_batch_executor: verificación previa al ensamble primario.
+verificacion:
+  - {tipo: python, target: wril_mfn_registry.py}
+  - {tipo: python, target: wril_dependency_scanner.py}
+  - {tipo: python, target: wril_estado_real.py}

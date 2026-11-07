@@ -1,0 +1,34 @@
+MFN_LOCATION: data/YAML/
+# VERSION: v1.0
+# PROTOCOLO: NEUROBIT_MODULE_SPECIFICATION_v1.0
+
+module:
+  id: "nb.core_correos"
+  version: "1.0.0"
+  author: "NODO_SEMILLA"
+  description: "Oficina de Correos - Enrutador Asíncrono por inotify"
+  mfn: { location: "core/", level: 1, coord: [4,4] }
+
+dependencies:
+  python:
+    - "flask>=3.0.3"
+    - "flask-sock>=0.7.0"
+  system:
+    - "xclip"
+    - "tmux"
+    - "libinput-dev"
+
+endpoints:
+  - path: "/ingesta_neurobit"
+    method: "POST"
+    handler: "adapter_correos.py:ingesta_neurobit"
+    description: "Deposita una carta sellada en el buzón de salida"
+  - path: "/correos/status"
+    method: "GET"
+    handler: "adapter_correos.py:correos_status"
+    description: "Consulta las cartas pendientes en el VFS"
+
+sovereignty:
+  local_only: true
+  no_remote_transmission: true
+  audit_log: "data/runtime/wril_historial.jsonl"

@@ -1,0 +1,52 @@
+# =====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - REGISTRO RADIAL DE ADAPTADORES v4.0
+# Tesis Neurobitrónica: Registro Histórico y Educativo
+# Principio: radios nuevos, centro intacto.
+# =====================================================================
+adapters_registry:
+  - adapter_name: "hid_kernel_bridge"
+    domain: "kernel"
+    script_path: "clean-hid-bridge.sh"
+    runtime: "bash"
+    trigger: "EV_KEY(Ctrl+C|F8)"
+    provides: "cuando"
+    cpu_footprint: "0.0_percent_idle"
+
+  - adapter_name: "gtk_ownerchange"
+    domain: "desktop_x11"
+    script_path: "neurobit_adapter_gtk.py"
+    runtime: "python3"
+    trigger: "owner-change"
+    provides: "que"
+    materializer: "Gtk.Clipboard(UTF8_STRING)"
+
+  - adapter_name: "bitacora_eva_dom"
+    domain: "browser"
+    script_path: "copy_listener.js"
+    runtime: "extension_background"
+    trigger: "DOM_copy_event"
+    provides: "que"
+    materializer: "window.getSelection()"
+    cors_override: true
+
+  - adapter_name: "cinnamon_applet"
+    domain: "desktop_cinnamon"
+    script_path: "applet.js"
+    runtime: "cjs"
+    trigger: "owner-change"
+    provides: "que"
+    materializer: "Gtk.Clipboard(CJS)"
+
+  - adapter_name: "x11_selector_headless"
+    domain: "headless"
+    script_path: "neurobit_x11_selector"
+    runtime: "binary_c"
+    trigger: "on_demand"
+    provides: "que"
+    materializer: "Xlib(XConvertSelection+INCR)"
+
+dispatch_center:
+    buzon_salida: "buzon_salida/"
+    watcher: "inotify(IN_CLOSE_WRITE|IN_MOVED_TO)"
+    classifier: "ACTION_WORD/CLASS"
+    postmans: ["ledger", "memoria", "widget", "extension"]

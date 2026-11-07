@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# MFN_LOCATION: core/
+# MFN_LEVEL: 1
+"""
+Ecosistema Neurobit - Estación Central Neurobitrónica
+Módulo: core/api_endpoint_manager.py
+Función: Hub Dinámico. Construye endpoints Flask desde los metadatos de los
+         adaptadores; valida contratos; inyecta nemotécnicos; localhost-first.
+         NO contiene lógica de negocio: solo orquesta.
+VERSION: v1.0 (SPEC implementado)
+LIMITACIÓN ASUMIDA: reload_agrega endpoints nuevos; los retirados permanecen
+         hasta reinicio del proceso.
+"""
+import sys as _ws
+from pathlib import Path as _wp
+_ws.path.insert(0, str(_wp(__file__).resolve().parent))  # WRIL::SELF_PATH::v1
+
+import atexit
+import uuid
+from flask import Flask, request, jsonify, g
+from core.adapters.base import ValidationError
+
+
+class APIEndpointManager:
+    def __init__(self, connector):
+        self.connector = connector
+        self.app = Flask(__name__)
+        self._registered = set()
+
+# =====================================================================
+# INJERTO TRASLADADO: POSTMAN HTTP LOCAL (ENDPOINT BITÁCORA_EVA)
+# =====================================================================
+import datetime
+BUZON_SALIDA = Path(__file__).resolve().parent / 'buzon_salida'
+BUZON_SALIDA.mkdir(parents=True, exist_ok=True)
+
+@app.route('/ingesta_neurobit', methods=['POST'])
+def ingesta_neurobit():
+    datos = request.get_json(silent=True) or {}
+    payload = datos.get('payload', '')
+    origen = datos.get('origen', 'extension')
+    clase = datos.get('class_filter', 'dom_copy')
+    if not payload or not payload.strip():
+        return jsonify({"estado": "VACIO"}), 400
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    sello = "|=•'captura'•=|»|['%s'.]" % clase
+    cierre = "[.'%s']|«|=•'captura'•=|" % clase
+    carta = BUZON_SALIDA / ("carta_%s_%s.txt" % (origen, ts))
+    carta.write_text(sello + payload + cierre, encoding="utf-8")
+    return jsonify({"estado": "CARTA_DEPOSITADA", "archivo": carta.name})
+
+    self._register_static()
+    self._register_dynamic_endpoints()
+    atexit.register(self._cleanup)
+
+    def _register_static(self):
+        @self.app.route("/health")
+        def health():
+            return jsonify({
+                "status": "ok",
+                "adapters": len(self.connector.get_adapters()),
+                "exec_id": getattr(g, "NB_EXEC_ID", None),
+            })
+
+        @self.app.route("/admin/reload_adapters", methods=["POST"])
+        def reload_adapters():
+            self.connector.reload_adapters()
+            self._register_dynamic_endpoints()
+            return jsonify({"status": "reloaded",
+                            "count": len(self.connector.get_adapters())})
+
+        @self.app.before_request
+        def inject_nemotechnics():
+            g.NB_MOD_ID = "nb.api_endpoint_manager"
+            g.NB_EXEC_ID = str(uuid.uuid4())
+            g.NB_SESSION_ID = request.headers.get("X-Session-ID", "anonymous")
+            g.NB_CTX_MODE = request.headers.get("X-Context-Mode", "STATION")
+
+    def _register_dynamic_endpoints(self):
+        for module_id, adapter in self.connector.get_adapters().items():
+            for endpoint in adapter.get_metadata().get("endpoints", []):
+                path = endpoint["path"]
+                if path in self._registered:
+                    continue
+                self._create_endpoint(path, endpoint.get("methods", ["GET"]),
+                                      endpoint["handler"], adapter)
+                self._registered.add(path)
+
+    def _create_endpoint(self, path, methods, handler_name, adapter):
+        def dynamic_handler():
+            payload = None
+            try:
+                if request.method in ("POST", "PUT"):
+                    payload = request.get_json(silent=True) or {}
+                    adapter.validate_input(payload, path)
+                handler_method = getattr(adapter, handler_name)
+                result = (handler_method(payload) if payload is not None
+                          else handler_method())
+                adapter.validate_output(result, path)
+                return jsonify(result), 200
+            except ValidationError as e:
+                return jsonify({"error": "validation_failed",
+                                "detail": str(e)}), 400
+            except AttributeError:
+                return jsonify({"error": "endpoint_not_found",
+                                "detail": handler_name}), 404
+            except Exception as e:
+                return jsonify({"error": "internal_error",
+                                "detail": str(e)}), 500
+
+        self.app.add_url_rule(path, view_func=dynamic_handler,
+                              methods=methods,
+                              endpoint=path.replace("/", "_"))
+
+    def run(self, host="127.0.0.1", port=5000):
+        self.app.run(host=host, port=port, debug=False, use_reloader=False)
+
+    def _cleanup(self):
+        pass  # Shutdown graceful: cerrar conexiones futuras según roadmap v1.1

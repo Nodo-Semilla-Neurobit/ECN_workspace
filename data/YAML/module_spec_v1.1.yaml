@@ -1,0 +1,24 @@
+# NEUROBIT MODULE SPEC v1.1 (adiciones sobre v1.0)
+module:
+  id: "nb.ejemplo.compile"
+  version: "1.1.0"
+  entry_point: "compile_project.py"
+  # --- NUEVO: identidad MFN visible en el contrato (copia del header) ---
+  mfn: { location: "modules/", level: 2, coord: [7,7] }
+  # --- NUEVO: documentación visible en la GUI al instalar (fin educativo) ---
+  documentation: "README.md"
+  # --- NUEVO: nemotécnicos que el módulo aporta al entorno ---
+  nemotecnics: ["NB_COMPILE_OUT"]
+parameters:
+  - { flag: "--project", type: "path",        label: "Directorio",  required: true  }
+  - { flag: "--compile", type: "output_file", label: "Salida TXT",  required: true  }
+  - { flag: "--ignore",  type: "text",        label: "Patrones",    required: false }
+  - { flag: "--dry-run", type: "boolean",     label: "Simular",     required: false }
+artifacts: { server: false, api: false }
+# --- NUEVO: ciclo de vida para el NCS Status Monitor ---
+lifecycle:
+  start: null            # null = módulo de ejecución única (no daemon)
+  stop: null
+  healthcheck: null
+# --- NUEVO: política WRIL ---
+wril: { backup_before_mutate: true, quarantine_on_no_header: true }

@@ -1,0 +1,12 @@
+nohup: no se tendrá en cuenta la entrada
+============================================================
+ECN · SALÓN SOBERANO v3.0 · COORDINADOR LOCAL
+============================================================
+INBOX:      /home/gus/workspace_reconstruido/tools/salon/inbox
+OUTBOX:     /home/gus/workspace_reconstruido/tools/salon/outbox
+HISTORIAL:  /home/gus/workspace_reconstruido/tools/salon/historial_salon.jsonl
+AGENTES:    /home/gus/workspace_reconstruido/tools/salon/agentes
+============================================================
+[✓ SALON] Coordinador vivo. Escuchando inbox/...
+[· SALON] Ctrl+C para detener
+

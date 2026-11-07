@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · El Camino del Aspirante · Juego de Desbloqueo</title>
+<style>
+:root{
+  --bg:#1e1e2e; --panel:#24243a; --borde:#3a3a55;
+  --ink:#a6e3a1; --gold:#f9e2af; --lila:#cba6f7; --cyan:#89dceb; --alert:#f38ba8; --marron:#a07850;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Courier New",Courier,monospace;display:flex;flex-direction:column;overflow:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:97;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.20) 0 1px,transparent 1px 3px)}
+#polvo{position:fixed;inset:0;z-index:0;opacity:.5}
+header{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:8px 14px;background:rgba(21,21,33,.92);border-bottom:1px solid var(--borde);font-size:11px;letter-spacing:2px}
+header .glow{text-shadow:0 0 8px rgba(166,227,161,.6)}
+.badge{border:1px solid var(--borde);padding:2px 8px;border-radius:3px;margin-left:6px}
+.badge.ok{color:var(--ink);border-color:var(--ink)}
+#btn-reset{background:none;border:1px solid var(--borde);color:var(--alert);cursor:pointer;font-family:inherit;padding:2px 8px;border-radius:3px}
+main{position:relative;z-index:1;flex:1;min-height:0;display:grid;grid-template-columns:250px 1fr 280px;gap:10px;padding:10px}
+aside,section{background:var(--panel);border:1px solid var(--borde);border-radius:6px;padding:10px;overflow-y:auto;min-height:0}
+h3{font-size:11px;letter-spacing:2px;color:var(--gold);margin:10px 0 8px;border-bottom:1px dashed var(--borde);padding-bottom:4px}
+h3:first-child{margin-top:0}
+#ladder{list-style:none}
+#ladder li{padding:6px 8px;margin:4px 0;border:1px solid var(--borde);border-radius:4px;font-size:11px;opacity:.4}
+#ladder li.act{opacity:1;border-color:var(--cyan);color:var(--cyan);box-shadow:0 0 8px rgba(137,220,235,.2)}
+#ladder li.ok{opacity:1;border-color:var(--ink);color:var(--ink)}
+.pin{border:1px solid var(--borde);border-radius:4px;padding:6px 8px;font-size:10px;margin:5px 0;opacity:.35}
+.pin.ganado{opacity:1;border-color:var(--gold);color:var(--gold);box-shadow:0 0 10px rgba(249,226,175,.2) inset}
+.pin small{display:block;color:var(--lila);font-style:italic;margin-top:3px}
+#nivel-cab h2{color:var(--cyan);font-size:15px;letter-spacing:2px;margin-bottom:6px}
+#nivel-cab .intro{color:var(--lila);font-style:italic;font-size:12px;border-left:2px solid var(--gold);padding-left:10px;margin-bottom:12px}
+.mis{border:1px solid var(--borde);border-radius:5px;padding:8px 10px;margin:6px 0;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mis.pend{border-color:var(--cyan);box-shadow:0 0 8px rgba(137,220,235,.15)}
+.mis.done{border-color:var(--ink);opacity:.65}
+.mis .st{color:var(--gold);font-size:10px;letter-spacing:1px}
+.mis em{color:var(--gold);font-style:normal}
+.acciones{display:flex;gap:8px;margin:10px 0}
+.acciones button{flex:1;background:none;border:1px solid var(--cyan);color:var(--cyan);font-family:inherit;font-size:11px;letter-spacing:1px;padding:7px;cursor:pointer;border-radius:4px}
+.acciones button:hover{background:rgba(137,220,235,.1)}
+.acciones button.warn{border-color:var(--alert);color:var(--alert)}
+.acciones button.warn:hover{background:rgba(243,139,168,.1)}
+.bar{margin:10px 0}
+.bar label{font-size:10px;letter-spacing:1px;display:flex;justify-content:space-between}
+.track{position:relative;height:13px;border:1px solid var(--borde);border-radius:3px;margin-top:4px;background:#191927;overflow:hidden}
+.fill{height:100%;width:0%;background:linear-gradient(90deg,#3f6e3c,var(--ink));transition:width .6s ease;box-shadow:0 0 10px rgba(166,227,161,.5)}
+.tick{position:absolute;top:0;bottom:0;width:1px;background:var(--gold);opacity:.7}
+.bar.congelada .fill{background:linear-gradient(90deg,#2c4a5e,var(--cyan));box-shadow:0 0 10px rgba(137,220,235,.5)}
+#tension-txt{font-size:10px;color:var(--alert);margin-top:8px}
+#freeze{font-size:10px;color:var(--cyan);margin-top:6px;font-style:italic}
+#mfn{display:block;margin:8px auto 0}
+#mfn-txt{text-align:center;font-size:10px;color:var(--gold);letter-spacing:2px;margin-top:6px}
+#ledger{font-size:9px;line-height:1.7;color:var(--lila);max-height:170px;overflow-y:auto}
+#ledger .ev{color:var(--ink)}
+footer{position:relative;z-index:2;border-top:1px solid var(--borde);background:#151521;padding:8px 12px}
+#log{height:130px;overflow-y:auto;font-size:12px;line-height:1.5;margin-bottom:6px}
+#log .ok{color:var(--ink)} #log .bad{color:var(--alert)} #log .cmd{color:var(--gold)} #log .sys{color:var(--lila)}
+#form-term{display:flex;gap:8px;align-items:center}
+#form-term .prompt{color:var(--gold);font-size:12px}
+#inp{flex:1;background:#0e0e18;border:1px solid var(--borde);color:var(--ink);font-family:inherit;font-size:13px;padding:6px 8px;border-radius:3px;outline:none}
+#inp:focus{border-color:var(--ink);box-shadow:0 0 8px rgba(166,227,161,.3)}
+#form-term button{background:none;border:1px solid var(--ink);color:var(--ink);font-family:inherit;cursor:pointer;padding:5px 12px;border-radius:3px}
+#toasts{position:fixed;top:52px;right:14px;z-index:120;display:flex;flex-direction:column;gap:8px;width:310px}
+.toast{border:1px solid var(--gold);background:#1c1c2e;color:var(--gold);padding:10px 12px;border-radius:6px;font-size:11px;box-shadow:0 0 18px rgba(249,226,175,.25);animation:aparece .5s ease}
+.toast small{display:block;color:var(--lila);font-style:italic;margin-top:4px}
+@keyframes aparece{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.oculto{display:none !important}
+.overlay{position:fixed;inset:0;z-index:110;background:rgba(14,14,22,.95);display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.caja{max-width:640px;text-align:center;animation:aparece .8s ease}
+.caja img{width:min(70vw,360px);border:1px solid var(--borde);border-radius:10px;box-shadow:0 0 34px rgba(203,166,247,.3)}
+.caja h1{color:var(--gold);letter-spacing:5px;font-size:clamp(18px,3.4vw,30px);margin:16px 0 6px;text-shadow:0 0 16px rgba(249,226,175,.4)}
+.caja .sub{color:var(--lila);letter-spacing:3px;font-size:11px;margin-bottom:14px}
+#tw{min-height:26px;font-size:14px;letter-spacing:2px;margin:10px 0}
+.caja p{font-size:12px;line-height:1.7;margin:8px 0}
+.btn-grande{margin-top:16px;background:none;border:1px solid var(--ink);color:var(--ink);font-family:inherit;letter-spacing:4px;font-size:13px;padding:11px 30px;cursor:pointer;border-radius:4px;text-shadow:0 0 8px rgba(166,227,161,.6)}
+.btn-grande:hover{background:rgba(166,227,161,.12)}
+.btn-oro{border-color:var(--gold);color:var(--gold)}
+.btn-oro:hover{background:rgba(249,226,175,.1)}
+@media(max-width:940px){body{overflow:auto}main{grid-template-columns:1fr;height:auto}#log{height:100px}}
+</style>
+</head>
+<body>
+<canvas id="polvo"></canvas>
+
+<header>
+  <div class="glow">☉ ECN · EL CAMINO DEL ASPIRANTE</div>
+  <div id="rango-actual" class="glow">[0] ASPIRANTE DESCONECTADO</div>
+  <div>
+    <span class="badge ok">127.0.0.1</span><span class="badge ok">CPU 0.0%</span><span class="badge">300 BAUD</span>
+    <button id="btn-reset" title="Re-sembrar territorio">⟲</button>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <h3>🛡 RANGOS OPERATIVOS</h3>
+    <ol id="ladder"></ol>
+    <h3>🏅 PINES DE SOBERANÍA</h3>
+    <div id="pines"></div>
+  </aside>
+
+  <section>
+    <div id="nivel-cab"></div>
+    <div class="acciones">
+      <button id="btn-pista">◈ PEDIR PISTA (revelación)</button>
+      <button id="btn-absorber" class="warn">⚡ ABSORBER TENSIÓN</button>
+    </div>
+    <div id="misiones"></div>
+  </section>
+
+  <aside>
+    <h3>📊 BARRAS DE SINTONÍA</h3>
+    <div class="bar" id="bar-int">
+      <label>INYECCIÓN DE INTENCIÓN <span id="v-int">0%</span></label>
+      <div class="track"><div class="fill" id="fill-int"></div><span class="tick" style="left:25%"></span><span class="tick" style="left:50%"></span><span class="tick" style="left:75%"></span></div>
+    </div>
+    <div class="bar" id="bar-res">
+      <label>RESILIENCIA FÍSICA <span id="v-res">0%</span></label>
+      <div class="track"><div class="fill" id="fill-res"></div><span class="tick" style="left:25%"></span><span class="tick" style="left:50%"></span><span class="tick" style="left:75%"></span></div>
+    </div>
+    <div id="tension-txt">TENSIÓN ACUMULADA: 0</div>
+    <div id="freeze" class="oculto">CERO LATENCIA MENTAL: barras congeladas en espera del parche orgánico.</div>
+    <h3>◉ CARTÓGRAFO MFN 13×13</h3>
+    <canvas id="mfn" width="250" height="250"></canvas>
+    <div id="mfn-txt">ACTIVOS: 1/169</div>
+    <h3>📜 LEDGER · memoria_eva.jsonl</h3>
+    <div id="ledger"></div>
+  </aside>
+</main>
+
+<footer>
+  <div id="log"></div>
+  <form id="form-term">
+    <span class="prompt">nodo@ecn:~$</span>
+    <input id="inp" autocomplete="off" spellcheck="false" placeholder="escribí el verbo preciso… (F8 = interrupción soberana)">
+    <button type="submit">⏎</button>
+  </form>
+</footer>
+
+<div id="toasts"></div>
+
+<div id="overlay-intro" class="overlay">
+  <div class="caja">
+    <img src="https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1abb8b3b8-787d-4185-bcfa-62ce883d86da.png" alt="Codex Lumina">
+    <h1>EL CAMINO DEL ASPIRANTE</h1>
+    <div class="sub">JUEGO DE DESBLOQUEO · RE-ALFABETIZACIÓN DEL NODO SEMILLA</div>
+    <div id="tw"></div>
+    <p>No se juega para aprender el sistema.<br>Se aprende el sistema, y ese aprendizaje se convierte en juego.<br>El error no es fracaso: es Absorción de Tensión.</p>
+    <button id="btn-iniciar" class="btn-grande">INICIAR TRAVESÍA</button>
+  </div>
+</div>
+
+<div id="overlay-rango" class="overlay oculto">
+  <div class="caja">
+    <h1>RANGO CONSOLIDADO</h1>
+    <div id="rango-nuevo" class="sub" style="font-size:16px;color:var(--cyan)"></div>
+    <p>Evolución ininterrumpida: el rango nunca disminuye.<br>Se asienta como registro inmutable en tu memoria local.</p>
+    <button id="btn-proseguir" class="btn-grande btn-oro">PROSEGUIR ▸</button>
+  </div>
+</div>
+
+<div id="overlay-final" class="overlay oculto">
+  <div class="caja">
+    <img src="https://image.qwenlm.ai/public_source/5cd33285-3091-47cd-81db-8acbbaacd3ae/1835b907a-964c-415c-a7f9-82031bd06664.png" alt="Apotheosis G7">
+    <h1>[4] NODO SEMILLA SOBERANO</h1>
+    <div class="sub">LA ESTACIÓN RESPIRA EN LOCALHOST · 169/169 EN FASE</div>
+    <p id="fin-stats"></p>
+    <p>«La poesía de este sistema es su única verdad:<br>sacar belleza de este caos es virtud.»</p>
+    <p>La última recompensa no es un trofeo:<br>es la capacidad de crear otro Nodo Semilla.</p>
+    <button id="btn-sembrar" class="btn-grande">⟲ FORMAR OTRO NODO SEMILLA</button>
+    <button id="btn-quedarse" class="btn-grande btn-oro">PERMANECER EN SILENCIO</button>
+  </div>
+</div>
+
+<script>
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var CLAVE="ecn_camino_aspirante_v1";
+var RANGOS=["Aspirante Desconectado","Técnico de Aislamiento","Tejedor de Nodos","Arquitecto de Resegridad","Nodo Semilla Soberano"];
+var PINES={
+  cordon:{nombre:"Pin del Cordón Sanitario",frase:"La salida es hacia adentro."},
+  kernel:{nombre:"Pin Guardián del Kernel",frase:"El verbo entra por interrupción, no por permiso."},
+  cirujano:{nombre:"Pin Cirujano de Texto",frase:"El territorio cura al mapa."},
+  silencio:{nombre:"Pin del Silencio Sagrado",frase:"Un buen sistema no es el que más hace, sino el que mejor duerme."},
+  fenix:{nombre:"Pin Fénix",frase:"La tensión no es fallo: es señal de ajuste."}
+};
+var LEVELS=[
+  {nombre:"NIVEL I — EL TERRITORIO",intro:"No puedo operar un territorio que no sé ubicar. Aprendé a leer tu máquina antes de tocarla.",
+   misiones:[
+    {id:"m1",titulo:"Ubicate en el territorio",tipo:"comando",cmd:/^pwd\s*$/,pista:"pwd — imprime tu directorio de trabajo.",puntos:10,saber:"pwd revela tu coordenada en el territorio: el primer acto de soberanía."},
+    {id:"m2",titulo:"Observá qué existe",tipo:"comando",cmd:/^ls(\s+-la)?\s*$/,pista:"ls — lista el contenido del directorio.",puntos:10,saber:"Observar antes de actuar. El territorio se lee, no se supone."},
+    {id:"m3",titulo:"Leé el manifiesto",tipo:"comando",cmd:/^cat\s+manifiesto\.txt\s*$/,pista:"cat manifiesto.txt — imprime el archivo.",puntos:15,saber:"El Logos escrito precede a toda operación. 127.0.0.1 es tu cordón sanitario."}]},
+  {nombre:"NIVEL II — EL AISLAMIENTO",intro:"Mi máquina → mi entorno → mi proceso → mi puerto → mi dato.",
+   misiones:[
+    {id:"m4",titulo:"Cristalizá el entorno virtual",tipo:"comando",cmd:/^python3\s+-m\s+venv\s+\.venv\s*$/,pista:"python3 -m venv .venv",puntos:15,saber:".venv aísla tu ecosistema del sistema global: inmune a lo externo."},
+    {id:"m5",titulo:"Activá el aislamiento",tipo:"comando",cmd:/^source\s+\.venv\/bin\/activate\s*$/,pista:"source .venv/bin/activate",puntos:15,saber:"Dentro del entorno, ninguna librería foránea puede tocarte."},
+    {id:"m6",titulo:"Enlazá el microframework local",tipo:"comando",cmd:/^pip\s+install\s+flask\s*$/,pista:"pip install flask",puntos:15,saber:"Flask escucha solo en el perímetro local. Nada sale de 127.0.0.1.",pin:"cordon"}]},
+  {nombre:"NIVEL III — LA RESEGRIDAD",intro:"DECLARACIÓN ≠ REALIDAD: no es un bug, es el detector.",
+   misiones:[
+    {id:"m7",titulo:"Sanear y anclar el territorio",tipo:"comando",cmd:/^bash\s+plan_reconciliacion\.sh\s*$/,pista:"bash plan_reconciliacion.sh",puntos:15,saber:"PIDs zombis purgados. La raíz queda perfectamente anclada."},
+    {id:"m8",titulo:"Repatriá los módulos WRIL",tipo:"comando",cmd:/^python3\s+tools\/patch_raiz_canonica\.py\s*$/,pista:"python3 tools/patch_raiz_canonica.py",puntos:15,saber:"Cada módulo vuelve a su hogar canónico declarado. El mapa se reescribe."},
+    {id:"m9",titulo:"Ceremonia seca (dry-run)",tipo:"comando",cmd:/^python3\s+wril\/wril_bootstrap\.py\s+--dry-run\s*$/,pista:"python3 wril/wril_bootstrap.py --dry-run",puntos:20,saber:"El mapa y el territorio coinciden por construcción. La tensión cae a cero.",pin:"cirujano"}]},
+  {nombre:"NIVEL IV — LA SOBERANÍA",intro:"El verbo entra por interrupción física, no por permiso.",
+   misiones:[
+    {id:"m10",titulo:"Interceptá la señal cruda (F8)",tipo:"f8",pista:"Presioná la tecla física F8: interrupción de hardware evdev.",puntos:20,saber:"El kernel captura el impulso eléctrico antes que cualquier servidor gráfico.",pin:"kernel"},
+    {id:"m11",titulo:"Despertá la Estación",tipo:"comando",cmd:/^bash\s+deploy_neurobit_estacion_v3\.2\.sh\s*$/,pista:"bash deploy_neurobit_estacion_v3.2.sh",puntos:25,saber:"La Estación respira en localhost y vuelve a dormir: 0.0% CPU.",pin:"silencio"}]}
+];
+var TOTAL_MISIONES=LEVELS.reduce(function(a,n){return a+n.misiones.length},0);
+var S={rango:0,hechas:[],pines:[],intencion:0,resiliencia:0,tension:0,consec:0,congelada:false,ledger:[],seq:0,iniciado:false};
+
+function guardar(){try{localStorage.setItem(CLAVE,JSON.stringify(S));}catch(e){}}
+function cargar(){try{var r=localStorage.getItem(CLAVE);if(r){var o=JSON.parse(r);if(o&&typeof o.rango==="number"){S=Object.assign(S,o);}}}catch(e){}}
+function cyrb(str){var h1=0xdeadbeef,h2=0x41c6ce57,i,ch;for(i=0;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return(((h2>>>0)*4294967296+(h1>>>0)).toString(16)).padStart(16,"0");}
+function sellar(evento,detalle){
+  var prev=S.ledger.length?S.ledger[S.ledger.length-1].h:"0000";
+  var h=cyrb("ECN|"+S.seq+"|"+evento+"|"+JSON.stringify(detalle||{})+"|"+prev);
+  S.ledger.push({n:S.seq,e:evento,d:detalle||{},h:h});S.seq++;
+}
+
+var AC=null;
+function tono(f,d,g,tipo){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),v=AC.createGain();o.type=tipo||"sine";o.frequency.value=f;v.gain.value=g||0.06;o.connect(v);v.connect(AC.destination);o.start();v.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+(d||0.25));o.stop(AC.currentTime+(d||0.25));}catch(e){}}
+function acordeExito(){tono(110,0.4,0.07);setTimeout(function(){tono(165,0.5,0.05)},120);}
+function golpeTension(){tono(55,0.5,0.09,"triangle");}
+function acordeRango(){[110,165,220,330].forEach(function(f,i){setTimeout(function(){tono(f,0.8,0.06)},i*160)});}
+
+function log(txt,cls){var d=document.createElement("div");d.className=cls||"sys";d.textContent=txt;$("#log").appendChild(d);$("#log").scrollTop=$("#log").scrollHeight;}
+function toast(titulo,frase){var d=document.createElement("div");d.className="toast";d.innerHTML=titulo+(frase?"<small>"+frase+"</small>":"");$("#toasts").appendChild(d);setTimeout(function(){d.remove()},6500);}
+
+function nivelActual(){return S.rango<LEVELS.length?LEVELS[S.rango]:null;}
+function misionPendiente(){var n=nivelActual();if(!n)return null;for(var i=0;i<n.misiones.length;i++){if(S.hechas.indexOf(n.misiones[i].id)<0)return n.misiones[i];}return null;}
+function todasHechas(n){return n.misiones.every(function(m){return S.hechas.indexOf(m.id)>=0})}
+function otorgarPin(id){if(S.pines.indexOf(id)>=0)return;S.pines.push(id);sellar("PIN",{id:id});toast("🏅 "+PINES[id].nombre,"«"+PINES[id].frase+"»");}
+
+function completarMision(m){
+  S.hechas.push(m.id);
+  var antes=S.intencion;
+  S.intencion=Math.min(100,S.intencion+m.puntos);
+  S.resiliencia=Math.min(100,S.resiliencia+Math.round(m.puntos/2));
+  [25,50,75].forEach(function(hh){if(antes<hh&&S.intencion>=hh)toast("⬆ HITO DE SINTONÍA "+hh+"%","El progreso se consolida localmente, nunca retrocede.")});
+  S.consec=0;S.congelada=false;
+  sellar("MISION_OK",{id:m.id});
+  log("✔ "+m.titulo,"ok");log("   saber → "+m.saber,"sys");
+  if(m.pin)otorgarPin(m.pin);
+  acordeExito();
+  var n=nivelActual();
+  if(n&&todasHechas(n)){S.rango++;sellar("RANGO",{rango:S.rango});guardar();render();setTimeout(ceremoniaRango,600);}
+  else{guardar();render();}
+}
+function ceremoniaRango(){
+  if(S.rango>=4){mostrarFinal();acordeRango();return;}
+  $("#rango-nuevo").textContent="["+S.rango+"] "+RANGOS[S.rango].toUpperCase();
+  $("#overlay-rango").classList.remove("oculto");
+  acordeRango();
+}
+function absorberTension(msg){
+  S.tension++;S.consec++;S.congelada=true;
+  sellar("TENSION",{consec:S.consec});
+  golpeTension();
+  log("⚠ TENSIÓN — "+msg,"bad");
+  if(S.consec>=3&&S.pines.indexOf("fenix")<0)otorgarPin("fenix");
+  guardar();render();
+}
+
+/* ---- territorio simulado ---- */
+var cwd="/home/nodo";
+var FS={
+ "/home/nodo":{dirs:["wril","core","adapters","data","inbox","tools"],files:{"manifiesto.txt":"MANIFIESTO NEUROBITRÓNICO\nLa salida es hacia adentro.\n127.0.0.1 — cordón sanitario activo.\nEl error no es fracaso: es tensión."}},
+ "/home/nodo/wril":{dirs:[],files:{"wril_sentinel.py":"# MFN_LOCATION: wril/\n# Duerme. Despierta por inotify.","wril_path_resolver.py":"# MFN_LOCATION: wril/\n# DNS interno del filesystem.","wril_bootstrap.py":"# MFN_LOCATION: wril/\n# Ceremonia de despertar."}},
+ "/home/nodo/core":{dirs:[],files:{"neurobit_api.py":"# El núcleo enruta. No procesa."}},
+ "/home/nodo/adapters":{dirs:[],files:{}},
+ "/home/nodo/data":{dirs:[],files:{"memoria_eva.jsonl":"(append-only · nada se borra)"}},
+ "/home/nodo/inbox":{dirs:[],files:{}},
+ "/home/nodo/tools":{dirs:[],files:{"patch_raiz_canonica.py":"# Reescribe la variable RAIZ.","ingest_compendium.py":"# Extrae módulos del compendio."}}
+};
+function ejecutarShell(cmd){
+  var partes=cmd.split(/\s+/),base=partes[0];
+  if(base==="help"){log("Verbos del territorio: pwd · ls · cd · cat · whoami · clear","sys");return true;}
+  if(base==="clear"){$("#log").innerHTML="";return true;}
+  if(base==="pwd"){log(cwd,"sys");return true;}
+  if(base==="whoami"){log("nodo_semilla — homo vivo @ 127.0.0.1","sys");return true;}
+  if(base==="ls"){var nodo=FS[cwd];if(!nodo){log("ls: territorio desconocido","bad");return true;}
+    var items=nodo.dirs.map(function(d){return d+"/"}).concat(Object.keys(nodo.files));
+    log(items.length?items.join("   "):"(vacío)","sys");return true;}
+  if(base==="cd"){var dest=partes[1]||"";
+    if(dest===".."||dest==="/"){cwd="/home/nodo";log(cwd,"sys");return true;}
+    var nd=FS[cwd];
+    if(nd&&nd.dirs.indexOf(dest)>=0){cwd=cwd+"/"+dest;log(cwd,"sys");}
+    else log("cd: "+dest+" no existe en este territorio","bad");
+    return true;}
+  if(base==="cat"){var nombre=partes[1],nn=FS[cwd];
+    if(nn&&nn.files[nombre]!==undefined){nn.files[nombre].split("\n").forEach(function(l){log(l,"sys")});}
+    else log("cat: "+(nombre||"?")+" no encontrado","bad");
+    return true;}
+  return false;
+}
+
+function procesarComando(raw){
+  var cmd=raw.trim();if(!cmd)return;
+  log("nodo@ecn:~$ "+cmd,"cmd");
+  var pend=misionPendiente();
+  if(pend){
+    if(pend.tipo==="f8"){
+      if(/^f8$/i.test(cmd)){log("La señal cruda no entra por texto. Presioná la tecla física F8.","sys");return;}
+    }else if(pend.cmd&&pend.cmd.test(cmd)){completarMision(pend);return;}
+    var n=nivelActual();
+    var otra=null;
+    if(n)n.misiones.forEach(function(m){if(m.cmd&&m.cmd.test(cmd)&&m.id!==pend.id)otra=m;});
+    if(otra){absorberTension("El orden de la ceremonia debe respetarse. Primero: «"+pend.titulo+"».");return;}
+  }
+  if(ejecutarShell(cmd))return;
+  absorberTension("El verbo no resuena con ninguna operación conocida. Probá «help» o pedí una pista.");
+}
+
+/* ---- MFN ---- */
+function bitsActivos(){return 1+Math.floor((S.hechas.length/TOTAL_MISIONES)*168);}
+function dibujarMFN(){
+  var c=$("#mfn"),x=c.getContext("2d"),W=c.width,H=c.height,cx=W/2,cy=H/2;
+  x.clearRect(0,0,W,H);
+  var AN=[8,16,24,32,40,48],COL=["#f9e2af","#fab387","#cba6f7","#89b4fa","#74c7ec","#a07850"];
+  var bits=bitsActivos();
+  var g=x.createRadialGradient(cx,cy,0,cx,cy,10);
+  g.addColorStop(0,"#fff8e0");g.addColorStop(1,"rgba(249,226,175,0)");
+  x.fillStyle=g;x.beginPath();x.arc(cx,cy,10,0,7);x.fill();
+  x.fillStyle="#1e1e2e";x.font="bold 8px monospace";x.textAlign="center";x.textBaseline="middle";x.fillText("G7",cx,cy);
+  var idx=1,r0=18,dr=(W/2-22)/6,a,s;
+  for(a=0;a<6;a++){
+    var r=r0+dr*a+dr/2;
+    for(s=0;s<AN[a];s++){
+      var ang=(s/AN[a])*Math.PI*2-Math.PI/2;
+      var px=cx+Math.cos(ang)*r,py=cy+Math.sin(ang)*r;
+      var on=idx<bits;
+      x.beginPath();x.arc(px,py,2.4,0,7);
+      x.fillStyle=on?COL[a]:"rgba(166,227,161,.10)";
+      x.shadowColor=COL[a];x.shadowBlur=on?6:0;
+      x.fill();x.shadowBlur=0;
+      idx++;
+    }
+  }
+  $("#mfn-txt").textContent="ACTIVOS: "+bits+"/169"+(bits>=169?" · FASE TOTAL":"");
+}
+function renderLedger(){
+  var lz=$("#ledger");lz.innerHTML="";
+  S.ledger.slice(-14).forEach(function(e){
+    var d=document.createElement("div");
+    d.innerHTML="<span class=\"ev\">"+e.e+"</span> seq "+e.n+" · #"+e.h.slice(0,8);
+    lz.appendChild(d);
+  });
+  lz.scrollTop=lz.scrollHeight;
+}
+function render(){
+  $("#rango-actual").textContent="["+Math.min(S.rango,4)+"] "+RANGOS[Math.min(S.rango,4)].toUpperCase();
+  var lad=$("#ladder");lad.innerHTML="";
+  RANGOS.forEach(function(r,i){
+    var li=document.createElement("li");li.textContent="["+i+"] "+r;
+    if(i<S.rango)li.className="ok";else if(i===S.rango)li.className="act";
+    lad.appendChild(li);
+  });
+  var pz=$("#pines");pz.innerHTML="";
+  Object.keys(PINES).forEach(function(k){
+    var d=document.createElement("div"),g=S.pines.indexOf(k)>=0;
+    d.className="pin"+(g?" ganado":"");
+    d.innerHTML=(g?"🏅 ":"🔒 ")+PINES[k].nombre+"<small>«"+PINES[k].frase+"»</small>";
+    pz.appendChild(d);
+  });
+  $("#v-int").textContent=S.intencion+"%";
+  $("#v-res").textContent=S.resiliencia+"%";
+  $("#fill-int").style.width=S.intencion+"%";
+  $("#fill-res").style.width=S.resiliencia+"%";
+  $("#bar-int").classList.toggle("congelada",S.congelada);
+  $("#bar-res").classList.toggle("congelada",S.congelada);
+  $("#freeze").classList.toggle("oculto",!S.congelada);
+  $("#tension-txt").textContent="TENSIÓN ACUMULADA: "+S.tension+(S.consec>0?" · consecutivos: "+S.consec:"");
+  var n=nivelActual(),cab=$("#nivel-cab");
+  if(n){cab.innerHTML="<h2>"+n.nombre+"</h2><p class=\"intro\">«"+n.intro+"»</p>";}
+  else{cab.innerHTML="<h2>ESTACIÓN ACTIVA — ESTADO DURMIENTE</h2><p class=\"intro\">«Un buen sistema no es el que más hace, sino el que mejor duerme.» · CPU 0.0%</p>";}
+  var mz=$("#misiones");mz.innerHTML="";
+  if(n){
+    var pend=misionPendiente();
+    n.misiones.forEach(function(m){
+      var hecha=S.hechas.indexOf(m.id)>=0;
+      var esPend=pend&&pend.id===m.id;
+      var d=document.createElement("div");
+      d.className="mis"+(hecha?" done":"")+(esPend?" pend":"");
+      var titulo=hecha?m.titulo:(esPend?m.titulo:"▓▓▓ MISIÓN SELLADA ▓▓▓");
+      d.innerHTML="<span>"+(hecha?"🟢 ":(esPend?"🔸 ":"🔒 "))+titulo+" <em>+"+m.puntos+"</em></span>"+(hecha?"<span class=\"st\">CONSOLIDADA</span>":"");
+      mz.appendChild(d);
+    });
+  }else{
+    var dd=document.createElement("div");dd.className="mis done";
+    dd.innerHTML="<span>🟢 Travesía completa — "+S.hechas.length+" misiones · "+S.pines.length+" pines · "+S.ledger.length+" sellos en el Ledger</span>";
+    mz.appendChild(dd);
+  }
+  dibujarMFN();renderLedger();
+}
+function mostrarFinal(){
+  $("#fin-stats").textContent=S.hechas.length+" misiones consolidadas · "+S.pines.length+" pines · "+S.ledger.length+" sellos en el Ledger inmutable.";
+  $("#overlay-final").classList.remove("oculto");
+}
+
+/* ---- eventos ---- */
+$("#form-term").addEventListener("submit",function(e){e.preventDefault();var inp=$("#inp");var v=inp.value;inp.value="";procesarComando(v);});
+$("#btn-pista").addEventListener("click",function(){var m=misionPendiente();if(m){log("PISTA → "+m.pista,"sys");sellar("PISTA",{id:m.id});guardar();}else log("No hay misiones pendientes. La Estación duerme.","sys");});
+$("#btn-absorber").addEventListener("click",function(){S.congelada=false;S.consec=0;sellar("ABSORCION",{});log("Tensión absorbida. Las barras se descongelan.","ok");guardar();render();});
+$("#btn-proseguir").addEventListener("click",function(){$("#overlay-rango").classList.add("oculto");log("Rango consolidado: "+RANGOS[S.rango]+". El progreso es inmutable.","ok");});
+$("#btn-quedarse").addEventListener("click",function(){$("#overlay-final").classList.add("oculto");log("La Estación permanece en silencio. 0.0% CPU.","sys");});
+$("#btn-sembrar").addEventListener("click",function(){try{localStorage.removeItem(CLAVE);}catch(e){}location.reload();});
+$("#btn-reset").addEventListener("click",function(){if(confirm("¿Re-sembrar el territorio? El Ledger actual se disolverá.")){try{localStorage.removeItem(CLAVE);}catch(e){}location.reload();}});
+window.addEventListener("keydown",function(e){
+  if(e.key==="F8"){
+    e.preventDefault();
+    var m=misionPendiente();
+    if(m&&m.tipo==="f8"){log("⚡ Interrupción F8: señal cruda interceptada en /dev/input.","ok");completarMision(m);}
+    else if(S.rango>=3){log("⚡ F8 registrado en el WAL (write-ahead-log).","ok");sellar("IRQ1",{tecla:"F8"});guardar();renderLedger();}
+  }
+});
+
+/* ---- intro ---- */
+var FRASES=["En el principio era el verbo...","...y el verbo se hizo carne...","...luego se hizo silicio.","La salida es hacia adentro."];
+function maquina(){
+  var el=$("#tw"),fi=0,ci=0,borrando=false;
+  function paso(){
+    if(fi>=FRASES.length)return;
+    var f=FRASES[fi];
+    if(!borrando){ci++;el.textContent=f.slice(0,ci);
+      if(ci===f.length){if(fi===FRASES.length-1)return;borrando=true;setTimeout(paso,1500);return;}
+      setTimeout(paso,60);}
+    else{ci--;el.textContent=f.slice(0,ci);if(ci===0){borrando=false;fi++;}setTimeout(paso,26);}
+  }
+  paso();
+}
+$("#btn-iniciar").addEventListener("click",function(){
+  $("#overlay-intro").classList.add("oculto");
+  tono(110,0.6,0.06);
+  if(!S.iniciado){
+    S.iniciado=true;sellar("INICIO",{nodo:"0001"});guardar();
+    log("Ceremonia de iniciación. El error no es fracaso: es Absorción de Tensión.","sys");
+    log("Escribí «help» para conocer los verbos del territorio.","sys");
+    log("Las misiones selladas se revelan al consolidar la anterior.","sys");
+  }
+  render();
+});
+
+/* ---- polvo de fondo ---- */
+var pc=$("#polvo"),px=pc.getContext("2d"),PP=[],i;
+function resize(){pc.width=innerWidth;pc.height=innerHeight;}
+resize();addEventListener("resize",resize);
+for(i=0;i<60;i++)PP.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2});
+function animar(){
+  px.clearRect(0,0,pc.width,pc.height);
+  px.fillStyle="rgba(166,227,161,.4)";
+  PP.forEach(function(p){p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=pc.width;if(p.x>pc.width)p.x=0;if(p.y<0)p.y=pc.height;if(p.y>pc.height)p.y=0;px.fillRect(p.x,p.y,1.3,1.3);});
+  requestAnimationFrame(animar);
+}
+animar();
+
+/* ---- arranque ---- */
+cargar();
+if(S.iniciado){$("#overlay-intro").classList.add("oculto");}
+else{maquina();}
+render();
+</script>
+<script src="ecn_misiones_bridge.js"></script>
+</body>
+</html>

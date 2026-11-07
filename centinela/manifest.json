@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "ECN Centinela de Composición",
+  "version": "0.1",
+  "description": "Captura la composición de respuestas vía MutationObserver y la sella al puente local.",
+  "host_permissions": ["ws://127.0.0.1:8080/"],
+  "content_scripts": [
+    { "matches": ["<all_urls>"], "js": ["content.js"], "run_at": "document_idle" }
+  ]
+}

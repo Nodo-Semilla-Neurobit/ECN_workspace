@@ -1,0 +1,20 @@
+{
+    "neurobit_api": {
+        "port": 5000,
+        "provenance": "CORE",
+        "pid": 47203,
+        "timestamp": "2026-11-06T07:42:26.410867"
+    },
+    "supersend_server": {
+        "port": 5010,
+        "provenance": "EXT",
+        "pid": 47203,
+        "timestamp": "2026-11-06T07:42:26.411151"
+    },
+    "gtk_monitor": {
+        "port": 5020,
+        "provenance": "TOOLS",
+        "pid": 47203,
+        "timestamp": "2026-11-06T07:42:26.414660"
+    }
+}

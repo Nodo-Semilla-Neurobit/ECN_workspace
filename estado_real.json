@@ -1,0 +1,25 @@
+{
+ "t": "2026-11-06T07:33:21.584557",
+ "componentes": [
+  {
+   "nombre": "WS_SENTINEL",
+   "pid": 46830,
+   "estado": "ALIVE"
+  },
+  {
+   "nombre": "DISPATCHER",
+   "pid": 46832,
+   "estado": "ALIVE"
+  },
+  {
+   "nombre": "VISOR_SOBERANO",
+   "pid": 46834,
+   "estado": "ALIVE"
+  },
+  {
+   "nombre": "DICTAFONO",
+   "pid": 46836,
+   "estado": "ALIVE"
+  }
+ ]
+}

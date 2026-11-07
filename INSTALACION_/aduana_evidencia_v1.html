@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · Aduana de Evidencia · El Log como Territorio</title>
+<link href="https://cdn.jsdelivr.net/fontsource/css/vt323@latest/index.css" rel="stylesheet">
+<style>
+:root{--bg:#1e1e2e;--panel:#24243a;--panel2:#1c1c2e;--borde:#3a3a55;--ink:#a6e3a1;--gold:#f9e2af;--lila:#cba6f7;--cyan:#89dceb;--alert:#f38ba8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:"VT323","Courier New",monospace;min-height:100vh;display:flex;flex-direction:column}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:97;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+header{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;padding:8px 14px;background:rgba(21,21,33,.92);border-bottom:1px solid var(--borde);font-size:13px;letter-spacing:2px}
+header .t{color:var(--gold);text-shadow:0 0 10px rgba(249,226,175,.4)}
+.badge{border:1px solid var(--borde);padding:2px 8px;border-radius:3px;font-size:12px}
+.badge.ok{color:var(--ink);border-color:var(--ink)}.badge.warn{color:var(--alert);border-color:var(--alert)}
+main{flex:1;display:grid;grid-template-columns:270px 1fr 290px;gap:10px;padding:10px;max-width:1500px;margin:0 auto;width:100%}
+aside,section{background:var(--panel);border:1px solid var(--borde);border-radius:6px;padding:10px;overflow-y:auto}
+h3{font-size:13px;letter-spacing:2px;color:var(--gold);border-bottom:1px dashed var(--borde);padding-bottom:4px;margin:8px 0}
+h3:first-child{margin-top:0}
+.estado-item{border:1px solid var(--borde);border-radius:4px;padding:6px 8px;margin:5px 0;font-size:13px}
+.estado-item b{color:var(--cyan)}
+button.acc{width:100%;margin:5px 0;background:none;border:1px solid var(--cyan);color:var(--cyan);font-family:inherit;font-size:13px;letter-spacing:1px;padding:7px;cursor:pointer;border-radius:4px}
+button.acc:hover{background:rgba(137,220,235,.1)}
+button.acc.oro{border-color:var(--gold);color:var(--gold)}
+label.mini{font-size:11px;color:var(--lila);letter-spacing:1px}
+.det{border:1px solid var(--cyan);border-radius:6px;padding:10px;margin:8px 0;background:var(--panel2);box-shadow:0 0 10px rgba(137,220,235,.12)}
+.det h4{color:var(--cyan);font-size:15px;letter-spacing:1px}
+.det .cmd{display:block;background:#0e0e18;border:1px solid var(--borde);color:var(--gold);border-radius:4px;padding:4px 8px;margin:6px 0;font-size:13px}
+.det .exc{display:block;font-size:11px;color:var(--lila);white-space:pre-wrap;max-height:90px;overflow-y:auto;border-left:2px solid var(--borde);padding-left:8px;margin:6px 0}
+.det .fila{display:flex;gap:8px}
+.det button{flex:1;background:none;border:1px solid var(--ink);color:var(--ink);font-family:inherit;font-size:12px;padding:5px;cursor:pointer;border-radius:3px}
+.det button.no{border-color:var(--alert);color:var(--alert)}
+.vacio{border:1px dashed var(--borde);border-radius:6px;padding:16px;text-align:center;color:#6c7086;font-size:13px;letter-spacing:1px}
+#ledger{font-size:11px;color:var(--lila);line-height:1.7;max-height:240px;overflow-y:auto;background:#0e0e18;border:1px solid var(--borde);border-radius:4px;padding:8px}
+#ledger .ev{color:var(--ink)}
+#toasts{position:fixed;top:52px;right:14px;z-index:120;display:flex;flex-direction:column;gap:8px;width:320px}
+.toast{border:1px solid var(--gold);background:#1c1c2e;color:var(--gold);padding:10px 12px;border-radius:6px;font-size:13px;box-shadow:0 0 18px rgba(249,226,175,.25)}
+.toast small{display:block;color:var(--lila);font-style:italic;margin-top:4px}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="t">☉ ECN · ADUANA DE EVIDENCIA v1 · EL LOG COMO TERRITORIO</div>
+  <div>
+    <span class="badge warn" id="st-puente">PUENTE: SONDEANDO…</span>
+    <span class="badge" id="st-rango">[0] ASPIRANTE</span>
+    <span class="badge ok">127.0.0.1</span>
+  </div>
+</header>
+<main>
+  <aside>
+    <h3>🧭 ESTADO COMPARTIDO</h3>
+    <div id="estado-caja"></div>
+    <h3>📡 LECTURA DEL LOG</h3>
+    <button class="acc" id="btn-leer">📜 LEER @INFORME (8080)</button>
+    <label class="mini"><input type="checkbox" id="chk-auto"> sondeo automático (20 s)</label>
+    <p style="font-size:12px;opacity:.8;margin-top:8px">La Aduana no ejecuta nada: solo lee el informe sellado por el puente, detecta evidencia real y te pide confirmación. DESCARTAR descarta; CONSOLIDAR asienta. Las tareas resueltas se descartan del pendiente.</p>
+  </aside>
+  <section>
+    <h3>⚖ EVIDENCIAS DETECTADAS EN EL TRANSCRIPT</h3>
+    <div id="dets"></div>
+  </section>
+  <aside>
+    <h3>📜 LEDGER DE LA ADUANA</h3>
+    <div id="ledger"></div>
+    <h3>🔮 PRINCIPIO</h3>
+    <div class="estado-item">DECLARACIÓN ≠ REALIDAD: el puente produce la realidad; la Aduana la lee; vos la confirmás.</div>
+    <div class="estado-item">Cero auto-caos: nada se consolida sin tu gesto.</div>
+  </aside>
+</main>
+<div id="toasts"></div>
+<script>
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var INFORME_URL="http://127.0.0.1:8080/informe";
+var CLAVE_EST="ecn_dojo_v1", CLAVE_LED="ecn_aduana_ledger_v1", CLAVE_DESC="ecn_aduana_descartadas_v1";
+var RANGOS=["ASPIRANTE DESCONECTADO","TÉCNICO DE AISLAMIENTO","TEJEDOR DE NODOS","ARQUITECTO DE RESEGRIDAD","NODO SEMILLA SOBERANO"];
+var MISIONES=[
+ {id:"m1",nivel:1,t:"Coordenada de origen",auto:[{cmd:/^pwd$/,out:[/^\/.+/m]}]},
+ {id:"m2",nivel:1,t:"Cristalizar .venv",auto:[{cmd:/^python3\s+-m\s+venv\s+\.venv$/,not:[/no encontrada|ERROR|No such/i]},{cmd:/^ls(\s+-\w+)?\s+\.venv\s*$/,out:[/bin/,/pyvenv\.cfg/]}]},
+ {id:"m3",nivel:1,t:"Activar el entorno",auto:[{cmd:/^source\s+\.venv\/bin\/activate$/,not:[/ERROR|no encontrada/i]},{cmd:/^which\s+python3?\s*$/,out:[/\/\.venv\//]}]},
+ {id:"m4",nivel:2,t:"Enlazar Flask",auto:[{cmd:/^pip\s+install\s+flask\s*$/,out:[/Successfully installed|already satisfied/i]}]},
+ {id:"m5",nivel:2,t:"Aduana del Hub Dinámico",auto:[{cmd:/^curl\b/,out:[/"status"|\bok\b/i],not:[/refused/i]}]},
+ {id:"m6",nivel:3,t:"Saneamiento y ancla",auto:[{cmd:/plan_reconciliacion/,out:[/FASE|SANEAMIENTO|✓/]}]},
+ {id:"m7",nivel:3,t:"Bootstrap WRIL",auto:[{cmd:/wril_bootstrap/,out:[/Bootstrap completo/]}]},
+ {id:"m8",nivel:3,t:"Dry-run del pliegue",auto:[{cmd:/wril_topologia/,out:[/DRY-RUN|coherente|tensi/i]}]},
+ {id:"m9",nivel:4,t:"Dictado consciente (F8)",auto:[]},
+ {id:"m10",nivel:4,t:"Ceremonia de Despertar",auto:[{cmd:/deploy_neurobit_estacion/,out:[/OPERATIVA|ALIVE|✓/]}]}
+];
+var estado={rango:0,hechas:[],pines:[],intencion:0,resiliencia:0,tension:0};
+var LEDGER=[], DESCARTADAS=[];
+try{estado=Object.assign(estado,JSON.parse(localStorage.getItem(CLAVE_EST)||"null")||estado);}catch(e){}
+try{LEDGER=JSON.parse(localStorage.getItem(CLAVE_LED)||"[]");}catch(e){}
+try{DESCARTADAS=JSON.parse(localStorage.getItem(CLAVE_DESC)||"[]");}catch(e){}
+function guardar(){try{localStorage.setItem(CLAVE_EST,JSON.stringify(estado));localStorage.setItem(CLAVE_LED,JSON.stringify(LEDGER));localStorage.setItem(CLAVE_DESC,JSON.stringify(DESCARTADAS));}catch(e){}}
+function cyrb(s){var h1=0xdeadbeef,h2=0x41c6ce57,i,c;for(i=0;i<s.length;i++){c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return(((h2>>>0)*4294967296+(h1>>>0)).toString(16)).padStart(16,"0");}
+function sellar(ev,d){var p=LEDGER.length?LEDGER[LEDGER.length-1].h:"00000000";var n=LEDGER.length;LEDGER.push({n:n,e:ev,d:d,h:cyrb(n+"|"+ev+"|"+JSON.stringify(d)+"|"+p)});guardar();renderLedger();}
+function toast(t,f){var d=document.createElement("div");d.className="toast";d.innerHTML=t+(f?"<small>"+f+"</small>":"");$("#toasts").appendChild(d);setTimeout(function(){d.remove()},6500);}
+function nivelOk(nv){return MISIONES.filter(function(m){return m.nivel===nv}).every(function(m){return estado.hechas.indexOf(m.id)>=0})}
+function recalcRango(){var r=0;for(var i=1;i<=4;i++){if(nivelOk(i))r=i;else break}return r}
+function parsearInforme(txt){
+  var pairs=[],cur=null;
+  txt.split("\n").forEach(function(line){
+    var m=line.match(/^\[(\d\d:\d\d:\d\d)\]\s*(>|<|#)\s?(.*)$/);
+    if(m){ if(m[2]===">"){cur={ts:m[1],cmd:m[3],out:[]};pairs.push(cur);} else if(m[2]==="<"&&cur){cur.out.push(m[3]);} }
+    else if(cur&&line.trim()){cur.out.push(line);}
+  });
+  return pairs;
+}
+function detectar(pairs){
+  var det=[];
+  MISIONES.forEach(function(mz){
+    if(estado.hechas.indexOf(mz.id)>=0)return;
+    (mz.auto||[]).forEach(function(cond){
+      if(det.some(function(d){return d.id===mz.id}))return;
+      pairs.forEach(function(p){
+        if(det.some(function(d){return d.id===mz.id}))return;
+        if(cond.cmd.test(p.cmd)){
+          var out=p.out.join("\n");
+          if((cond.out||[]).every(function(r){return r.test(out)})&&(cond.not||[]).every(function(r){return !r.test(out)})){
+            if(!DESCARTADAS.some(function(x){return x===mz.id+"|"+p.cmd}))
+              det.push({id:mz.id,t:mz.t,cmd:p.cmd,ts:p.ts,exc:out.slice(0,160)});
+          }
+        }
+      });
+    });
+  });
+  return det;
+}
+function leerInforme(){
+  fetch(INFORME_URL).then(function(r){ if(!r.ok)throw new Error(); return r.text(); }).then(function(txt){
+    $("#st-puente").textContent="PUENTE: CONECTADO · INFORME LEÍDO";$("#st-puente").className="badge ok";
+    var det=detectar(parsearInforme(txt));
+    renderDets(det);
+    if(det.length)toast("⚖ "+det.length+" evidencia(s) real(es) detectada(s)","Confirmá para consolidar; descartá si es falso positivo.");
+  }).catch(function(){
+    $("#st-puente").textContent="PUENTE EN REPOSO";$("#st-puente").className="badge warn";
+    $("#dets").innerHTML='<div class="vacio">EL PUENTE DUERME. Levantalo con: bash levantar_puente_v2.3.sh</div>';
+  });
+}
+function renderDets(det){
+  var c=$("#dets");c.innerHTML="";
+  if(!det.length){c.innerHTML='<div class="vacio">SIN EVIDENCIAS NUEVAS. Operá en la consola puente y sellá con @informe.</div>';return;}
+  det.forEach(function(d){
+    var el=document.createElement("div");el.className="det";
+    el.innerHTML="<h4>🔸 "+d.t+"</h4><span class=\"cmd\">&gt; "+d.cmd+"</span><span class=\"exc\">"+d.exc.replace(/</g,"&lt;")+"</span><div class=\"fila\"><button data-id=\""+d.id+"\" data-cmd=\""+d.cmd.replace(/"/g,"&quot;")+"\" class=\"si\">CONSOLIDAR</button><button data-id=\""+d.id+"\" data-cmd=\""+d.cmd.replace(/"/g,"&quot;")+"\" class=\"no\">DESCARTAR</button></div>";
+    c.appendChild(el);
+  });
+  c.querySelectorAll("button.si").forEach(function(b){b.addEventListener("click",function(){
+    var id=b.dataset.id;
+    if(estado.hechas.indexOf(id)<0){
+      estado.hechas.push(id);
+      estado.intencion=Math.min(100,estado.intencion+12);
+      estado.resiliencia=Math.min(100,estado.resiliencia+6);
+      var antes=estado.rango;estado.rango=recalcRango();
+      sellar("EVIDENCIA_REAL",{id:id,cmd:b.dataset.cmd});
+      toast(" MISIÓN CONSOLIDADA CON EVIDENCIA REAL: "+id,"El log del puente fue el testigo. Tarea descartada del pendiente.");
+      if(estado.rango>antes)toast("🛡 RANGO CONSOLIDADO: ["+estado.rango+"] "+RANGOS[estado.rango],"Evolución ininterrumpida.");
+      guardar();renderEstado();leerInforme();
+    }
+  });});
+  c.querySelectorAll("button.no").forEach(function(b){b.addEventListener("click",function(){
+    DESCARTADAS.push(b.dataset.id+"|"+b.dataset.cmd);sellar("DESCARTE",{id:b.dataset.id});guardar();leerInforme();
+  });});
+}
+function renderEstado(){
+  $("#st-rango").textContent="["+estado.rango+"] "+RANGOS[estado.rango].split(" ")[0];
+  $("#estado-caja").innerHTML=
+   "<div class=\"estado-item\">RANGO: <b>["+estado.rango+"] "+RANGOS[estado.rango]+"</b></div>"+
+   "<div class=\"estado-item\">MISIONES: <b>"+estado.hechas.length+"/"+MISIONES.length+"</b></div>"+
+   "<div class=\"estado-item\">INTENCIÓN: <b>"+estado.intencion+"%</b> · RESILIENCIA: <b>"+estado.resiliencia+"%</b></div>"+
+   "<div class=\"estado-item\">PENDIENTE: <b>"+(function(){for(var i=0;i<MISIONES.length;i++){if(estado.hechas.indexOf(MISIONES[i].id)<0)return MISIONES[i].t}return "ninguna — viaje completo"})()+"</b></div>";
+}
+function renderLedger(){
+  var el=$("#ledger");el.innerHTML="";
+  LEDGER.slice(-25).reverse().forEach(function(e){
+    var d=document.createElement("div");
+    d.innerHTML="<span class=\"ev\">"+e.e+"</span> n"+e.n+" · #"+e.h.slice(0,8)+" · "+(e.d.id||"");
+    el.appendChild(d);
+  });
+}
+$("#btn-leer").addEventListener("click",leerInforme);
+$("#chk-auto").addEventListener("change",function(){
+  if(this.checked){window._autoT=setInterval(leerInforme,20000);toast("📡 Sondeo automático cada 20 s.","La Aduana vigila; vos confirmás.");}
+  else{clearInterval(window._autoT);}
+});
+renderEstado();renderLedger();leerInforme();
+</script>
+</body>
+</html>

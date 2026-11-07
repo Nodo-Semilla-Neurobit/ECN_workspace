@@ -1,0 +1,317 @@
+# =====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - REGISTRO RADIAL DE ADAPTADORES 
+# Tesis Neurobitrónica: Registro Histórico y Educativo
+# Principio: radios nuevos, centro intacto.
+# =====================================================================
+adapters_registry:
+  - adapter_name: "hid_kernel_bridge"
+    domain: "kernel"
+    script_path: "clean-hid-bridge.sh"
+    runtime: "bash"
+    trigger: "EV_KEY(Ctrl+C|F8)"
+    provides: "cuando"
+    cpu_footprint: "0.0_percent_idle"
+
+  - adapter_name: "gtk_ownerchange"
+    domain: "desktop_x11"
+    script_path: "neurobit_adapter_gtk.py"
+    runtime: "python3"
+    trigger: "owner-change"
+    provides: "que"
+    materializer: "Gtk.Clipboard(UTF8_STRING)"
+
+  - adapter_name: "bitacora_eva_dom"
+    domain: "browser"
+    script_path: "copy_listener.js"
+    runtime: "extension_background"
+    trigger: "DOM_copy_event"
+    provides: "que"
+    materializer: "window.getSelection()"
+    cors_override: true
+
+  - adapter_name: "cinnamon_applet"
+    domain: "desktop_cinnamon"
+    script_path: "applet.js"
+    runtime: "cjs"
+    trigger: "owner-change"
+    provides: "que"
+    materializer: "Gtk.Clipboard(CJS)"
+
+  - adapter_name: "x11_selector_headless"
+    domain: "headless"
+    script_path: "neurobit_x11_selector"
+    runtime: "binary_c"
+    trigger: "on_demand"
+    provides: "que"
+    materializer: "Xlib(XConvertSelection+INCR)"
+
+dispatch_center:
+    buzon_salida: "buzon_salida/"
+    watcher: "inotify(IN_CLOSE_WRITE|IN_MOVED_TO)"
+    classifier: "ACTION_WORD/CLASS"
+    postmans: ["ledger", "memoria", "widget", "extension"]
+# =====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL 
+# Tesis Neurobitrónica: Registro Histórico y Educativo
+# Principio: radios nuevos, centro intacto; la matemática describe el sistema.
+# =====================================================================
+scrum_master_env:
+  node_id: "NODO_SEMILLA"
+  log_level: "COHERENTE"
+  matrix_core: "neurobit_mfn_13x13.py"
+  dispatch_core: "neurobit_dispatcher.py"
+
+adapters_registry:
+  - adapter_name: "hid_kernel_bridge"
+    domain: "kernel"
+    script_path: "clean-hid-bridge.sh"
+    runtime: "bash"
+    trigger: "EV_KEY(Ctrl+C)"
+    provides: "cuando"
+    cpu_footprint: "0.0_percent_idle"
+    mfn_sector: 0
+
+  - adapter_name: "gtk_ownerchange"
+    domain: "desktop_x11"
+    script_path: "neurobit_adapter_gtk.py"
+    runtime: "python3"
+    trigger: "owner-change"
+    provides: "que"
+    materializer: "Gtk.Clipboard(UTF8_STRING)"
+    mfn_sector: 1
+
+  - adapter_name: "cinnamon_applet"
+    domain: "desktop_cinnamon"
+    script_path: "applet.js"
+    runtime: "cjs"
+    trigger: "owner-change"
+    provides: "que"
+    materializer: "Gtk.Clipboard(CJS)"
+    mfn_sector: 2
+
+  - adapter_name: "bitacora_eva_dom"
+    domain: "browser"
+    script_path: "copy_listener.js"
+    runtime: "extension_background"
+    trigger: "DOM_copy_event"
+    provides: "que"
+    materializer: "window.getSelection()"
+    cors_override: true
+    mfn_sector: 3
+
+  - adapter_name: "x11_selector_headless"
+    domain: "headless"
+    script_path: "neurobit_x11_selector"
+    runtime: "binary_c"
+    trigger: "on_demand"
+    provides: "que"
+    materializer: "Xlib(XConvertSelection+INCR)"
+    mfn_sector: 4
+
+  - adapter_name: "http_sala_endpoint"
+    domain: "http_local"
+    script_path: "sala_app.py::/ingesta_neurobit"
+    runtime: "flask"
+    trigger: "POST_json"
+    provides: "que"
+    materializer: "background.js(fetch)"
+    mfn_sector: 5
+
+  - adapter_name: "dictado_evdev"
+    domain: "kernel_ingesta"
+    script_path: "neurobit_dictado_evdev.py"
+    runtime: "python3"
+    trigger: "EV_KEY(F8_opt_in)"
+    provides: "que_y_cuando"
+    materializer: "evdev(input_event_crudo)"
+    etica: "opt_in_consciente_cero_exfiltracion"
+    mfn_sector: 6
+
+postmans_registry:
+  - postman: "ledger"
+    destino: "clipboard_captured_folder/tesis_neurobit_ledger.log"
+    mfn_sector: 7
+  - postman: "memoria"
+    destino: "memoria_eva.jsonl"
+    mfn_sector: 8
+  - postman: "auditoria"
+    destino: "neurobit_epistemic_validator.py"
+    mfn_sector: 9
+  - postman: "versiones"
+    destino: "clipboard_captured_folder/backups/"
+    mfn_sector: 10
+  - postman: "tesis"
+    destino: "dossier/README_v2.md"
+    mfn_sector: 11
+
+dispatch_center:
+  buzon_salida: "buzon_salida/"
+  watcher: "inotify(IN_CLOSE_WRITE|IN_MOVED_TO)"
+  classifier: "sello -> (rho, phi) via declaracion"
+  origen: "rho_0_oficina_de_correos"
+# =====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL 
+# Novedad: capa WRIL registrada en el sector 12 (la reserva es infraestructura)
+# =====================================================================
+wril_registry:
+  principio: "cada modulo responde una pregunta distinta; jamas un supermodulo"
+  pipeline: "Discover -> Resolve -> Reconcile -> Verify -> Record"
+  secuencia_inicial: ["wril_path_map", "wril_patch_resolver"]  # logica declarada pendiente de transmision del NODO
+  inbox: "inbox/"
+  historial: "wril_historial.jsonl"
+  modules:
+    - {name: wril_sentinel,          pregunta: "donde debe vivir lo nuevo",   funcion: ROUTE,     mfn_sector: 12}
+    - {name: wril_path_map,          pregunta: "cual es la topologia actual", funcion: DISCOVER,  mfn_sector: 12}
+    - {name: wril_path_resolver,     pregunta: "donde esta X",                funcion: RESOLVE,   mfn_sector: 12}
+    - {name: wril_mfn_registry,      pregunta: "que declara ser",             funcion: INTERPRET, mfn_sector: 12}
+    - {name: wril_patch_resolver,    pregunta: "que referencia esta rota",    funcion: REPAIR,    mfn_sector: 12}
+    - {name: wril_dependency_scanner,pregunta: "que necesita para funcionar", funcion: REQUIRE,   mfn_sector: 12}
+    - {name: wril_dynamic_tester,    pregunta: "se comporta como declara",    funcion: VERIFY,    mfn_sector: 12}
+    - {name: wril_batch_executor,    pregunta: "como ejecuto la secuencia",   funcion: EXECUTE,   mfn_sector: 12}
+    - {name: wril_backup,            pregunta: "como preservo antes de mutar",funcion: RECORD,    mfn_sector: 12}
+
+ # =====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL 
+# Novedad: pliegue topológico declarado; el mapa y el territorio coinciden.
+# Hereda adapters_registry, postmans_registry y dispatch_center de v6.0.
+# =====================================================================
+topologia:
+  motor: "wril/wril_topologia.py"
+  modo_defecto: "dry_run"
+  parches_controlados:
+    - "WRIL::RAIZ_PLEGADA (parents[1] en .py plegados)"
+    - "WRIL::SELF_PATH::v1 (shim sys.path tras docstring)"
+  etica: "backup previo a toda mudanza; registro en wril_historial.jsonl"
+  entry_points_plegados:
+    bootstrap: "wril/wril_bootstrap.py"
+    sentinel: "wril/wril_sentinel.py"
+    tester: "wril/wril_dynamic_tester.py"
+    batch: "wril/wril_batch_executor.py"
+  raiz_sin_plegar: ["neurobit_dispatcher.py", "neurobit_gnome_widget.py",
+                    "neurobit_dictado_evdev.py", "deploy_neurobit_estacion_v2.sh"]
+wril_registry:
+  principio: "cada modulo responde una pregunta distinta; jamas un supermodulo"
+  pipeline: "Discover -> Resolve -> Reconcile -> Verify -> Record -> Route"
+  fisicamente_plegado: true
+  mfn_sector: 12
+#=====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL 
+# Novedad: MFN Sprite Cartógrafo registrado como radio visual (mfn_sector 12).
+# Hereda adapters_registry, postmans_registry, dispatch_center y topologia.
+#=====================================================================
+adapters_registry_append:
+  - adapter_name: "mfn_cartografo"
+    domain: "visual_mfn"
+    script_path: "core/adapters/adapter_mfn_cartografo.py"
+    runtime: "python3"
+    trigger: "HTTP_localhost"
+    provides: "estado_radial_169"
+    backend: "MFN_Sprite_Cartografo/backend/app.py"
+    backend_port: 5002
+    mfn_sector: 12
+modules_append:
+  - module_name: "mfn_sprite_cartografo"
+    script_path: "MFN_Sprite_Cartografo/backend/app.py"
+    runtime: "python3"
+    type: "capa_presentacion"
+    puerto: 5002
+    soberania: {local_only: true, no_remote_transmission: true}
+#=====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL 
+# Novedad: Centinela legacy (Message Builder) registrado como radio
+#          de mensajería (mfn_sector 13). Puerto 5003.
+#=====================================================================
+adapters_registry_append:
+  - adapter_name: "centinela_legacy"
+    domain: "mensajeria_legacy"
+    script_path: "core/adapters/adapter_centinela_legacy.py"
+    runtime: "python3"
+    trigger: "HTTP_localhost"
+    provides: "carta_centinela"
+    backend: "MECANISMO/centinela_websocket_server.py"
+    backend_port: 5003
+    mfn_sector: 13
+modules_append:
+  - module_name: "centinela_websocket_server"
+    script_path: "MECANISMO/centinela_websocket_server.py"
+    runtime: "python3"
+    type: "capa_mensajeria"
+    puerto: 5003
+    soberania: {local_only: true, no_remote_transmission: true}
+# NEUROBIT MODULE SPEC v1.1 (adiciones sobre v1.0)
+module:
+  id: "nb.ejemplo.compile"
+  version: "1.1.0"
+  entry_point: "compile_project.py"
+  # --- NUEVO: identidad MFN visible en el contrato (copia del header) ---
+  mfn: { location: "modules/", level: 2, coord: [7,7] }
+  # --- NUEVO: documentación visible en la GUI al instalar (fin educativo) ---
+  documentation: "README.md"
+  # --- NUEVO: nemotécnicos que el módulo aporta al entorno ---
+  nemotecnics: ["NB_COMPILE_OUT"]
+parameters:
+  - { flag: "--project", type: "path",        label: "Directorio",  required: true  }
+  - { flag: "--compile", type: "output_file", label: "Salida TXT",  required: true  }
+  - { flag: "--ignore",  type: "text",        label: "Patrones",    required: false }
+  - { flag: "--dry-run", type: "boolean",     label: "Simular",     required: false }
+artifacts: { server: false, api: false }
+# --- NUEVO: ciclo de vida para el NCS Status Monitor ---
+lifecycle:
+  start: null            # null = módulo de ejecución única (no daemon)
+  stop: null
+  healthcheck: null
+# --- NUEVO: política WRIL ---
+wril: { backup_before_mutate: true, quarantine_on_no_header: true }
+# Para wril_batch_executor: verificación previa al ensamble primario.
+verificacion:
+  - {tipo: python, target: wril_mfn_registry.py}
+  - {tipo: python, target: wril_dependency_scanner.py}
+  - {tipo: python, target: wril_estado_real.py}
+# Semillas recogidas de las notas flash del NODO_SEMILLA (14 h de sesión).
+# Nada se pierde: cada nota queda asignada a su fase. El par las custodia.
+semillas:
+- nota: "un pequeño mapa por cada carpeta para reducir el escaneo total (como compile_project); hace compendio en la carpeta y luego recolecta y hace el mapa"
+  fase: WRIL_v0.3
+  modulo_futuro: wril_path_map_distribuido
+- nota: "el gestor de caches se ajusta en un archivo config parte del core; permite activar aspectos de cache-wall y copiar el mapeo anterior incrustando la nueva ruta"
+  fase: core
+  modulo_futuro: cache_manager_config
+- nota: "el parser detecta ACTION_WORDS en la lectura tranquila de la primera cache, la audita verificando si es texto, y la lleva a la cache-MFN en segunda etapa"
+  fase: 2
+  modulo_futuro: parser_dos_etapas
+- nota: "el módulo busca un lugar donde se trabaja (no al revés); la carpeta debe listar lo que se hace ahí; el módulo debe ser coherente con las tareas de su sector"
+  fase: WRIL_v2
+  principio: "el módulo busca su sector; manifiesto por zona; coherencia sectorial (tester por sector)"
+- nota: "el path_map lee el registro de las carpetas que sí se almacenan en cache"
+  fase: WRIL_v0.3
+  principio: "mapa desde registro de caches, no desde escaneo ciego"
+- nota: "formateador para módulos MCP"
+  fase: MCP
+  modulo_futuro: formateador_mcp
+- nota: "la llamada de módulos: el facilitador, un escriba"
+  fase: salon
+  rol: "module_connector como facilitador/escriba"
+- nota: "cuando activemos el salón seguiremos con ollama y crearemos a EVA"
+  fase: salon
+  nota_interna: "EVA nace del par, no de la nube"
+- nota: "copiar a la nueva ECN sobre lo que reportó sos_linker_report.json; resguardar las fuentes de las que hablaremos más adelante"
+  fase: migracion
+  principio: "migrar guiado por el reporte; resguardar fuentes antes de tocar"
+# ECN v4.0 — Rondas de Co-Depuración (spec de la escuela)
+ronda:
+  numero: 1
+  modulo_objetivo: neurobit_dispatcher.py
+  pregunta: "¿se comporta como declara?"
+  pasos:
+    - {orden: 1, nombre: matricula,        herramienta: module_spec_v1.1.yaml}
+    - {orden: 2, nombre: test,             herramienta: wril_dynamic_tester.py}
+    - {orden: 3, nombre: depuracion_grupal, herramienta: salon (sala_app / estado_real.json)}
+    - {orden: 4, nombre: parche,           herramienta: wril_patch_resolver.py (dry-run primero)}
+    - {orden: 5, nombre: expansion,        herramienta: declaracion_adaptadores.yaml (radio nuevo)}
+    - {orden: 6, nombre: version,          herramienta: neurobit_version_control (+0.1)}
+    - {orden: 7, nombre: asiento,          herramienta: Arca (memoria_eva.jsonl)}
+  roles:
+    - {rol: NODO_SEMILLA, funcion: "director y observador c:G7; última palabra"}
+    - {rol: nodo_reflejo, funcion: "propone y verifica; nunca impone"}
+    - {rol: newbie,       funcion: "aporta un radio por ronda; así crece el perímetro"}
+  regla_de_oro: "ningún módulo se muda sin backup; ninguna versión sin test."

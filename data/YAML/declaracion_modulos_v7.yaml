@@ -1,0 +1,24 @@
+# =====================================================================
+# ESTACIÓN CENTRAL NEUROBITRÓNICA - DECLARACIÓN RADIAL v7.0
+# Novedad: pliegue topológico declarado; el mapa y el territorio coinciden.
+# Hereda adapters_registry, postmans_registry y dispatch_center de v6.0.
+# =====================================================================
+topologia:
+  motor: "wril/wril_topologia.py"
+  modo_defecto: "dry_run"
+  parches_controlados:
+    - "WRIL::RAIZ_PLEGADA (parents[1] en .py plegados)"
+    - "WRIL::SELF_PATH::v1 (shim sys.path tras docstring)"
+  etica: "backup previo a toda mudanza; registro en wril_historial.jsonl"
+  entry_points_plegados:
+    bootstrap: "wril/wril_bootstrap.py"
+    sentinel: "wril/wril_sentinel.py"
+    tester: "wril/wril_dynamic_tester.py"
+    batch: "wril/wril_batch_executor.py"
+  raiz_sin_plegar: ["neurobit_dispatcher.py", "neurobit_gnome_widget.py",
+                    "neurobit_dictado_evdev.py", "deploy_neurobit_estacion_v2.sh"]
+wril_registry:
+  principio: "cada modulo responde una pregunta distinta; jamas un supermodulo"
+  pipeline: "Discover -> Resolve -> Reconcile -> Verify -> Record -> Route"
+  fisicamente_plegado: true
+  mfn_sector: 12

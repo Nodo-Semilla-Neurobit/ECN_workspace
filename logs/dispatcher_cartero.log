@@ -1,0 +1,15 @@
+# ---------- ANCLAJE DINÁMICO DE RAÍZ CANÓNICA (WRIL::SELF_PATH::v1.1) ----------
+import sys as _ws
+from pathlib import Path as _wp
+_ecn_root = _wp(__file__).resolve().parent
+
+while _ecn_root.parent != _ecn_root:
+    if (_ecn_root / "where_am_I.inf").exists() or (_ecn_root / ".ecn_raiz").exists() or (_ecn_root / "pids").is_dir():
+        break
+    _ecn_root = _ecn_root.parent
+if str(_ecn_root) not in _ws.path:
+    _ws.path.insert(0, str(_ecn_root))
+# -------------------------------------------------------------------------------
+
+nohup: no se tendrá en cuenta la entrada
+[✓ CORREOS] Oficina abierta. El Kernel avisará por cada carta.

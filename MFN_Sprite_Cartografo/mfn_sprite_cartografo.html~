@@ -1,0 +1,2633 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MFN Sprite Cartógrafo — standalone</title>
+
+<!--sáb 07 nov 2026 02:40:53link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Orbitron:wght@800&display=swap" rel="stylesheet">
+<!--Fuentes opcionales (online); sin ellas degrada a monospace del sistema. -->
+
+<canvas id="canvas">
+(function() {
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
+
+  // resize the canvas to fill browser window dynamically
+  window.addEventListener('resize', resizeCanvas, false);
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    /**
+     * Your drawings need to be inside this function otherwise they will be reset when
+
+
+<style>
+/* Template contract — keep this sizing block intact when re-theming.
+   The game runs in an iframe inside iOS/Android WebViews, where viewport
+   units go stale after the view scrolls. Container percentages keep the game
+   locked to the actual Playabl frame. */
+html,
+body {
+	<!--margin: 0;-->
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	overscroll-behavior: none;
+	background: #071011;
+	color: #eefbf4;
+	font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+
+	position: fixed;
+	inset: 0;
+	touch-action: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+[hidden] {
+	display: none !important;
+}
+
+#app {
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+canvas,
+.game-surface {
+	box-sizing: border-box;
+	<!--display: block;-->
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	touch-action: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+button,
+[role="button"] {
+	touch-action: manipulation;
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+button,
+select {
+	font: inherit;
+}
+
+.mfn-shell {
+	--panel: rgba(8, 18, 20, 0.78);
+	--panel-strong: rgba(15, 31, 34, 0.92);
+	--line: rgba(102, 255, 123, 0.45);
+	--text-dim: #a9c4c1;
+	box-sizing: border-box;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	background:
+		linear-gradient(180deg, rgba(2, 8, 9, 0.4), rgba(2, 9, 10, 0.84)),
+		var(--mfn-dash-texture),
+		radial-gradient(circle at 30% 15%, rgba(30, 255, 199, 0.16), transparent 34%),
+		#071011;
+	background-size: cover;
+	background-position: center;
+}
+
+.mfn-workbench {
+	box-sizing: border-box;
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr) auto auto;
+	gap: 8px;
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+<!--	padding: 8px;-->
+}
+
+.mfn-hud {
+	display: grid;
+	grid-template-columns: 1fr 1.35fr 1fr;
+	gap: 7px;
+	min-width: 0;
+}
+
+.hud-chip,
+.panel,
+.transmission-panel {
+	box-sizing: border-box;
+	border: 1px solid var(--line);
+	background: var(--panel);
+	box-shadow: inset 0 0 18px rgba(89, 255, 123, 0.06), 0 0 18px rgba(0, 0, 0, 0.28);
+	backdrop-filter: blur(8px);
+}
+
+.hud-chip {
+	display: grid;
+	align-content: center;
+	gap: 1px;
+	min-width: 0;
+	<!--padding: 7px 9px;-->
+	border-radius: 10px;
+}
+
+.hud-chip span,
+.panel-title,
+.inspector-row,
+.transmission-panel span,
+.controls-panel label {
+	color: var(--text-dim);
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: clamp(0.64rem, 1.6vw, 0.78rem);
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.hud-chip strong {
+	overflow: hidden;
+	color: #f4fff9;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: clamp(0.86rem, 2.6vw, 1.1rem);
+	font-weight: 700;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.hud-chip.primary strong {
+	color: #69ff87;
+}
+
+.mfn-main {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: minmax(180px, 1.1fr) minmax(180px, 1fr) auto;
+	gap: 8px;
+	min-width: 0;
+	min-height: 0;
+}
+
+.panel {
+	min-width: 0;
+	min-height: 0;
+	border-radius: 13px;
+}
+
+.canvas-panel {
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr);
+<!--	padding: 7px;-->
+}
+
+.panel-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+<!--	padding: 0 2px 6px;-->
+}
+
+.panel-title b,
+.inspector-row b {
+	color: #eefbf4;
+	font-weight: 700;
+}
+
+.mfn-canvas {
+	border-radius: 9px;
+	background: rgba(3, 10, 12, 0.62);
+}
+
+.inspector-panel {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 6px;
+<!--	padding: 8px;-->
+}
+
+.inspector-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.bitstream {
+	box-sizing: border-box;
+	min-height: 74px;
+	max-height: 110px;
+<!--	margin: 0;-->
+	overflow: auto;
+<!--	padding: 8px;-->
+	border: 1px solid rgba(91, 247, 116, 0.22);
+	border-radius: 8px;
+	background: rgba(0, 0, 0, 0.35);
+	color: #c8feda;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.72rem;
+	line-height: 1.22;
+}
+
+.mode-tabs,
+.controls-panel,
+.library-grid {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.mode-note {
+	min-height: 2.2em;
+<!--	margin: 0;-->
+	color: var(--text-dim);
+	font-size: 0.77rem;
+	line-height: 1.35;
+}
+
+.mfn-console {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 8px;
+	min-height: 0;
+}
+
+.controls-panel,
+.library-panel,
+.compression-panel {
+<!--	padding: 8px;-->
+}
+
+.controls-panel label {
+	display: grid;
+	grid-template-columns: auto minmax(54px, 1fr);
+	align-items: center;
+	gap: 5px;
+}
+
+select,
+button {
+	box-sizing: border-box;
+	min-height: 36px;
+	border: 1px solid rgba(198, 255, 211, 0.26);
+	border-radius: 9px;
+	background: rgba(10, 24, 27, 0.92);
+	color: #f4fff9;
+	font-family: "Space Mono", ui-monospace, monospace;
+}
+
+button {
+	cursor: pointer;
+<!--	padding: 0 10px;-->
+}
+
+button:active,
+button.is-active {
+	border-color: #6cff83;
+	background: rgba(50, 123, 70, 0.5);
+}
+
+button:disabled {
+	cursor: wait;
+	opacity: 0.55;
+}
+
+.controls-panel.compact button {
+	flex: 1 1 auto;
+}
+
+.library-panel,
+.compression-panel {
+	display: grid;
+	gap: 6px;
+}
+
+.library-grid {
+	max-height: 88px;
+	overflow: auto;
+}
+
+.library-grid button {
+	min-width: 36px;
+	min-height: 32px;
+<!--	padding: 0;-->
+}
+
+.pattern-list {
+	display: grid;
+	gap: 5px;
+	max-height: 92px;
+	overflow: auto;
+}
+
+.pattern-row,
+.empty-row {
+	display: grid;
+	grid-template-columns: auto auto minmax(0, 1fr);
+	gap: 8px;
+	align-items: center;
+<!--	padding: 5px 7px;-->
+	border-radius: 7px;
+	background: rgba(0, 0, 0, 0.24);
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.72rem;
+}
+
+.empty-row {
+	display: block;
+	color: var(--text-dim);
+}
+
+.pattern-row code {
+	overflow: hidden;
+	color: #7effd2;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.transmission-panel {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	gap: 8px;
+	min-height: 34px;
+<!--	padding: 5px 8px;-->
+	border-radius: 10px;
+}
+
+.transmission-panel code {
+	overflow: hidden;
+	color: #f7ffca;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.72rem;
+	text-overflow: clip;
+	white-space: nowrap;
+}
+
+.start-overlay {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-content: center;
+	justify-items: center;
+	gap: 10px;
+<!--	padding: 24px;-->
+	background: linear-gradient(180deg, rgba(3, 8, 9, 0.32), rgba(3, 8, 9, 0.7));
+	text-align: center;
+}
+
+.start-mark {
+	display: grid;
+	place-items: center;
+<!--	width: 64px;-->
+	aspect-ratio: 1;
+	border: 2px solid #6cff83;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.48);
+	color: #6cff83;
+	font-family: Orbitron, "Space Mono", monospace;
+	font-size: 1rem;
+	font-weight: 800;
+}
+
+.start-overlay h1 {
+	max-width: 13em;
+<!--	margin: 0;-->
+	font-family: Orbitron, "Space Mono", monospace;
+	font-size: clamp(1.45rem, 7vw, 2.4rem);
+	line-height: 1.05;
+}
+
+.start-overlay p {
+<!--	margin: 0;-->
+	color: #d6ece8;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.9rem;
+}
+
+.start-overlay button {
+	min-width: 190px;
+	border-color: rgba(108, 255, 131, 0.6);
+	background: rgba(29, 89, 49, 0.76);
+}
+
+@media (min-width: 720px) {
+	.mfn-workbench {
+		gap: 10px;
+<!--		padding: 10px;-->
+	}
+
+	.mfn-main {
+		grid-template-columns: minmax(250px, 0.95fr) minmax(260px, 1fr) minmax(210px, 0.55fr);
+		grid-template-rows: minmax(0, 1fr);
+	}
+
+	.mfn-console {
+		grid-template-columns: 1.25fr 1fr;
+	}
+
+	.library-panel,
+	.compression-panel {
+		min-height: 116px;
+	}
+}
+
+@media (max-height: 690px) {
+	.mfn-main {
+		grid-template-rows: minmax(145px, 1fr) minmax(145px, 1fr) auto;
+	}
+
+	.library-grid,
+	.pattern-list {
+		max-height: 58px;
+	}
+
+	.bitstream {
+		max-height: 76px;
+	}
+}
+</style>
+
+     * you resize the browser window and the canvas goes will be cleared.
+     */
+    drawStuff();
+  }
+
+  resizeCanvas();
+
+  function drawStuff() {
+    // do your drawing stuff here
+  }
+})();
+</canvas>
+
+
+
+<style>
+/* Template contract — keep this sizing block intact when re-theming.
+   The game runs in an iframe inside iOS/Android WebViews, where viewport
+   units go stale after the view scrolls. Container percentages keep the game
+   locked to the actual Playabl frame. */
+html,
+body {
+	<!--margin: 0;-->
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	overscroll-behavior: none;
+	background: #071011;
+	color: #eefbf4;
+	font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+
+	position: fixed;
+	inset: 0;
+	touch-action: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+[hidden] {
+	display: none !important;
+}
+
+#app {
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+canvas,
+.game-surface {
+	box-sizing: border-box;
+	<!--display: block;-->
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	touch-action: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+button,
+[role="button"] {
+	touch-action: manipulation;
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+button,
+select {
+	font: inherit;
+}
+
+.mfn-shell {
+	--panel: rgba(8, 18, 20, 0.78);
+	--panel-strong: rgba(15, 31, 34, 0.92);
+	--line: rgba(102, 255, 123, 0.45);
+	--text-dim: #a9c4c1;
+	box-sizing: border-box;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	background:
+		linear-gradient(180deg, rgba(2, 8, 9, 0.4), rgba(2, 9, 10, 0.84)),
+		var(--mfn-dash-texture),
+		radial-gradient(circle at 30% 15%, rgba(30, 255, 199, 0.16), transparent 34%),
+		#071011;
+	background-size: cover;
+	background-position: center;
+}
+
+.mfn-workbench {
+	box-sizing: border-box;
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr) auto auto;
+	gap: 8px;
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+<!--	padding: 8px;-->
+}
+
+.mfn-hud {
+	display: grid;
+	grid-template-columns: 1fr 1.35fr 1fr;
+	gap: 7px;
+	min-width: 0;
+}
+
+.hud-chip,
+.panel,
+.transmission-panel {
+	box-sizing: border-box;
+	border: 1px solid var(--line);
+	background: var(--panel);
+	box-shadow: inset 0 0 18px rgba(89, 255, 123, 0.06), 0 0 18px rgba(0, 0, 0, 0.28);
+	backdrop-filter: blur(8px);
+}
+
+.hud-chip {
+	display: grid;
+	align-content: center;
+	gap: 1px;
+	min-width: 0;
+	<!--padding: 7px 9px;-->
+	border-radius: 10px;
+}
+
+.hud-chip span,
+.panel-title,
+.inspector-row,
+.transmission-panel span,
+.controls-panel label {
+	color: var(--text-dim);
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: clamp(0.64rem, 1.6vw, 0.78rem);
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.hud-chip strong {
+	overflow: hidden;
+	color: #f4fff9;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: clamp(0.86rem, 2.6vw, 1.1rem);
+	font-weight: 700;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.hud-chip.primary strong {
+	color: #69ff87;
+}
+
+.mfn-main {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: minmax(180px, 1.1fr) minmax(180px, 1fr) auto;
+	gap: 8px;
+	min-width: 0;
+	min-height: 0;
+}
+
+.panel {
+	min-width: 0;
+	min-height: 0;
+	border-radius: 13px;
+}
+
+.canvas-panel {
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr);
+<!--	padding: 7px;-->
+}
+
+.panel-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+<!--	padding: 0 2px 6px;-->
+}
+
+.panel-title b,
+.inspector-row b {
+	color: #eefbf4;
+	font-weight: 700;
+}
+
+.mfn-canvas {
+	border-radius: 9px;
+	background: rgba(3, 10, 12, 0.62);
+}
+
+.inspector-panel {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 6px;
+<!--	padding: 8px;-->
+}
+
+.inspector-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.bitstream {
+	box-sizing: border-box;
+	min-height: 74px;
+	max-height: 110px;
+<!--	margin: 0;-->
+	overflow: auto;
+<!--	padding: 8px;-->
+	border: 1px solid rgba(91, 247, 116, 0.22);
+	border-radius: 8px;
+	background: rgba(0, 0, 0, 0.35);
+	color: #c8feda;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.72rem;
+	line-height: 1.22;
+}
+
+.mode-tabs,
+.controls-panel,
+.library-grid {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.mode-note {
+	min-height: 2.2em;
+<!--	margin: 0;-->
+	color: var(--text-dim);
+	font-size: 0.77rem;
+	line-height: 1.35;
+}
+
+.mfn-console {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 8px;
+	min-height: 0;
+}
+
+.controls-panel,
+.library-panel,
+.compression-panel {
+<!--	padding: 8px;-->
+}
+
+.controls-panel label {
+	display: grid;
+	grid-template-columns: auto minmax(54px, 1fr);
+	align-items: center;
+	gap: 5px;
+}
+
+select,
+button {
+	box-sizing: border-box;
+	min-height: 36px;
+	border: 1px solid rgba(198, 255, 211, 0.26);
+	border-radius: 9px;
+	background: rgba(10, 24, 27, 0.92);
+	color: #f4fff9;
+	font-family: "Space Mono", ui-monospace, monospace;
+}
+
+button {
+	cursor: pointer;
+<!--	padding: 0 10px;-->
+}
+
+button:active,
+button.is-active {
+	border-color: #6cff83;
+	background: rgba(50, 123, 70, 0.5);
+}
+
+button:disabled {
+	cursor: wait;
+	opacity: 0.55;
+}
+
+.controls-panel.compact button {
+	flex: 1 1 auto;
+}
+
+.library-panel,
+.compression-panel {
+	display: grid;
+	gap: 6px;
+}
+
+.library-grid {
+	max-height: 88px;
+	overflow: auto;
+}
+
+.library-grid button {
+	min-width: 36px;
+	min-height: 32px;
+<!--	padding: 0;-->
+}
+
+.pattern-list {
+	display: grid;
+	gap: 5px;
+	max-height: 92px;
+	overflow: auto;
+}
+
+.pattern-row,
+.empty-row {
+	display: grid;
+	grid-template-columns: auto auto minmax(0, 1fr);
+	gap: 8px;
+	align-items: center;
+<!--	padding: 5px 7px;-->
+	border-radius: 7px;
+	background: rgba(0, 0, 0, 0.24);
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.72rem;
+}
+
+.empty-row {
+	display: block;
+	color: var(--text-dim);
+}
+
+.pattern-row code {
+	overflow: hidden;
+	color: #7effd2;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.transmission-panel {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	gap: 8px;
+	min-height: 34px;
+<!--	padding: 5px 8px;-->
+	border-radius: 10px;
+}
+
+.transmission-panel code {
+	overflow: hidden;
+	color: #f7ffca;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.72rem;
+	text-overflow: clip;
+	white-space: nowrap;
+}
+
+.start-overlay {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-content: center;
+	justify-items: center;
+	gap: 10px;
+<!--	padding: 24px;-->
+	background: linear-gradient(180deg, rgba(3, 8, 9, 0.32), rgba(3, 8, 9, 0.7));
+	text-align: center;
+}
+
+.start-mark {
+	display: grid;
+	place-items: center;
+<!--	width: 64px;-->
+	aspect-ratio: 1;
+	border: 2px solid #6cff83;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.48);
+	color: #6cff83;
+	font-family: Orbitron, "Space Mono", monospace;
+	font-size: 1rem;
+	font-weight: 800;
+}
+
+.start-overlay h1 {
+	max-width: 13em;
+<!--	margin: 0;-->
+	font-family: Orbitron, "Space Mono", monospace;
+	font-size: clamp(1.45rem, 7vw, 2.4rem);
+	line-height: 1.05;
+}
+
+.start-overlay p {
+<!--	margin: 0;-->
+	color: #d6ece8;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.9rem;
+}
+
+.start-overlay button {
+	min-width: 190px;
+	border-color: rgba(108, 255, 131, 0.6);
+	background: rgba(29, 89, 49, 0.76);
+}
+
+@media (min-width: 720px) {
+	.mfn-workbench {
+		gap: 10px;
+<!--		padding: 10px;-->
+	}
+
+	.mfn-main {
+		grid-template-columns: minmax(250px, 0.95fr) minmax(260px, 1fr) minmax(210px, 0.55fr);
+		grid-template-rows: minmax(0, 1fr);
+	}
+
+	.mfn-console {
+		grid-template-columns: 1.25fr 1fr;
+	}
+
+	.library-panel,
+	.compression-panel {
+		min-height: 116px;
+	}
+}
+
+@media (max-height: 690px) {
+	.mfn-main {
+		grid-template-rows: minmax(145px, 1fr) minmax(145px, 1fr) auto;
+	}
+
+	.library-grid,
+	.pattern-list {
+		max-height: 58px;
+	}
+
+	.bitstream {
+		max-height: 76px;
+	}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+const ASSETS_MANIFEST = {
+  "MFN_DASH_TEXTURE": "/generated-assets/mfn_dash_texture.webp",
+  "MFN_UI_DECALS": "/generated-assets/mfn_ui_decals-transparent.webp"
+};
+
+<canvas id="canvas">
+(function() {
+  const canvas = document.getElementById('canvas');
+  const context = canvas.getContext('2d');
+
+  // resize the canvas to fill browser window dynamically
+  window.addEventListener('resize', resizeCanvas, false);
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    /**
+     * Your drawings need to be inside this function otherwise they will be reset when
+
+
+<style>
+/* Template contract — keep this sizing block intact when re-theming.
+   The game runs in an iframe inside iOS/Android WebViews, where viewport
+   units go stale after the view scrolls. Container percentages keep the game
+   locked to the actual Playabl frame. */
+html,
+body {
+	<!--margin: 0;-->
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	overscroll-behavior: none;
+	background: #071011;
+	color: #eefbf4;
+	font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+
+	position: fixed;
+	inset: 0;
+	touch-action: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+[hidden] {
+	display: none !important;
+}
+
+#app {
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+}
+
+canvas,
+.game-surface {
+	box-sizing: border-box;
+	<!--display: block;-->
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	touch-action: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+button,
+[role="button"] {
+	touch-action: manipulation;
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+button,
+select {
+	font: inherit;
+}
+
+.mfn-shell {
+	--panel: rgba(8, 18, 20, 0.78);
+	--panel-strong: rgba(15, 31, 34, 0.92);
+	--line: rgba(102, 255, 123, 0.45);
+	--text-dim: #a9c4c1;
+	box-sizing: border-box;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+	overflow: hidden;
+	background:
+		linear-gradient(180deg, rgba(2, 8, 9, 0.4), rgba(2, 9, 10, 0.84)),
+		var(--mfn-dash-texture),
+		radial-gradient(circle at 30% 15%, rgba(30, 255, 199, 0.16), transparent 34%),
+		#071011;
+	background-size: cover;
+	background-position: center;
+}
+
+.mfn-workbench {
+	box-sizing: border-box;
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr) auto auto;
+	gap: 8px;
+	width: 100%;
+	height: 100%;
+	min-width: 0;
+	min-height: 0;
+<!--	padding: 8px;-->
+}
+
+.mfn-hud {
+	display: grid;
+	grid-template-columns: 1fr 1.35fr 1fr;
+	gap: 7px;
+	min-width: 0;
+}
+
+.hud-chip,
+.panel,
+.transmission-panel {
+	box-sizing: border-box;
+	border: 1px solid var(--line);
+	background: var(--panel);
+	box-shadow: inset 0 0 18px rgba(89, 255, 123, 0.06), 0 0 18px rgba(0, 0, 0, 0.28);
+	backdrop-filter: blur(8px);
+}
+
+.hud-chip {
+	display: grid;
+	align-content: center;
+	gap: 1px;
+	min-width: 0;
+	<!--padding: 7px 9px;-->
+	border-radius: 10px;
+}
+
+.hud-chip span,
+.panel-title,
+.inspector-row,
+.transmission-panel span,
+.controls-panel label {
+	color: var(--text-dim);
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: clamp(0.64rem, 1.6vw, 0.78rem);
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.hud-chip strong {
+	overflow: hidden;
+	color: #f4fff9;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: clamp(0.86rem, 2.6vw, 1.1rem);
+	font-weight: 700;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.hud-chip.primary strong {
+	color: #69ff87;
+}
+
+.mfn-main {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	grid-template-rows: minmax(180px, 1.1fr) minmax(180px, 1fr) auto;
+	gap: 8px;
+	min-width: 0;
+	min-height: 0;
+}
+
+.panel {
+	min-width: 0;
+	min-height: 0;
+	border-radius: 13px;
+}
+
+.canvas-panel {
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr);
+<!--	padding: 7px;-->
+}
+
+.panel-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+<!--	padding: 0 2px 6px;-->
+}
+
+.panel-title b,
+.inspector-row b {
+	color: #eefbf4;
+	font-weight: 700;
+}
+
+.mfn-canvas {
+	border-radius: 9px;
+	background: rgba(3, 10, 12, 0.62);
+}
+
+.inspector-panel {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 6px;
+<!--	padding: 8px;-->
+}
+
+.inspector-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.bitstream {
+	box-sizing: border-box;
+	min-height: 74px;
+	max-height: 110px;
+<!--	margin: 0;-->
+	overflow: auto;
+<!--	padding: 8px;-->
+	border: 1px solid rgba(91, 247, 116, 0.22);
+	border-radius: 8px;
+	background: rgba(0, 0, 0, 0.35);
+	color: #c8feda;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.72rem;
+	line-height: 1.22;
+}
+
+.mode-tabs,
+.controls-panel,
+.library-grid {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.mode-note {
+	min-height: 2.2em;
+<!--	margin: 0;-->
+	color: var(--text-dim);
+	font-size: 0.77rem;
+	line-height: 1.35;
+}
+
+.mfn-console {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 8px;
+	min-height: 0;
+}
+
+.controls-panel,
+.library-panel,
+.compression-panel {
+<!--	padding: 8px;-->
+}
+
+.controls-panel label {
+	display: grid;
+	grid-template-columns: auto minmax(54px, 1fr);
+	align-items: center;
+	gap: 5px;
+}
+
+select,
+button {
+	box-sizing: border-box;
+	min-height: 36px;
+	border: 1px solid rgba(198, 255, 211, 0.26);
+	border-radius: 9px;
+	background: rgba(10, 24, 27, 0.92);
+	color: #f4fff9;
+	font-family: "Space Mono", ui-monospace, monospace;
+}
+
+button {
+	cursor: pointer;
+<!--	padding: 0 10px;-->
+}
+
+button:active,
+button.is-active {
+	border-color: #6cff83;
+	background: rgba(50, 123, 70, 0.5);
+}
+
+button:disabled {
+	cursor: wait;
+	opacity: 0.55;
+}
+
+.controls-panel.compact button {
+	flex: 1 1 auto;
+}
+
+.library-panel,
+.compression-panel {
+	display: grid;
+	gap: 6px;
+}
+
+.library-grid {
+	max-height: 88px;
+	overflow: auto;
+}
+
+.library-grid button {
+	min-width: 36px;
+	min-height: 32px;
+<!--	padding: 0;-->
+}
+
+.pattern-list {
+	display: grid;
+	gap: 5px;
+	max-height: 92px;
+	overflow: auto;
+}
+
+.pattern-row,
+.empty-row {
+	display: grid;
+	grid-template-columns: auto auto minmax(0, 1fr);
+	gap: 8px;
+	align-items: center;
+<!--	padding: 5px 7px;-->
+	border-radius: 7px;
+	background: rgba(0, 0, 0, 0.24);
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.72rem;
+}
+
+.empty-row {
+	display: block;
+	color: var(--text-dim);
+}
+
+.pattern-row code {
+	overflow: hidden;
+	color: #7effd2;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.transmission-panel {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: center;
+	gap: 8px;
+	min-height: 34px;
+<!--	padding: 5px 8px;-->
+	border-radius: 10px;
+}
+
+.transmission-panel code {
+	overflow: hidden;
+	color: #f7ffca;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.72rem;
+	text-overflow: clip;
+	white-space: nowrap;
+}
+
+.start-overlay {
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-content: center;
+	justify-items: center;
+	gap: 10px;
+<!--	padding: 24px;-->
+	background: linear-gradient(180deg, rgba(3, 8, 9, 0.32), rgba(3, 8, 9, 0.7));
+	text-align: center;
+}
+
+.start-mark {
+	display: grid;
+	place-items: center;
+<!--	width: 64px;-->
+	aspect-ratio: 1;
+	border: 2px solid #6cff83;
+	border-radius: 50%;
+	background: rgba(0, 0, 0, 0.48);
+	color: #6cff83;
+	font-family: Orbitron, "Space Mono", monospace;
+	font-size: 1rem;
+	font-weight: 800;
+}
+
+.start-overlay h1 {
+	max-width: 13em;
+<!--	margin: 0;-->
+	font-family: Orbitron, "Space Mono", monospace;
+	font-size: clamp(1.45rem, 7vw, 2.4rem);
+	line-height: 1.05;
+}
+
+.start-overlay p {
+<!--	margin: 0;-->
+	color: #d6ece8;
+	font-family: "Space Mono", ui-monospace, monospace;
+	font-size: 0.9rem;
+}
+
+.start-overlay button {
+	min-width: 190px;
+	border-color: rgba(108, 255, 131, 0.6);
+	background: rgba(29, 89, 49, 0.76);
+}
+
+@media (min-width: 720px) {
+	.mfn-workbench {
+		gap: 10px;
+<!--		padding: 10px;-->
+	}
+
+	.mfn-main {
+		grid-template-columns: minmax(250px, 0.95fr) minmax(260px, 1fr) minmax(210px, 0.55fr);
+		grid-template-rows: minmax(0, 1fr);
+	}
+
+	.mfn-console {
+		grid-template-columns: 1.25fr 1fr;
+	}
+
+	.library-panel,
+	.compression-panel {
+		min-height: 116px;
+	}
+}
+
+@media (max-height: 690px) {
+	.mfn-main {
+		grid-template-rows: minmax(145px, 1fr) minmax(145px, 1fr) auto;
+	}
+
+	.library-grid,
+	.pattern-list {
+		max-height: 58px;
+	}
+
+	.bitstream {
+		max-height: 76px;
+	}
+}
+</style>
+
+     * you resize the browser window and the canvas goes will be cleared.
+     */
+    drawStuff();
+  }
+
+  resizeCanvas();
+
+  function drawStuff() {
+    // do your drawing stuff here
+  }
+})();
+</canvas>
+
+
+
+
+
+
+const TWEAKS_MANIFEST = {};
+
+/* Shim SDK: sustituye @playabl/sdk fuera de la plataforma. */
+const SDK = {
+  ready: () => Promise.resolve(true),
+  tweaks: { init: (m) => Promise.resolve(m || {}) },
+  assets: { register: (m) => Promise.resolve({ get: (k) => (m || {})[k] || undefined }) },
+  device: {
+    haptics: {
+      isSupported: () => typeof navigator !== "undefined" && typeof navigator.vibrate === "function",
+      vibrate: (ms) => (navigator.vibrate ? navigator.vibrate(ms) : false),
+    },
+    fileSystem: {
+      isSupported: () => typeof window.showSaveFilePicker === "function" && typeof window.showOpenFilePicker === "function",
+      saveFile: async (blob, name) => {
+        const h = await window.showSaveFilePicker({ suggestedName: name });
+        const w = await h.createWritable(); await w.write(blob); await w.close();
+      },
+      openFile: async () => {
+        const [h] = await window.showOpenFilePicker({ multiple: false });
+        return { files: [await h.getFile()] };
+      },
+      readAsText: (file) => file.text(),
+    },
+  },
+};
+
+const MATRIX_SIZE = 13;
+const CENTER = 6;
+
+const RINGS = [
+	{ id: "c", label: "Centro", order: 0, bitsPerPortion: 1, totalBits: 1, color: "#d7ff3e" },
+	{ id: "am", label: "Amarillo", order: 1, bitsPerPortion: 1, totalBits: 8, color: "#f9d84a" },
+	{ id: "na", label: "Naranja", order: 2, bitsPerPortion: 2, totalBits: 16, color: "#ff7a1a" },
+	{ id: "vi", label: "Violeta", order: 3, bitsPerPortion: 3, totalBits: 24, color: "#b13cff" },
+	{ id: "añ", label: "Añil", order: 4, bitsPerPortion: 4, totalBits: 32, color: "#5b5ff0" },
+	{ id: "az", label: "Azul", order: 5, bitsPerPortion: 5, totalBits: 40, color: "#168be8" },
+	{ id: "m", label: "Marrón", order: 6, bitsPerPortion: 6, totalBits: 48, color: "#79503a" },
+];
+
+const RING_IDS = RINGS.map((ring) => ring.id);
+const TOTAL_BITS = RINGS.reduce((total, ring) => total + ring.totalBits, 0);
+
+function createBlankState() {
+	return Array.from({ length: TOTAL_BITS }, () => 0);
+}
+
+function cloneState(state) {
+	return normalizeState(state).slice();
+}
+
+function normalizeState(state) {
+	const next = createBlankState();
+	if (!Array.isArray(state)) return next;
+	for (let index = 0; index < Math.min(state.length, TOTAL_BITS); index += 1) {
+		next[index] = state[index] ? 1 : 0;
+	}
+	return next;
+}
+
+function getRing(id) {
+	const ring = RINGS.find((entry) => entry.id === id);
+	if (!ring) throw new Error(`Anillo desconocido: ${id}`);
+	return ring;
+}
+
+function offsetForRing(id) {
+	let offset = 0;
+	for (const ring of RINGS) {
+		if (ring.id === id) return offset;
+		offset += ring.totalBits;
+	}
+	throw new Error(`Anillo desconocido: ${id}`);
+}
+
+function portionGlobal(sector, portion) {
+	if (!Number.isInteger(sector) || sector < 1 || sector > 4) {
+		throw new Error("Sector debe ser 1-4");
+	}
+	if (!Number.isInteger(portion) || portion < 1 || portion > 2) {
+		throw new Error("Porción debe ser 1-2");
+	}
+	return (sector - 1) * 2 + (portion - 1);
+}
+
+function indexFromRadial(ringId, sector = 1, portion = 1, bit = 1) {
+	if (ringId === "c") return 0;
+	const ring = getRing(ringId);
+	const globalPortion = portionGlobal(sector, portion);
+	if (!Number.isInteger(bit) || bit < 1 || bit > ring.bitsPerPortion) {
+		throw new Error(`Bit debe ser 1-${ring.bitsPerPortion}`);
+	}
+	return offsetForRing(ringId) + globalPortion * ring.bitsPerPortion + (bit - 1);
+}
+
+function radialFromIndex(index) {
+	if (!Number.isInteger(index) || index < 0 || index >= TOTAL_BITS) {
+		throw new Error(`Índice fuera de rango: ${index}`);
+	}
+	let offset = 0;
+	for (const ring of RINGS) {
+		if (index < offset + ring.totalBits) {
+			if (ring.id === "c") {
+				return { ring: "c", sector: 1, portion: 1, bit: 1, index };
+			}
+			const local = index - offset;
+			const globalPortion = Math.floor(local / ring.bitsPerPortion);
+			return {
+				ring: ring.id,
+				sector: Math.floor(globalPortion / 2) + 1,
+				portion: (globalPortion % 2) + 1,
+				bit: (local % ring.bitsPerPortion) + 1,
+				index,
+			};
+		}
+		offset += ring.totalBits;
+	}
+	throw new Error(`Índice fuera de rango: ${index}`);
+}
+
+function cellForRadial(ringId, sector = 1, portion = 1, bit = 1) {
+	if (ringId === "c") return { row: CENTER, col: CENTER };
+	const ring = getRing(ringId);
+	const radius = ring.order;
+	const globalPortion = portionGlobal(sector, portion);
+	const step = bit - 1;
+	if (step < 0 || step >= radius) throw new Error(`Bit debe ser 1-${radius}`);
+
+	switch (globalPortion) {
+		case 0:
+			return { row: CENTER - radius, col: CENTER + step };
+		case 1:
+			return { row: CENTER - radius + step, col: CENTER + radius };
+		case 2:
+			return { row: CENTER + step, col: CENTER + radius };
+		case 3:
+			return { row: CENTER + radius, col: CENTER + radius - step };
+		case 4:
+			return { row: CENTER + radius, col: CENTER - step };
+		case 5:
+			return { row: CENTER + radius - step, col: CENTER - radius };
+		case 6:
+			return { row: CENTER - step, col: CENTER - radius };
+		case 7:
+			return { row: CENTER - radius, col: CENTER - radius + step };
+		default:
+			throw new Error(`Porción global inválida: ${globalPortion}`);
+	}
+}
+
+function cellForIndex(index) {
+	const radial = radialFromIndex(index);
+	return cellForRadial(radial.ring, radial.sector, radial.portion, radial.bit);
+}
+
+function radialFromCell(row, col) {
+	if (!Number.isInteger(row) || !Number.isInteger(col)) return null;
+	if (row < 0 || row >= MATRIX_SIZE || col < 0 || col >= MATRIX_SIZE) return null;
+	const radius = Math.max(Math.abs(row - CENTER), Math.abs(col - CENTER));
+	if (radius === 0) return { ring: "c", sector: 1, portion: 1, bit: 1, index: 0 };
+	const ring = RINGS.find((entry) => entry.order === radius);
+	if (!ring) return null;
+
+	for (let globalPortion = 0; globalPortion < 8; globalPortion += 1) {
+		for (let bit = 1; bit <= radius; bit += 1) {
+			const sector = Math.floor(globalPortion / 2) + 1;
+			const portion = (globalPortion % 2) + 1;
+			const cell = cellForRadial(ring.id, sector, portion, bit);
+			if (cell.row === row && cell.col === col) {
+				return {
+					ring: ring.id,
+					sector,
+					portion,
+					bit,
+					index: indexFromRadial(ring.id, sector, portion, bit),
+				};
+			}
+		}
+	}
+	return null;
+}
+
+function indexFromCell(row, col) {
+	const radial = radialFromCell(row, col);
+	return radial ? radial.index : -1;
+}
+
+function rotateState(state, quarterTurns = 1) {
+	const turns = ((quarterTurns % 4) + 4) % 4;
+	let next = normalizeState(state);
+	for (let turn = 0; turn < turns; turn += 1) {
+		const rotated = createBlankState();
+		for (let index = 0; index < TOTAL_BITS; index += 1) {
+			const { row, col } = cellForIndex(index);
+			const targetRow = col;
+			const targetCol = MATRIX_SIZE - 1 - row;
+			rotated[indexFromCell(targetRow, targetCol)] = next[index];
+		}
+		next = rotated;
+	}
+	return next;
+}
+
+function activeCount(state) {
+	return normalizeState(state).reduce((total, bit) => total + bit, 0);
+}
+
+function matrixFromState(state) {
+	const matrix = Array.from({ length: MATRIX_SIZE }, () => Array.from({ length: MATRIX_SIZE }, () => 0));
+	const clean = normalizeState(state);
+	for (let index = 0; index < TOTAL_BITS; index += 1) {
+		const { row, col } = cellForIndex(index);
+		matrix[row][col] = clean[index];
+	}
+	return matrix;
+}
+
+function stateFromMatrix(matrix) {
+	const state = createBlankState();
+	for (let row = 0; row < MATRIX_SIZE; row += 1) {
+		for (let col = 0; col < MATRIX_SIZE; col += 1) {
+			const index = indexFromCell(row, col);
+			if (index >= 0) state[index] = matrix?.[row]?.[col] ? 1 : 0;
+		}
+	}
+	return state;
+}
+
+function coordinateLabel(radial) {
+	if (!radial || radial.ring === "c") return "c:G7";
+	return `${radial.ring}:S${radial.sector}:P${radial.portion}:B${radial.bit}`;
+}
+
+function extractFragment(state, pointer, amount = 4, mode = "RAW") {
+	const clean = normalizeState(state);
+	const start = pointer?.ring === "c"
+		? 0
+		: indexFromRadial(pointer.ring, pointer.sector, pointer.portion, pointer.bit);
+	const bits = [];
+	for (let offset = 0; offset < amount; offset += 1) {
+		bits.push(clean[(start + offset) % TOTAL_BITS]);
+	}
+	if (mode === "AND") return { bits, value: bits.every(Boolean) ? 1 : 0 };
+	if (mode === "OR") return { bits, value: bits.some(Boolean) ? 1 : 0 };
+	if (mode === "XOR") return { bits, value: bits.reduce((value, bit) => value ^ bit, 0) };
+	return { bits, value: bits.join("") };
+}
+
+function serializeState(state, pointer, logs = []) {
+	return {
+		header: "MFN_SPRITE_V1",
+		total_bits: TOTAL_BITS,
+		anillos: Object.fromEntries(RINGS.map((ring) => [
+			ring.id,
+			{ bits_por_porcion: ring.bitsPerPortion, total_bits: ring.totalBits },
+		])),
+		estado: normalizeState(state),
+		puntero: pointer,
+		logs,
+	};
+}
+
+;
+const FONT_5X7 = {
+	A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
+	B: ["11110", "10001", "10001", "11110", "10001", "10001", "11110"],
+	C: ["01111", "10000", "10000", "10000", "10000", "10000", "01111"],
+	D: ["11110", "10001", "10001", "10001", "10001", "10001", "11110"],
+	E: ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
+	F: ["11111", "10000", "10000", "11110", "10000", "10000", "10000"],
+	G: ["01111", "10000", "10000", "10111", "10001", "10001", "01110"],
+	H: ["10001", "10001", "10001", "11111", "10001", "10001", "10001"],
+	I: ["11111", "00100", "00100", "00100", "00100", "00100", "11111"],
+	J: ["00111", "00010", "00010", "00010", "10010", "10010", "01100"],
+	K: ["10001", "10010", "10100", "11000", "10100", "10010", "10001"],
+	L: ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
+	M: ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
+	N: ["10001", "11001", "10101", "10011", "10001", "10001", "10001"],
+	O: ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
+	P: ["11110", "10001", "10001", "11110", "10000", "10000", "10000"],
+	Q: ["01110", "10001", "10001", "10001", "10101", "10010", "01101"],
+	R: ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
+	S: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
+	T: ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
+	U: ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
+	V: ["10001", "10001", "10001", "10001", "10001", "01010", "00100"],
+	W: ["10001", "10001", "10001", "10101", "10101", "10101", "01010"],
+	X: ["10001", "10001", "01010", "00100", "01010", "10001", "10001"],
+	Y: ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
+	Z: ["11111", "00001", "00010", "00100", "01000", "10000", "11111"],
+	0: ["01110", "10001", "10011", "10101", "11001", "10001", "01110"],
+	1: ["00100", "01100", "00100", "00100", "00100", "00100", "01110"],
+	2: ["01110", "10001", "00001", "00010", "00100", "01000", "11111"],
+	3: ["11110", "00001", "00001", "01110", "00001", "00001", "11110"],
+	4: ["00010", "00110", "01010", "10010", "11111", "00010", "00010"],
+	5: ["11111", "10000", "10000", "11110", "00001", "00001", "11110"],
+	6: ["01110", "10000", "10000", "11110", "10001", "10001", "01110"],
+	7: ["11111", "00001", "00010", "00100", "01000", "01000", "01000"],
+	8: ["01110", "10001", "10001", "01110", "10001", "10001", "01110"],
+	9: ["01110", "10001", "10001", "01111", "00001", "00001", "01110"],
+};
+
+const LIBRARY_SYMBOLS = Object.keys(FONT_5X7);
+
+function stateFromSymbol(symbol) {
+	const normalized = String(symbol).toUpperCase();
+	const pattern = FONT_5X7[normalized] || FONT_5X7.A;
+	const state = createBlankState();
+	const top = 3;
+	const left = 4;
+	for (let row = 0; row < pattern.length; row += 1) {
+		for (let col = 0; col < pattern[row].length; col += 1) {
+			if (pattern[row][col] === "1") {
+				state[indexFromCell(top + row, left + col)] = 1;
+			}
+		}
+	}
+	return state;
+}
+
+function createDemoState() {
+	const state = stateFromSymbol("M");
+	for (let offset = 0; offset < 13; offset += 2) {
+		state[indexFromCell(offset, offset)] = 1;
+		state[indexFromCell(offset, 12 - offset)] = 1;
+	}
+	return state;
+}
+
+;
+function blockKey(matrix, row, col, size) {
+	let key = "";
+	for (let y = 0; y < size; y += 1) {
+		for (let x = 0; x < size; x += 1) {
+			key += matrix[row + y][col + x];
+		}
+	}
+	return key;
+}
+
+function detectPatterns(state, size = 3) {
+	const matrix = matrixFromState(state);
+	const table = new Map();
+	for (let row = 0; row <= 13 - size; row += 1) {
+		for (let col = 0; col <= 13 - size; col += 1) {
+			const key = blockKey(matrix, row, col, size);
+			if (!table.has(key)) {
+				table.set(key, { id: `P${table.size.toString().padStart(2, "0")}`, key, size, coordinates: [] });
+			}
+			table.get(key).coordinates.push({ row: row + 1, col: col + 1 });
+		}
+	}
+	return Array.from(table.values())
+		.map((pattern) => ({
+			...pattern,
+			count: pattern.coordinates.length,
+			density: [...pattern.key].filter((bit) => bit === "1").length,
+		}))
+		.sort((a, b) => b.count - a.count || b.density - a.density);
+}
+
+function compressState(state, blockSize = 3) {
+	const clean = normalizeState(state);
+	const patterns = detectPatterns(clean, blockSize);
+	const repeated = patterns.filter((pattern) => pattern.count > 1);
+	const savedBits = repeated.reduce((sum, pattern) => sum + (pattern.count - 1) * pattern.size * pattern.size, 0);
+	const overheadBits = repeated.length * 8;
+	const estimatedBits = Math.max(21, TOTAL_BITS - savedBits + overheadBits);
+	return {
+		header: "MFN_COMPRESSED_V1",
+		blockSize,
+		rawBits: TOTAL_BITS,
+		estimatedBits,
+		ratio: TOTAL_BITS / estimatedBits,
+		activeBits: activeCount(clean),
+		patterns,
+		repeatedPatterns: repeated.slice(0, 16),
+		stateBits: clean.join(""),
+	};
+}
+
+function packageForTransmission(state, compression) {
+	const clean = normalizeState(state);
+	const bitString = clean.join("");
+	let hex = "";
+	for (let index = 0; index < bitString.length; index += 8) {
+		const byte = bitString.slice(index, index + 8).padEnd(8, "0");
+		hex += Number.parseInt(byte, 2).toString(16).padStart(2, "0");
+	}
+	const packet = {
+		header: "MFN_SPRITE_V1",
+		total_bits: TOTAL_BITS,
+		baud: 300,
+		active_bits: activeCount(clean),
+		patterns_count: compression.repeatedPatterns.length,
+		estimated_bits: compression.estimatedBits,
+		hex,
+	};
+	const payload = JSON.stringify(packet);
+	return {
+		packet,
+		payload,
+		bytes: new Blob([payload]).size,
+		secondsAt300Baud: (payload.length * 10) / 300,
+	};
+}
+
+function patternsToCsv(patterns) {
+	const rows = ["id,size,count,density,coordinates,key"];
+	for (const pattern of patterns) {
+		rows.push([
+			pattern.id,
+			pattern.size,
+			pattern.count,
+			pattern.density,
+			`"${pattern.coordinates.map((coord) => `${coord.row}:${coord.col}`).join(" ")}"`,
+			pattern.key,
+		].join(","));
+	}
+	return rows.join("\n");
+}
+
+;
+const TWO_PI = Math.PI * 2;
+
+function frameMap(framesData) {
+	return new Map((framesData?.frames || []).map((frame) => [frame.name, frame]));
+}
+
+function drawFrameInBox(ctx, image, frame, x, y, width, height) {
+	if (!image || !frame) return false;
+	const source = frame.source;
+	const crop = frame.content || source;
+	const scaleX = width / source.w;
+	const scaleY = height / source.h;
+	ctx.drawImage(
+		image,
+		crop.x,
+		crop.y,
+		crop.w,
+		crop.h,
+		x + (crop.x - source.x) * scaleX,
+		y + (crop.y - source.y) * scaleY,
+		crop.w * scaleX,
+		crop.h * scaleY,
+	);
+	return true;
+}
+
+function setCanvasSize(canvas) {
+	const rect = canvas.getBoundingClientRect();
+	const ratio = Math.min(window.devicePixelRatio || 1, 2);
+	const width = Math.max(1, Math.floor(rect.width * ratio));
+	const height = Math.max(1, Math.floor(rect.height * ratio));
+	if (canvas.width !== width || canvas.height !== height) {
+		canvas.width = width;
+		canvas.height = height;
+	}
+	const ctx = canvas.getContext("2d");
+	ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+	return { ctx, width: rect.width, height: rect.height };
+}
+
+function roundedRect(ctx, x, y, width, height, radius) {
+	ctx.beginPath();
+	ctx.roundRect(x, y, width, height, radius);
+}
+
+function drawGrid(canvas, state, pointer, decals) {
+	const { ctx, width, height } = setCanvasSize(canvas);
+	ctx.clearRect(0, 0, width, height);
+	const size = Math.min(width, height) - 10;
+	const cell = size / MATRIX_SIZE;
+	const left = (width - size) / 2;
+	const top = (height - size) / 2;
+
+	ctx.save();
+	ctx.shadowColor = "rgba(42, 255, 99, 0.45)";
+	ctx.shadowBlur = 14;
+	ctx.strokeStyle = "#5cff72";
+	ctx.lineWidth = 1.5;
+	roundedRect(ctx, left - 2, top - 2, size + 4, size + 4, 8);
+	ctx.stroke();
+	ctx.restore();
+
+	for (let row = 0; row < MATRIX_SIZE; row += 1) {
+		for (let col = 0; col < MATRIX_SIZE; col += 1) {
+			const radial = radialFromCell(row, col);
+			const x = left + col * cell;
+			const y = top + row * cell;
+			const ring = radial ? getRing(radial.ring) : RINGS[0];
+			const active = radial ? state[radial.index] === 1 : false;
+
+			ctx.fillStyle = active ? "rgba(41, 255, 201, 0.14)" : "rgba(25, 35, 36, 0.88)";
+			ctx.strokeStyle = active ? "rgba(67, 255, 210, 0.8)" : `${ring.color}99`;
+			ctx.lineWidth = active ? 1.4 : 0.9;
+			roundedRect(ctx, x + 2, y + 2, cell - 4, cell - 4, Math.max(3, cell * 0.12));
+			ctx.fill();
+			ctx.stroke();
+
+			if (active) {
+				const frameName = radial.index % 3 === 0 ? "red_bit" : "cyan_bit";
+				const drawn = drawFrameInBox(
+					ctx,
+					decals?.image,
+					decals?.frames.get(frameName),
+					x + cell * 0.18,
+					y + cell * 0.12,
+					cell * 0.64,
+					cell * 0.72,
+				);
+				if (!drawn) {
+					ctx.fillStyle = frameName === "red_bit" ? "#ff3048" : "#20eaff";
+					ctx.beginPath();
+					ctx.arc(x + cell / 2, y + cell / 2, cell * 0.18, 0, TWO_PI);
+					ctx.fill();
+				}
+			}
+		}
+	}
+
+	const selectedIndex = pointer.ring === "c"
+		? 0
+		: indexFromRadial(pointer.ring, pointer.sector, pointer.portion, pointer.bit);
+	const selectedCell = cellForIndex(selectedIndex);
+	ctx.strokeStyle = "#f7ff4a";
+	ctx.lineWidth = 2.5;
+	ctx.shadowColor = "rgba(247,255,74,0.75)";
+	ctx.shadowBlur = 10;
+	roundedRect(
+		ctx,
+		left + selectedCell.col * cell + 2,
+		top + selectedCell.row * cell + 2,
+		cell - 4,
+		cell - 4,
+		Math.max(3, cell * 0.12),
+	);
+	ctx.stroke();
+	ctx.shadowBlur = 0;
+
+	return { left, top, size, cell };
+}
+
+function gridPointerFromEvent(canvas, event) {
+	const rect = canvas.getBoundingClientRect();
+	const size = Math.min(rect.width, rect.height) - 10;
+	const cell = size / MATRIX_SIZE;
+	const left = (rect.width - size) / 2;
+	const top = (rect.height - size) / 2;
+	const x = event.clientX - rect.left - left;
+	const y = event.clientY - rect.top - top;
+	const col = Math.floor(x / cell);
+	const row = Math.floor(y / cell);
+	return radialFromCell(row, col);
+}
+
+function wedge(ctx, centerX, centerY, innerRadius, outerRadius, startAngle, endAngle) {
+	ctx.beginPath();
+	ctx.arc(centerX, centerY, outerRadius, startAngle, endAngle);
+	ctx.arc(centerX, centerY, innerRadius, endAngle, startAngle, true);
+	ctx.closePath();
+}
+
+function polar(centerX, centerY, radius, angle) {
+	return { x: centerX + Math.cos(angle) * radius, y: centerY + Math.sin(angle) * radius };
+}
+
+function drawRadial(canvas, state, pointer, decals) {
+	const { ctx, width, height } = setCanvasSize(canvas);
+	ctx.clearRect(0, 0, width, height);
+	const centerX = width / 2;
+	const centerY = height / 2;
+	const outer = Math.min(width, height) * 0.42;
+	const ringWidth = outer / 7.3;
+	const baseRadius = ringWidth * 0.85;
+
+	ctx.save();
+	ctx.strokeStyle = "rgba(94,255,122,0.62)";
+	ctx.lineWidth = 1.4;
+	for (let portion = 0; portion < 8; portion += 1) {
+		const angle = -Math.PI / 2 + portion * Math.PI / 4;
+		const from = polar(centerX, centerY, baseRadius * 0.3, angle);
+		const to = polar(centerX, centerY, outer + ringWidth * 0.88, angle);
+		ctx.beginPath();
+		ctx.moveTo(from.x, from.y);
+		ctx.lineTo(to.x, to.y);
+		ctx.stroke();
+	}
+	ctx.restore();
+
+	for (const ring of RINGS.slice(1)) {
+		const inner = baseRadius + (ring.order - 1) * ringWidth;
+		const outerRadius = inner + ringWidth * 0.88;
+		for (let sector = 1; sector <= 4; sector += 1) {
+			for (let portion = 1; portion <= 2; portion += 1) {
+				const globalPortion = portionGlobal(sector, portion);
+				for (let bit = 1; bit <= ring.bitsPerPortion; bit += 1) {
+					const slice = Math.PI / 4 / ring.bitsPerPortion;
+					const start = -Math.PI / 2 + globalPortion * Math.PI / 4 + (bit - 1) * slice;
+					const end = start + slice;
+					const index = indexFromRadial(ring.id, sector, portion, bit);
+					const active = state[index] === 1;
+					wedge(ctx, centerX, centerY, inner, outerRadius, start + 0.006, end - 0.006);
+					ctx.fillStyle = active ? `${ring.color}cc` : `${ring.color}38`;
+					ctx.strokeStyle = active ? "rgba(255,255,255,0.72)" : "rgba(255,255,255,0.22)";
+					ctx.lineWidth = active ? 1.2 : 0.8;
+					ctx.fill();
+					ctx.stroke();
+
+					if (active) {
+						const mid = (start + end) / 2;
+						const dot = polar(centerX, centerY, (inner + outerRadius) / 2, mid);
+						drawFrameInBox(
+							ctx,
+							decals?.image,
+							decals?.frames.get(index % 2 === 0 ? "magenta_bit" : "cyan_bit"),
+							dot.x - ringWidth * 0.23,
+							dot.y - ringWidth * 0.23,
+							ringWidth * 0.46,
+							ringWidth * 0.46,
+						);
+					}
+				}
+			}
+		}
+	}
+
+	ctx.fillStyle = "rgba(215,255,62,0.85)";
+	ctx.strokeStyle = "#5cff72";
+	ctx.lineWidth = 1.5;
+	ctx.beginPath();
+	ctx.arc(centerX, centerY, baseRadius * 0.45, 0, TWO_PI);
+	ctx.fill();
+	ctx.stroke();
+
+	ctx.save();
+	ctx.strokeStyle = "rgba(76, 145, 230, 0.95)";
+	ctx.lineWidth = 2.2;
+	ctx.beginPath();
+	ctx.arc(centerX, centerY, outer + ringWidth * 0.7, 0, TWO_PI);
+	ctx.stroke();
+	ctx.restore();
+
+	drawPointer(ctx, centerX, centerY, outer, ringWidth, pointer, decals);
+	drawCompass(ctx, centerX, centerY, outer + ringWidth * 1.05);
+}
+
+function drawCompass(ctx, centerX, centerY, radius) {
+	ctx.save();
+	ctx.fillStyle = "rgba(136,255,153,0.94)";
+	ctx.font = "600 14px 'Space Mono', monospace";
+	ctx.textAlign = "center";
+	ctx.textBaseline = "middle";
+	const labels = [
+		["N", -Math.PI / 2],
+		["E", 0],
+		["S", Math.PI / 2],
+		["W", Math.PI],
+	];
+	for (const [label, angle] of labels) {
+		const point = polar(centerX, centerY, radius, angle);
+		ctx.fillText(label, point.x, point.y);
+	}
+	ctx.restore();
+}
+
+function drawPointer(ctx, centerX, centerY, outer, ringWidth, pointer, decals) {
+	let globalPortion = 0;
+	let bitRatio = 0.5;
+	if (pointer.ring !== "c") {
+		const ring = getRing(pointer.ring);
+		globalPortion = portionGlobal(pointer.sector, pointer.portion);
+		bitRatio = (pointer.bit - 0.5) / ring.bitsPerPortion;
+	}
+	const angle = -Math.PI / 2 + globalPortion * Math.PI / 4 + bitRatio * Math.PI / 4;
+	const tip = polar(centerX, centerY, outer + ringWidth * 1.05, angle);
+	const boxSize = ringWidth * 1.1;
+	const frameName = globalPortion === 6 ? "blue_pointer" : "red_pointer";
+	ctx.save();
+	ctx.translate(tip.x, tip.y);
+	ctx.rotate(angle + Math.PI / 2);
+	const drawn = drawFrameInBox(ctx, decals?.image, decals?.frames.get(frameName), -boxSize / 2, -boxSize / 2, boxSize, boxSize);
+	if (!drawn) {
+		ctx.fillStyle = frameName === "blue_pointer" ? "#1677ff" : "#ff244c";
+		ctx.strokeStyle = "#72ff2d";
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.moveTo(0, -boxSize * 0.52);
+		ctx.lineTo(boxSize * 0.42, boxSize * 0.34);
+		ctx.lineTo(-boxSize * 0.42, boxSize * 0.34);
+		ctx.closePath();
+		ctx.fill();
+		ctx.stroke();
+	}
+	ctx.restore();
+
+	ctx.save();
+	ctx.fillStyle = "rgba(247,255,74,0.96)";
+	ctx.font = "600 12px 'Space Mono', monospace";
+	ctx.textAlign = "center";
+	ctx.textBaseline = "middle";
+	const labelPoint = polar(centerX, centerY, outer + ringWidth * 1.45, angle);
+	ctx.fillText(coordinateLabel(pointer), labelPoint.x, labelPoint.y);
+	ctx.restore();
+}
+
+function radialPointerFromEvent(canvas, event) {
+	const rect = canvas.getBoundingClientRect();
+	const x = event.clientX - rect.left;
+	const y = event.clientY - rect.top;
+	const centerX = rect.width / 2;
+	const centerY = rect.height / 2;
+	const dx = x - centerX;
+	const dy = y - centerY;
+	const distance = Math.hypot(dx, dy);
+	const outer = Math.min(rect.width, rect.height) * 0.42;
+	const ringWidth = outer / 7.3;
+	const baseRadius = ringWidth * 0.85;
+	const ringOrder = Math.floor((distance - baseRadius) / ringWidth) + 1;
+	if (ringOrder < 1 || ringOrder > 6) return null;
+	const ring = RINGS.find((entry) => entry.order === ringOrder);
+	const normalizedAngle = (Math.atan2(dy, dx) + Math.PI / 2 + TWO_PI) % TWO_PI;
+	const unit = normalizedAngle / (Math.PI / 4);
+	const globalPortion = Math.min(7, Math.floor(unit));
+	const local = unit - globalPortion;
+	const bit = Math.min(ring.bitsPerPortion, Math.floor(local * ring.bitsPerPortion) + 1);
+	const radial = radialFromIndex(indexFromRadial(
+		ring.id,
+		Math.floor(globalPortion / 2) + 1,
+		(globalPortion % 2) + 1,
+		bit,
+	));
+	return radial;
+}
+
+;
+const DECAL_FRAMES_URL = "/generated-assets/mfn_ui_decals-transparent.frames.json";
+const DEFAULT_POINTER = { ring: "m", sector: 1, portion: 1, bit: 1 };
+
+function loadImage(url) {
+	return new Promise((resolve, reject) => {
+		const image = new Image();
+		image.decoding = "async";
+		image.onload = () => resolve(image);
+		image.onerror = () => reject(new Error(`No se pudo cargar: ${url}`));
+		image.src = url;
+	});
+}
+
+async function loadJson(url) {
+	const response = await fetch(url);
+	if (!response.ok) throw new Error(`No se pudo cargar JSON: ${url}`);
+	return response.json();
+}
+
+function chunkBits(bits, size = 13) {
+	const lines = [];
+	for (let index = 0; index < bits.length; index += size) {
+		lines.push(bits.slice(index, index + size).join(""));
+	}
+	return lines.join("\n");
+}
+
+function makeTimestamp() {
+	return new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+function fileName(stem, extension) {
+	const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+	return `${stem}-${stamp}.${extension}`;
+}
+
+function svgDotMap(state) {
+	const cell = 18;
+	const margin = 4;
+	const size = cell * 13 + margin * 2;
+	let rects = "";
+	for (let row = 0; row < 13; row += 1) {
+		for (let col = 0; col < 13; col += 1) {
+			const index = indexFromCell(row, col);
+			const on = state[index] === 1;
+			rects += `<rect x="${margin + col * cell}" y="${margin + row * cell}" width="${cell - 2}" height="${cell - 2}" rx="3" fill="${on ? "#ff3048" : "#172426"}" stroke="#5cff72" stroke-opacity="0.55"/>`;
+		}
+	}
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="100%" height="100%" fill="#071011"/>${rects}</svg>`;
+}
+
+function createGame({ mount, sdk, ready, tweaks, assets }) {
+	let cleanup = () => {};
+	void ready;
+	void tweaks;
+
+	return {
+		start() {
+			let state = createDemoState();
+			let pointer = { ...DEFAULT_POINTER };
+			let decals = { image: null, frames: new Map() };
+			let assetsReady = false;
+			let started = false;
+			let tickerOffset = 0;
+			let lastCompression = compressState(state, 3);
+			let lastPacket = packageForTransmission(state, lastCompression);
+			const logs = [];
+			const disposers = [];
+
+			const shell = document.createElement("section");
+			shell.className = "mfn-shell";
+			shell.innerHTML = `
+				<div class="mfn-workbench" hidden>
+					<header class="mfn-hud" aria-label="Estado MFN">
+						<div class="hud-chip primary"><span>ACTIVOS</span><strong data-active>0</strong></div>
+						<div class="hud-chip"><span>COORD</span><strong data-coordinate>m:S1:P1:B1</strong></div>
+						<div class="hud-chip"><span>COMPRESIÓN</span><strong data-ratio>1.00:1</strong></div>
+					</header>
+
+					<main class="mfn-main">
+						<section class="panel canvas-panel grid-panel" aria-label="Editor de sprites 13 por 13">
+							<div class="panel-title"><span>DOT MAP 13×13</span><b>G7 pivote</b></div>
+							<canvas class="mfn-canvas" data-grid-canvas aria-label="Matriz cuadrada interactiva"></canvas>
+						</section>
+						<section class="panel canvas-panel radial-panel" aria-label="Vista radial MFN">
+							<div class="panel-title"><span>ANILLOS RADIALES</span><b>4S × 2P</b></div>
+							<canvas class="mfn-canvas" data-radial-canvas aria-label="Anillos concéntricos interactivos"></canvas>
+						</section>
+
+						<aside class="panel inspector-panel" aria-label="Panel de inspección">
+							<div class="inspector-row"><span>Array lineal</span><b>${TOTAL_BITS} bits</b></div>
+							<pre class="bitstream" data-bitstream></pre>
+							<div class="inspector-row"><span>Fragmento</span><b data-fragment>RAW: 0000</b></div>
+							<div class="mode-tabs" role="group" aria-label="Modo de lectura">
+								<button type="button" class="is-active" data-mode="RAW">Visual</button>
+								<button type="button" data-mode="AND">Semántico</button>
+								<button type="button" data-mode="XOR">Etimológico</button>
+							</div>
+							<p class="mode-note" data-mode-note>RAW conserva la secuencia exacta desde el puntero.</p>
+						</aside>
+					</main>
+
+					<section class="mfn-console">
+						<div class="panel controls-panel">
+							<label>Anillo <select data-ring-select></select></label>
+							<label>Sector <select data-sector-select></select></label>
+							<label>Porción <select data-portion-select></select></label>
+							<label>Bit <select data-bit-select></select></label>
+							<button type="button" data-write-one>Marcar 1</button>
+							<button type="button" data-write-zero>Marcar 0</button>
+						</div>
+
+						<div class="panel controls-panel compact">
+							<button type="button" data-rotate="1">Rotar 90°</button>
+							<button type="button" data-rotate="2">180°</button>
+							<button type="button" data-rotate="3">270°</button>
+							<button type="button" data-clear>Limpiar</button>
+							<button type="button" data-import>Importar JSON</button>
+							<button type="button" data-export-json>JSON</button>
+							<button type="button" data-export-png>PNG</button>
+							<button type="button" data-export-svg>SVG</button>
+							<button type="button" data-export-csv>CSV</button>
+						</div>
+
+						<div class="panel library-panel" aria-label="Biblioteca de sprites">
+							<div class="panel-title"><span>Biblioteca</span><b>26 letras + 10 números</b></div>
+							<div class="library-grid" data-library></div>
+						</div>
+
+						<div class="panel compression-panel">
+							<div class="panel-title"><span>Patrones detectados</span><b data-pattern-count>0</b></div>
+							<div class="pattern-list" data-pattern-list></div>
+						</div>
+					</section>
+
+					<footer class="transmission-panel" aria-label="Simulador de transmisión">
+						<span>TRANSMISIÓN 300 BAUD</span>
+						<code data-transmission></code>
+					</footer>
+				</div>
+
+				<div class="start-overlay" data-overlay>
+					<div class="start-mark">MFN</div>
+					<h1>MFN Sprite Cartógrafo</h1>
+					<p data-start-status>Cargando matriz 13×13…</p>
+					<button type="button" data-start-button disabled>Toca para activar</button>
+				</div>
+				<input type="file" accept="application/json,.json" data-file-input hidden>
+			`;
+
+			mount.replaceChildren(shell);
+
+			const workbench = shell.querySelector(".mfn-workbench");
+			const overlay = shell.querySelector("[data-overlay]");
+			const startButton = shell.querySelector("[data-start-button]");
+			const startStatus = shell.querySelector("[data-start-status]");
+			const gridCanvas = shell.querySelector("[data-grid-canvas]");
+			const radialCanvas = shell.querySelector("[data-radial-canvas]");
+			const ringSelect = shell.querySelector("[data-ring-select]");
+			const sectorSelect = shell.querySelector("[data-sector-select]");
+			const portionSelect = shell.querySelector("[data-portion-select]");
+			const bitSelect = shell.querySelector("[data-bit-select]");
+			const fileInput = shell.querySelector("[data-file-input]");
+
+			for (const ring of RINGS) {
+				const option = document.createElement("option");
+				option.value = ring.id;
+				option.textContent = `${ring.id} · ${ring.label}`;
+				ringSelect.append(option);
+			}
+			for (let value = 1; value <= 4; value += 1) {
+				sectorSelect.append(new Option(String(value), String(value)));
+			}
+			for (let value = 1; value <= 2; value += 1) {
+				portionSelect.append(new Option(String(value), String(value)));
+			}
+
+			const library = shell.querySelector("[data-library]");
+			for (const symbol of LIBRARY_SYMBOLS) {
+				const button = document.createElement("button");
+				button.type = "button";
+				button.textContent = symbol;
+				button.dataset.symbol = symbol;
+				library.append(button);
+			}
+
+			const addLog = (action) => {
+				logs.unshift({ time: makeTimestamp(), action });
+				logs.splice(7);
+			};
+
+			const haptic = () => {
+				try {
+					if (sdk?.device?.haptics?.isSupported()) void sdk.device.haptics.vibrate(18);
+				} catch (error) {
+					void error;
+				}
+			};
+
+			const updateBitOptions = () => {
+				const ring = getRing(pointer.ring);
+				bitSelect.replaceChildren();
+				const count = pointer.ring === "c" ? 1 : ring.bitsPerPortion;
+				for (let value = 1; value <= count; value += 1) {
+					bitSelect.append(new Option(String(value), String(value)));
+				}
+				pointer.bit = Math.min(pointer.bit, count);
+				bitSelect.value = String(pointer.bit);
+				sectorSelect.disabled = pointer.ring === "c";
+				portionSelect.disabled = pointer.ring === "c";
+				bitSelect.disabled = pointer.ring === "c";
+			};
+
+			const syncControls = () => {
+				ringSelect.value = pointer.ring;
+				sectorSelect.value = String(pointer.sector);
+				portionSelect.value = String(pointer.portion);
+				updateBitOptions();
+			};
+
+			const pointerFromControls = () => {
+				pointer = {
+					ring: ringSelect.value,
+					sector: Number(sectorSelect.value),
+					portion: Number(portionSelect.value),
+					bit: Number(bitSelect.value),
+				};
+				if (pointer.ring === "c") pointer = { ring: "c", sector: 1, portion: 1, bit: 1 };
+				syncControls();
+				render();
+			};
+
+			const render = () => {
+				lastCompression = compressState(state, 3);
+				lastPacket = packageForTransmission(state, lastCompression);
+				syncControls();
+				drawGrid(gridCanvas, state, pointer, decals);
+				drawRadial(radialCanvas, state, pointer, decals);
+
+				const active = activeCount(state);
+				shell.querySelector("[data-active]").textContent = `${active}/${TOTAL_BITS}`;
+				shell.querySelector("[data-coordinate]").textContent = coordinateLabel(pointer);
+				shell.querySelector("[data-ratio]").textContent = `${lastCompression.ratio.toFixed(2)}:1`;
+				shell.querySelector("[data-bitstream]").textContent = chunkBits(state);
+
+				const mode = shell.querySelector(".mode-tabs .is-active")?.dataset.mode || "RAW";
+				const fragment = extractFragment(state, pointer, 6, mode);
+				shell.querySelector("[data-fragment]").textContent = `${mode}: ${Array.isArray(fragment.bits) ? fragment.bits.join("") : fragment.value} → ${fragment.value}`;
+				const modeNote = shell.querySelector("[data-mode-note]");
+				modeNote.textContent = {
+					RAW: "Visual conserva la secuencia exacta desde el puntero.",
+					AND: "Semántico exige co-herencia total: todos los bits deben ser 1.",
+					XOR: "Etimológico resalta diferencia: paridad de activaciones del fragmento.",
+				}[mode] || "Lectura OR activa si cualquier bit del fragmento está encendido.";
+
+				const repeated = lastCompression.repeatedPatterns;
+				shell.querySelector("[data-pattern-count]").textContent = `${repeated.length} repetidos`;
+				const patternList = shell.querySelector("[data-pattern-list]");
+				patternList.replaceChildren(...repeated.slice(0, 5).map((pattern) => {
+					const row = document.createElement("div");
+					row.className = "pattern-row";
+					row.innerHTML = `<b>${pattern.id}</b><span>${pattern.count}×</span><code>${pattern.key}</code>`;
+					return row;
+				}));
+				if (repeated.length === 0) {
+					const empty = document.createElement("div");
+					empty.className = "empty-row";
+					empty.textContent = "Sin repeticiones 3×3 útiles.";
+					patternList.append(empty);
+				}
+
+				const transmission = shell.querySelector("[data-transmission]");
+				const payload = `${lastPacket.payload} · ${lastPacket.bytes} B · ${lastPacket.secondsAt300Baud.toFixed(2)} s`;
+				const padded = `${payload}   ${payload}`;
+				transmission.textContent = padded.slice(tickerOffset, tickerOffset + 130);
+			};
+
+			const writePointer = (value) => {
+				const index = pointer.ring === "c" ? 0 : indexFromRadial(pointer.ring, pointer.sector, pointer.portion, pointer.bit);
+				state[index] = value;
+				addLog(`${coordinateLabel(pointer)} = ${value}`);
+				haptic();
+				render();
+			};
+
+			const saveBlob = async (blob, name) => {
+				try {
+					if (sdk?.device?.fileSystem?.isSupported()) {
+						await sdk.device.fileSystem.saveFile(blob, name);
+						return;
+					}
+				} catch {
+					addLog("Guardado SDK no disponible; usando descarga local");
+				}
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.href = url;
+				link.download = name;
+				link.click();
+				URL.revokeObjectURL(url);
+			};
+
+			const loadStateFromText = (text) => {
+				const parsed = JSON.parse(text);
+				state = normalizeState(Array.isArray(parsed) ? parsed : parsed.estado || parsed.state || parsed.datos);
+				if (parsed.puntero) pointer = { ...DEFAULT_POINTER, ...parsed.puntero };
+				addLog("Sprite importado desde JSON");
+				render();
+			};
+
+			const on = (target, type, handler) => {
+				target.addEventListener(type, handler);
+				disposers.push(() => target.removeEventListener(type, handler));
+			};
+
+			on(startButton, "click", () => {
+				if (!assetsReady || started) return;
+				started = true;
+				overlay.hidden = true;
+				addLog("Editor activado");
+				render();
+			});
+
+			on(gridCanvas, "pointerdown", (event) => {
+				if (!started) return;
+				const radial = gridPointerFromEvent(gridCanvas, event);
+				if (!radial) return;
+				pointer = { ring: radial.ring, sector: radial.sector, portion: radial.portion, bit: radial.bit };
+				state[radial.index] = state[radial.index] ? 0 : 1;
+				addLog(`${coordinateLabel(pointer)} alternado`);
+				haptic();
+				render();
+			});
+
+			on(radialCanvas, "pointerdown", (event) => {
+				if (!started) return;
+				const radial = radialPointerFromEvent(radialCanvas, event);
+				if (!radial) return;
+				pointer = { ring: radial.ring, sector: radial.sector, portion: radial.portion, bit: radial.bit };
+				state[radial.index] = state[radial.index] ? 0 : 1;
+				addLog(`${coordinateLabel(pointer)} desde vista radial`);
+				haptic();
+				render();
+			});
+
+			for (const select of [ringSelect, sectorSelect, portionSelect, bitSelect]) {
+				on(select, "change", pointerFromControls);
+			}
+
+			on(shell.querySelector("[data-write-one]"), "click", () => writePointer(1));
+			on(shell.querySelector("[data-write-zero]"), "click", () => writePointer(0));
+			on(shell.querySelector("[data-clear]"), "click", () => {
+				state = state.map(() => 0);
+				addLog("Matriz limpiada");
+				render();
+			});
+
+			for (const button of shell.querySelectorAll("[data-rotate]")) {
+				on(button, "click", () => {
+					const turns = Number(button.dataset.rotate);
+					state = rotateState(state, turns);
+					addLog(`Rotación ${turns * 90}°`);
+					render();
+				});
+			}
+
+			for (const button of shell.querySelectorAll("[data-mode]")) {
+				on(button, "click", () => {
+					for (const modeButton of shell.querySelectorAll("[data-mode]")) modeButton.classList.remove("is-active");
+					button.classList.add("is-active");
+					render();
+				});
+			}
+
+			on(library, "click", (event) => {
+				const button = event.target.closest("button[data-symbol]");
+				if (!button) return;
+				state = stateFromSymbol(button.dataset.symbol);
+				addLog(`Sprite ${button.dataset.symbol} cargado`);
+				render();
+			});
+
+			on(shell.querySelector("[data-export-json]"), "click", () => {
+				const blob = new Blob([JSON.stringify(serializeState(state, pointer, logs), null, 2)], { type: "application/json" });
+				void saveBlob(blob, fileName("mfn-sprite", "json"));
+			});
+
+			on(shell.querySelector("[data-export-csv]"), "click", () => {
+				const blob = new Blob([patternsToCsv(lastCompression.patterns)], { type: "text/csv" });
+				void saveBlob(blob, fileName("mfn-patrones", "csv"));
+			});
+
+			on(shell.querySelector("[data-export-svg]"), "click", () => {
+				const blob = new Blob([svgDotMap(state)], { type: "image/svg+xml" });
+				void saveBlob(blob, fileName("mfn-dot-map", "svg"));
+			});
+
+			on(shell.querySelector("[data-export-png]"), "click", () => {
+				gridCanvas.toBlob((blob) => {
+					if (blob) void saveBlob(blob, fileName("mfn-dot-map", "png"));
+				}, "image/png");
+			});
+
+			on(shell.querySelector("[data-import]"), "click", async () => {
+				try {
+					if (sdk?.device?.fileSystem?.isSupported()) {
+						const result = await sdk.device.fileSystem.openFile({ accept: [".json", "application/json"], multiple: false });
+						if (result.files?.[0]) loadStateFromText(await sdk.device.fileSystem.readAsText(result.files[0]));
+						return;
+					}
+				} catch {
+					addLog("Importación SDK no disponible; usando selector local");
+				}
+				fileInput.click();
+			});
+
+			on(fileInput, "change", async () => {
+				const file = fileInput.files?.[0];
+				if (!file) return;
+				loadStateFromText(await file.text());
+				fileInput.value = "";
+			});
+
+			const resizeObserver = new ResizeObserver(() => {
+				if (assetsReady) render();
+			});
+			resizeObserver.observe(shell);
+			disposers.push(() => resizeObserver.disconnect());
+
+			const interval = window.setInterval(() => {
+				tickerOffset = (tickerOffset + 1) % Math.max(1, lastPacket.payload.length);
+				if (assetsReady) render();
+			}, 420);
+			disposers.push(() => window.clearInterval(interval));
+
+			const dashUrl = assets?.get("MFN_DASH_TEXTURE") || "/generated-assets/mfn_dash_texture.webp";
+			shell.style.setProperty("--mfn-dash-texture", `url("${dashUrl}")`);
+			const decalUrl = assets?.get("MFN_UI_DECALS") || "/generated-assets/mfn_ui_decals-transparent.webp";
+
+			Promise.all([loadImage(decalUrl), loadJson(DECAL_FRAMES_URL)])
+				.then(([image, frames]) => {
+					decals = { image, frames: frameMap(frames) };
+					assetsReady = true;
+					workbench.hidden = false;
+					startStatus.textContent = "Matriz lista: toca para editar";
+					startButton.disabled = false;
+					render();
+				})
+				.catch(() => {
+					assetsReady = true;
+					workbench.hidden = false;
+					startStatus.textContent = "Recursos opcionales no cargaron; usando trazos técnicos";
+					startButton.disabled = false;
+					render();
+				});
+
+			cleanup = () => {
+				for (const dispose of disposers.splice(0)) dispose();
+				mount.replaceChildren();
+			};
+		},
+		destroy() {
+			cleanup();
+			cleanup = () => {};
+		},
+		sdk,
+		ready,
+		tweaks,
+		assets,
+	};
+}
+
+/* Bootstrap standalone (reemplaza main.js: aquí no hay @playabl/sdk). */
+(async () => {
+  const app = document.querySelector("#app");
+  const ready = await SDK.ready();
+  const tweaks = await SDK.tweaks.init(TWEAKS_MANIFEST);
+  const assets = Object.keys(ASSETS_MANIFEST).length > 0
+    ? await SDK.assets.register(ASSETS_MANIFEST) : undefined;
+  const game = createGame({ mount: app, sdk: SDK, ready, tweaks, assets });
+  game.start();
+  window.MFN_GAME = game; /* asa de consola para auditoría */
+})();
+
+</script>
+</body>
+</html>

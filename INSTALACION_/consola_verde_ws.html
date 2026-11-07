@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · Terminal de Fósforo · Puente WS v2.6 · ADUANA NARRATIVA + EVA</title>
+<link href="https://cdn.jsdelivr.net/fontsource/css/vt323@latest/index.css" rel="stylesheet">
+<style>
+:root{ --ph:#8dff9a; --ph-glow:rgba(64,255,120,.5); --amber:#ffb46e; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(ellipse at 50% 30%, #101410 0%, #070907 55%, #030403 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:"VT323","Courier New",monospace;overflow:hidden;gap:14px}
+.monitor{width:min(92vw,880px)}
+.frame{background:linear-gradient(#262b26,#151915 70%,#101410);border-radius:26px;padding:24px 24px 0;
+  box-shadow:inset 0 2px 4px rgba(255,255,255,.05), inset 0 -6px 14px rgba(0,0,0,.7), 0 22px 60px rgba(0,0,0,.85)}
+.screen-wrap{background:#0b0e0b;border-radius:20px;padding:16px;box-shadow:inset 0 0 34px #000}
+.screen{position:relative;border-radius:16px/14px;overflow:hidden;height:min(60vh,540px);background:#050805;cursor:text}
+.tube{position:absolute;inset:0;transform-origin:center}
+.tube.crt-off{animation:crtOff .45s ease-in forwards}
+.tube.crt-on{animation:crtOn .55s ease-out}
+@keyframes crtOff{0%{transform:scale(1,1);filter:brightness(1)}55%{transform:scale(1,.012);filter:brightness(2.8)}100%{transform:scale(.002,.012);filter:brightness(0)}}
+@keyframes crtOn{0%{transform:scale(.002,.012);filter:brightness(3)}55%{transform:scale(1,.012);filter:brightness(2.2)}100%{transform:scale(1,1);filter:brightness(1)}}
+.phosphor{position:absolute;inset:0;background:radial-gradient(ellipse at center,#1d4d2b 0%,#1a4526 40%,#0d2716 75%,#081c0f 100%)}
+.content{position:absolute;inset:0;padding:26px 34px;overflow-y:auto;white-space:pre-wrap;
+  color:var(--ph);font-size:21px;line-height:1.35;letter-spacing:.5px;
+  text-shadow:0 0 1px #c8ffd2,0 0 8px var(--ph-glow);scrollbar-width:none}
+.content::-webkit-scrollbar{display:none}
+#text{display:inline}
+#cursor{display:inline;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.30) 0 1px,transparent 1px 3px);pointer-events:none}
+.refresh{position:absolute;left:0;right:0;height:90px;top:-120px;
+  background:linear-gradient(180deg,transparent,rgba(190,255,200,.06),transparent);animation:sweep 7s linear infinite;pointer-events:none}
+@keyframes sweep{to{top:110%}}
+.vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 52%,rgba(0,0,0,.55) 100%);pointer-events:none}
+.glass{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at 72% 16%,rgba(190,255,205,.10),transparent 42%),
+  linear-gradient(115deg,rgba(255,255,255,.05) 0%,transparent 32%)}
+.flicker{position:absolute;inset:0;pointer-events:none;background:rgba(160,255,180,.03);animation:flick 3.7s steps(3) infinite}
+@keyframes flick{0%,100%{opacity:.5}30%{opacity:1}60%{opacity:.7}}
+.chin{display:flex;align-items:center;gap:16px;padding:14px 20px 18px}
+.screw{width:13px;height:13px;border-radius:50%;flex:none;background:radial-gradient(circle at 35% 30%,#4d554d,#20251f 72%);position:relative}
+.screw::after{content:"";position:absolute;left:2px;right:2px;top:50%;height:2px;background:#0d100c;transform:rotate(45deg)}
+.vents{flex:1;max-width:300px;margin:0 auto;height:15px;border-radius:2px;
+  background:repeating-linear-gradient(90deg,#0a0d0a 0 4px,transparent 4px 10px)}
+.power-zone{display:flex;align-items:center;gap:8px;flex:none}
+.power-label{font-size:12px;color:#7d857d;letter-spacing:2px}
+.power-btn{width:27px;height:27px;border-radius:6px;border:1px solid #3c413c;cursor:pointer;
+  background:radial-gradient(circle at 40% 32%,#ffe2b0,#cf8f42 58%,#7c4f1e);
+  box-shadow:0 0 12px rgba(255,190,110,.85),0 0 28px rgba(255,170,80,.4)}
+.power-btn.off{background:#252a25;box-shadow:inset 0 1px 3px #000}
+.hint{color:#4c554c;font-size:15px;letter-spacing:1px;text-align:center}
+.hint b{color:#6d7a6d}
+.hint b.click{cursor:pointer;color:#8a918a;border:1px solid #3a3f3a;border-radius:3px;padding:1px 6px}
+.hint b.click.on{color:var(--ph);border-color:var(--ph)}
+#btn-guia{position:fixed;right:18px;bottom:18px;z-index:130;width:46px;height:46px;border-radius:50%;
+  border:1px solid var(--amber);background:rgba(20,16,8,.9);color:var(--amber);font-family:inherit;font-size:20px;
+  cursor:pointer;box-shadow:0 0 14px rgba(255,180,110,.35)}
+#guia{position:fixed;right:18px;bottom:74px;z-index:130;width:330px;background:#1c1c2e;border:1px solid var(--amber);
+  border-radius:8px;padding:12px;color:#a6e3a1;font-family:"VT323","Courier New",monospace;box-shadow:0 0 24px rgba(0,0,0,.7)}
+#guia h4{color:var(--amber);letter-spacing:2px;font-size:14px;border-bottom:1px dashed #3a3a55;padding-bottom:4px;margin-bottom:8px}
+#guia .g{font-size:14px;line-height:1.5;margin:6px 0}
+#guia .g b{color:#89dceb}
+#guia code{display:block;background:#0e0e18;border:1px solid #3a3a55;border-radius:4px;color:#f9e2af;padding:5px 8px;font-size:13px;margin:6px 0;word-break:break-all}
+#guia button{background:none;border:1px solid #89dceb;color:#89dceb;font-family:inherit;font-size:12px;padding:4px 10px;cursor:pointer;border-radius:3px;margin:4px 6px 0 0}
+#guia button:hover{background:rgba(137,220,235,.12)}
+#guia button.oro{border-color:var(--amber);color:var(--amber)}
+#guia button.oro:hover{background:rgba(255,180,110,.1)}
+.oculto{display:none !important}
+#toasts{position:fixed;top:52px;right:14px;z-index:140;display:flex;flex-direction:column;gap:8px;width:330px}
+.toast{border:1px solid var(--amber);background:#1c1c2e;color:var(--amber);padding:10px 12px;border-radius:6px;font-size:13px;
+  font-family:"VT323","Courier New",monospace;box-shadow:0 0 18px rgba(255,180,110,.25);animation:ap .5s ease}
+@keyframes ap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="monitor">
+  <div class="frame">
+    <div class="screen-wrap">
+      <div class="screen" id="screen">
+        <div class="tube" id="tube">
+          <div class="phosphor"></div>
+          <div class="content" id="content"><span id="text"></span><span id="cursor">█</span></div>
+          <div class="scanlines"></div>
+          <div class="refresh"></div>
+          <div class="vignette"></div>
+          <div class="glass"></div>
+          <div class="flicker"></div>
+        </div>
+      </div>
+    </div>
+    <div class="chin">
+      <div class="screw"></div>
+      <div class="vents"></div>
+      <div class="screw"></div>
+      <div class="power-zone">
+        <span class="power-label">POWER</span>
+        <button id="power" class="power-btn" title="encender / apagar"></button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="hint">ECN · fósforo verde · <b id="st-puente">PUENTE: SONDEANDO…</b> ·
+  <b id="st-echo" class="click on" title="alternar eco">ECHO ON</b> ·
+  «@informe» sella y audita · Ctrl+V pega · POWER duerme al nodo</div>
+
+<button id="btn-guia" title="camino del aspirante">◈</button>
+<div id="guia" class="oculto">
+  <h4>🪜 CAMINO DEL ASPIRANTE</h4>
+  <div class="g" id="guia-rango"></div>
+  <div class="g" id="guia-mision"></div>
+  <code id="guia-pista"></code>
+  <button id="guia-copiar">COPIAR VERBO</button>
+  <button id="guia-auditar" class="oro">AUDITAR TERRITORIO</button>
+  <button id="guia-export" class="oro">EXPORTAR PAYLOAD</button>
+  <button id="guia-cerrar">CERRAR</button>
+</div>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+var textEl=document.getElementById("text"),
+    contentEl=document.getElementById("content"),
+    tubeEl=document.getElementById("tube"),
+    powerBtn=document.getElementById("power"),
+    stPuente=document.getElementById("st-puente"),
+    stEcho=document.getElementById("st-echo");
+
+var buf="", inputBuf="", powered=true, busy=true;
+var modo="simulacro", ws=null, promptSimulado=false;
+var marcaIdle=false, marcaStr="", idleT=null;
+var ultimoCmd="", evaRespondio=false;
+var AC=null;
+function unlockAudio(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } }
+function blip(f,d,g){ if(!AC)return; try{ var o=AC.createOscillator(),v=AC.createGain();
+  o.type="square";o.frequency.value=f;v.gain.value=g||0.012;o.connect(v);v.connect(AC.destination);
+  o.start();v.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+(d||0.03));o.stop(AC.currentTime+(d||0.03)); }catch(e){} }
+function paint(){ textEl.textContent=buf; contentEl.scrollTop=contentEl.scrollHeight; }
+function toastLocal(t){
+  var d=document.createElement("div");d.className="toast";d.textContent=t;
+  document.getElementById("toasts").appendChild(d);
+  setTimeout(function(){d.remove();},6000);
+}
+function copiarTexto(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).catch(function(){fallbackCopy(t);});}
+  else fallbackCopy(t);
+}
+function fallbackCopy(t){var ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();}
+
+/* ---------- marca idle (solo fósforo) ---------- */
+function ponerMarca(){
+  if(marcaIdle||modo!=="puente"||!powered||busy) return;
+  if(!buf.length){ marcaStr="> "; }
+  else if(buf.slice(-1)==="\n"){ marcaStr="> "; }
+  else { marcaStr="\n> "; }
+  buf+=marcaStr; marcaIdle=true; paint();
+}
+function quitarMarca(){ if(!marcaIdle) return; buf=buf.slice(0, buf.length-marcaStr.length); marcaIdle=false; }
+function agendarMarca(){ clearTimeout(idleT); idleT=setTimeout(function(){ if(modo==="puente"&&powered&&!busy) ponerMarca(); },900); }
+
+/* ---------- cola de cadencia ---------- */
+var cola="", timerCola=null;
+function colaLocal(txt){ cola+=txt; if(!timerCola) timerCola=setInterval(drenar,16); }
+function drenar(){
+  if(!powered){clearInterval(timerCola);timerCola=null;return;}
+  if(cola.length){
+    quitarMarca();
+    var n=Math.max(2,Math.min(8,Math.ceil(cola.length/40)));
+    buf+=cola.slice(0,n); cola=cola.slice(n); paint();
+    if(Math.random()<0.2) blip(240+Math.random()*60,0.02,0.006);
+  } else { clearInterval(timerCola); timerCola=null; }
+}
+
+function typeString(str,speed,done){
+  var i=0;
+  (function tick(){
+    if(!powered){done&&done();return;}
+    if(i>=str.length){done&&done();return;}
+    buf+=str[i]; i++; paint();
+    if(str[i-1]!==" "&&str[i-1]!=="\n") blip(240+Math.random()*60,0.02,0.008);
+    setTimeout(tick, speed+(Math.random()*speed*0.6));
+  })();
+}
+
+var BOOT=[
+"SISTEMA OPERATIVO NEUROBITRONICO ECN",
+"COPYRIGHT 2026-2027 R.E.D. SOBERANA NEUROBIT",
+"-Servidor 5-",
+"",
+"> Bienvenido.",
+"",
+"La salida es hacia adentro. Este nodo opera",
+"aislado en 127.0.0.1: cero telemetría, cero",
+"extracción, cero ruido gamma.",
+"",
+"El error no es un fallo: es Absorción de",
+"Tensión. La Estación se estira y se cura.",
+"",
+"v2.6: la ADUANA NARRATIVA enmarca el error;",
+"EVA traduce la sintaxis sin ejecutar por vos.",
+"",
+"Conectando puente de consola (ws 8080)…",
+""
+].join("\n");
+
+function boot(){
+  busy=true; buf=""; inputBuf=""; promptSimulado=false;
+  marcaIdle=false; marcaStr=""; clearTimeout(idleT);
+  paint();
+  typeString(BOOT,26,function(){ busy=false; conectarPuente(); });
+}
+function asegurarPromptSim(){ if(!promptSimulado){ promptSimulado=true; colaLocal("\n> "); } }
+
+/* ---------- v2.6 · EVA TRADUCTORA (guía sin ejecutar) ---------- */
+function evaTraduce(cmd, out){
+  if(/Could not resolve host/.test(out)){
+    return "El portal está mal escrito: «http://» lleva DOS barras. Revisá la sintaxis y volvé a intentar.";
+  }
+  if(/Failed to connect/.test(out)){
+    return "El núcleo en 5000 duerme profundamente. Despertá el servicio en el plano físico (bash despertador_hub.sh) antes de que tu verbo cruce la aduana.";
+  }
+  if(/orden no encontrada/.test(out)){
+    if(/^curl\s+help/.test(cmd)) return "El territorio exige precisión geométrica: probá «curl --help» para revelar el mapa del verbo.";
+    if(/\b(perfecto|fantastico|genial|anda|hermoso|encanta)\b/i.test(cmd)) return "Tu entusiasmo es Logos, pero la consola solo ejecuta el verbo exacto. Guardá la emoción con @informe y escribí el comando preciso.";
+    return "Ese verbo no existe en el territorio. Abrí la guía (◈) y copiá el verbo exacto de tu misión.";
+  }
+  return "";
+}
+
+/* ---------- puente WS ---------- */
+function setBadge(){
+  if(modo==="puente"){ stPuente.textContent="PUENTE: CONECTADO"; stPuente.style.color="#8dff9a"; }
+  else { stPuente.textContent="PUENTE: REPOSO · SIMULACRO"; stPuente.style.color="#ffb46e"; }
+}
+function conectarPuente(){
+  try{ ws=new WebSocket("ws://127.0.0.1:8080"); }
+  catch(e){ modo="simulacro"; setBadge(); asegurarPromptSim(); return; }
+  var t=setTimeout(function(){ try{ws.close();}catch(e){} },1500);
+  ws.onopen=function(){ clearTimeout(t); modo="puente"; setBadge(); agendarMarca(); };
+  ws.onmessage=function(ev){
+    var d=ev.data;
+    var m=d.match(/Echo cambiado a (ON|OFF)/);
+    if(m){ stEcho.textContent="ECHO "+m[1]; stEcho.classList.toggle("on",m[1]==="ON"); }
+    colaLocal(d);
+    /* v2.6: aduana narrativa + EVA traductora */
+    if(!evaRespondio && /ERROR|Failed to connect|Could not resolve|no encontrada/.test(d)){
+      var g=evaTraduce(ultimoCmd, d);
+      if(g){ evaRespondio=true; colaLocal("\n◈ EVA: "+g+"\n"); agendarMarca(); }
+    }
+    agendarMarca();
+    if(/INFORME_ACTIVIDADES/.test(d)){ setTimeout(auditarTerritorio,900); }
+  };
+  ws.onclose=function(){
+    if(modo==="puente"){
+      modo="simulacro"; setBadge();
+      quitarMarca(); clearTimeout(idleT);
+      colaLocal("\n[SISTEMA] puente caído → MODO SIMULACRO.");
+      asegurarPromptSim();
+    }
+  };
+  ws.onerror=function(){ clearTimeout(t); if(modo!=="puente"){ modo="simulacro"; setBadge(); } };
+}
+stEcho.addEventListener("click",function(){
+  unlockAudio();
+  if(modo==="puente"&&ws&&ws.readyState===1){ ws.send("@toggle-echo"); }
+  else { var on=stEcho.textContent==="ECHO ON"; stEcho.textContent=on?"ECHO OFF":"ECHO ON"; stEcho.classList.toggle("on",!on); }
+  blip(160,0.15,0.04);
+});
+
+/* ---------- paste ---------- */
+document.addEventListener("paste",function(e){
+  if(!powered||busy) return;
+  var t=(e.clipboardData||window.clipboardData).getData("text");
+  if(!t) return;
+  e.preventDefault();
+  inputBuf+=t; buf+=t; paint();
+  blip(340,0.03,0.02);
+});
+
+/* ---------- verbos del simulacro ---------- */
+function respond(txt){
+  busy=true;
+  typeString("\n"+txt,9,function(){ buf+="\n> "; paint(); busy=false; });
+}
+function runCommand(raw){
+  var cmd=raw.toLowerCase(), out;
+  if(cmd==="clear"){ buf="> "; paint(); busy=false; return; }
+  if(cmd==="apagar"){ powerOff(); return; }
+  if(cmd==="@informe"){ return respond("MODO SIMULACRO: el WAL vive en el puente.\nLevantalo con: bash levantar_puente.sh"); }
+  if(cmd.indexOf("echo")===0){
+    var resto=raw.slice(4).trim();
+    out = resto ? resto+"\n(el verbo vuelve al emisor: ECHO ON, Logos Genuino)"
+                : "ECHO ON — el verbo vuelve al emisor.";
+    return respond(out);
+  }
+  if(cmd==="help") return respond(
+"MODO SIMULACRO (el puente duerme).\n"+
+"Para consola real: bash levantar_puente.sh\n"+
+"Verbos locales:\n"+
+"  echo <texto> · rango · pines · mfn · manifiesto\n"+
+"  auditar · 300 · clear · apagar");
+  if(cmd==="rango") return respond("[0] ASPIRANTE DESCONECTADO\nEl rango nunca retrocede:\nse consolida en la memoria local.");
+  if(cmd==="pines") return respond("[ ] Cordón Sanitario   [ ] Guardián del Kernel\n[ ] Cirujano de Texto  [ ] Silencio Sagrado\n[ ] Fénix (antifrustración)");
+  if(cmd==="mfn") return respond("ACTIVOS: 22/169 · COMPRESIÓN: 8.05:1\naz:S3:P2:B5 — el centro G7 es el observador.");
+  if(cmd==="manifiesto") return respond("\"En el principio era el verbo, y el verbo\nse hizo carne... luego se hizo silicio.\"");
+  if(cmd==="300") return respond("TRANSMISIÓN 300 BAUD — lentitud sagrada.\n~30 caracteres por segundo: cadencia humana.");
+  respond("ERROR: VERBO NO RECONOCIDO.\nTENSIÓN +1 — LA ESTACIÓN ABSORBE Y AJUSTA.");
+}
+
+/* ---------- POWER ---------- */
+function powerOff(){
+  powered=false; busy=true;
+  clearTimeout(idleT); marcaIdle=false;
+  powerBtn.classList.add("off");
+  tubeEl.classList.remove("crt-on");
+  tubeEl.classList.add("crt-off");
+  blip(110,0.35,0.05);
+}
+function powerOn(){
+  powered=true;
+  powerBtn.classList.remove("off");
+  tubeEl.classList.remove("crt-off");
+  tubeEl.classList.add("crt-on");
+  blip(160,0.25,0.04);
+  setTimeout(boot,500);
+}
+powerBtn.addEventListener("click",function(){ unlockAudio(); powered?powerOff():powerOn(); });
+
+/* ---------- teclado ---------- */
+window.addEventListener("keydown",function(e){
+  unlockAudio();
+  if(!powered||busy) return;
+  if(e.key==="Enter"){
+    e.preventDefault();
+    var c=inputBuf.trim();
+    if(modo==="puente"&&ws&&ws.readyState===1){
+      buf=buf.slice(0, buf.length-inputBuf.length);
+      inputBuf="";
+      quitarMarca();
+      clearTimeout(idleT);
+      buf+="\n"; paint();
+      ultimoCmd=c; evaRespondio=false;
+      if(c==="clear"){ buf=""; paint(); agendarMarca(); return; }
+      if(c==="apagar"){ powerOff(); return; }
+      ws.send(c);
+    } else {
+      inputBuf="";
+      buf+="\n"; paint();
+      runCommand(c);
+    }
+    return;
+  }
+  if(e.key==="Backspace"){ e.preventDefault();
+    if(inputBuf.length){ inputBuf=inputBuf.slice(0,-1); buf=buf.slice(0,-1); paint(); }
+    return; }
+  if(e.key.length===1 && !e.ctrlKey && !e.metaKey && !e.altKey){
+    e.preventDefault();
+    inputBuf+=e.key; buf+=e.key; paint();
+    blip(340,0.02,0.014);
+  }
+});
+document.getElementById("screen").addEventListener("click",function(){ unlockAudio(); });
+
+/* ---------- viaje del aspirante ---------- */
+var RANGOS=["ASPIRANTE DESCONECTADO","TÉCNICO DE AISLAMIENTO","TEJEDOR DE NODOS","ARQUITECTO DE RESEGRIDAD","NODO SEMILLA SOBERANO"];
+var MISIONES_GUIA=[
+ {id:"m1",t:"Coordenada de origen",p:"pwd"},
+ {id:"m2",t:"Cristalizar .venv",p:"python3 -m venv .venv"},
+ {id:"m3",t:"Activar el entorno",p:"source .venv/bin/activate"},
+ {id:"m4",t:"Enlazar Flask",p:"pip install flask"},
+ {id:"m4_5",t:"Reconocer el territorio del Hub",p:"ls -l   (o cat neurobit_api.py)"},
+ {id:"m4_6",t:"Despertar el Hub (Faro)",p:"bash despertador_hub.sh"},
+ {id:"m5",t:"Aduana del Hub",p:"curl -s http://127.0.0.1:$PUERTO/health"},
+ {id:"m6",t:"Saneamiento y ancla",p:"bash plan_reconciliacion.sh"},
+ {id:"m7",t:"Bootstrap WRIL",p:"python3 wril/wril_bootstrap.py"},
+ {id:"m8",t:"Dry-run del pliegue",p:"python3 wril/wril_topologia.py"},
+ {id:"m9",t:"Dictado consciente",p:"F8: abrir sesión · escribir · F8: sellar"},
+ {id:"m10",t:"Ceremonia de Despertar",p:"bash deploy_neurobit_estacion_v3.2.sh"}
+];
+function leerViaje(){
+  var v={rango:0,hechas:[],intencion:0,tension:0};
+  try{
+    var a=JSON.parse(localStorage.getItem("ecn_dojo_v1")||"null");
+    var b=JSON.parse(localStorage.getItem("ecn_camino_aspirante_v1")||"null");
+    var s=(a&&b)?((a.rango>=b.rango)?a:b):(a||b);
+    if(s){v.rango=s.rango||0;v.hechas=s.hechas||[];v.intencion=s.intencion||0;v.tension=s.tension||0;}
+  }catch(e){}
+  return v;
+}
+function guardarViaje(v){
+  try{
+    var raw=JSON.parse(localStorage.getItem("ecn_camino_aspirante_v1")||"{}");
+    var merged=Object.assign(raw,v);
+    localStorage.setItem("ecn_camino_aspirante_v1",JSON.stringify(merged));
+  }catch(e){}
+}
+function calcRango(h){
+  var niveles=[["m1","m2","m3"],["m4","m4_5","m4_6","m5"],["m6","m7","m8"],["m9","m10"]];
+  var r=0;
+  for(var i=0;i<niveles.length;i++){
+    var comp=niveles[i].every(function(id){return h.indexOf(id)>=0;});
+    if(comp) r=i+1; else break;
+  }
+  return r;
+}
+function renderGuia(){
+  var v=leerViaje();
+  var pend=null;
+  for(var i=0;i<MISIONES_GUIA.length;i++){ if(v.hechas.indexOf(MISIONES_GUIA[i].id)<0){ pend=MISIONES_GUIA[i]; break; } }
+  document.getElementById("guia-rango").innerHTML="RANGO: <b>["+v.rango+"] "+RANGOS[Math.min(v.rango,4)]+"</b>";
+  document.getElementById("guia-mision").innerHTML=pend?("MISIÓN: <b>"+pend.t+"</b>"):"<b>Viaje completo: sembrá otro nodo.</b>";
+  var pista=pend?pend.p:"—";
+  if(pista.indexOf("$PUERTO")>=0){
+    fetch("pids/hub_dinamico.port").then(function(r){return r.text();}).then(function(p){
+      document.getElementById("guia-pista").textContent=pista.replace("$PUERTO",p.trim());
+    }).catch(function(){
+      document.getElementById("guia-pista").textContent=pista.replace("$PUERTO","5000");
+    });
+  } else {
+    document.getElementById("guia-pista").textContent=pista;
+  }
+}
+document.getElementById("btn-guia").addEventListener("click",function(){
+  var g=document.getElementById("guia");
+  g.classList.toggle("oculto");
+  if(!g.classList.contains("oculto")) renderGuia();
+  blip(196,0.15,0.04);
+});
+document.getElementById("guia-cerrar").addEventListener("click",function(){ document.getElementById("guia").classList.add("oculto"); });
+document.getElementById("guia-copiar").addEventListener("click",function(){
+  var txt=document.getElementById("guia-pista").textContent;
+  copiarTexto(txt); blip(294,0.15,0.04);
+});
+document.getElementById("guia-auditar").addEventListener("click",function(){ auditarTerritorio(); });
+
+/* ---------- v2.6 · EXPORTAR PAYLOAD (sanitizado, para playabl) ---------- */
+document.getElementById("guia-export").addEventListener("click",function(){
+  var v=leerViaje();
+  var pend=null;
+  for(var i=0;i<MISIONES_GUIA.length;i++){ if(v.hechas.indexOf(MISIONES_GUIA[i].id)<0){ pend=MISIONES_GUIA[i]; break; } }
+  var payload={
+    protocol:"NEUROBIT_STATE_PAYLOAD_v1",
+    sanitized:true, no_logos:true,
+    rango:v.rango,
+    rango_nombre:RANGOS[Math.min(v.rango,4)],
+    misiones_hechas:v.hechas,
+    mision_pendiente:pend?pend.id:null,
+    tension:v.tension||0,
+    echo:stEcho.textContent,
+    bits_activos:1+Math.round((v.hechas.length/MISIONES_GUIA.length)*168),
+    bits_totales:169,
+    anillos_bits:[8,16,24,32,40,48],
+    centro:"c:G7",
+    ts:new Date().toISOString()
+  };
+  copiarTexto(JSON.stringify(payload));
+  toastLocal("PAYLOAD SANITIZADO COPIADO — pegalo en playabl.ia (sin Logos, sin WAL)");
+  blip(220,0.3,0.06);
+});
+
+/* ---------- AUDITOR DEL TERRITORIO (v2.6) ---------- */
+function sinError(o){
+  return o.indexOf("[ERROR]")<0 && o.indexOf("orden no encontrada")<0 &&
+         o.indexOf("No existe el archivo")<0 && o.indexOf("error de sintaxis")<0;
+}
+var REGLAS=[
+ {id:"m1", re:/^pwd$/, ok:function(o){return sinError(o)&&/\//.test(o);}},
+ {id:"m2", re:/^python3\s+-m\s+venv\s+\.venv$/, ok:sinError},
+ {id:"m3", re:/^source\s+\.venv\/bin\/activate$/, ok:sinError},
+ {id:"m4", re:/^pip\s+install\s+flask$/, ok:function(o){return sinError(o)&&/Successfully installed|Requirement already|Using cached/.test(o);}},
+ /* v2.6: reconocimiento puro del territorio (ls/cat sobre la API) */
+ {id:"m4_5", re:/^(ls|cat|head)\b/, ok:function(o){return sinError(o)&&/neurobit_api\.py|MFN_LOCATION|Flask|app\.run/.test(o);}},
+ /* v2.6: despertador del Hub (cliente del Faro) */
+ {id:"m4_6", re:/^bash\s+despertador_hub\.sh/, ok:function(o){return sinError(o)&&/HUB_DINAMICO:\s*VIVO|HUB DINÁMICO VIVO/.test(o);}},
+ /* v2.6: aduana acepta cualquier puerto CORE (5000-5009) */
+ {id:"m5", re:/^curl\s+-s\s+http:\/\/127\.0\.0\.1:\d+\/health$/, ok:function(o){return sinError(o)&&/status|ok/.test(o);}},
+ {id:"m6", re:/^bash\s+plan_reconciliacion\.sh/, ok:sinError},
+ {id:"m7", re:/^python3\s+wril\/wril_bootstrap\.py/, ok:sinError},
+ {id:"m8", re:/^python3\s+wril\/wril_topologia\.py/, ok:sinError},
+ {id:"m10",re:/^bash\s+deploy_neurobit_estacion_v3\.2\.sh/, ok:function(o){return /OPERATIVA|ALIVE/.test(o)||sinError(o);}}
+];
+function parsearInforme(txt){
+  var entradas=[], cur=null;
+  txt.split("\n").forEach(function(l){
+    var m=l.match(/^\[(\d\d:\d\d:\d\d)\]\s(>|<|#)\s?(.*)$/);
+    if(m){ cur={dir:m[2],txt:m[3]}; entradas.push(cur); }
+    else if(cur && l.trim()){ cur.txt+="\n"+l; }
+  });
+  return entradas;
+}
+function salidaDe(entradas,i){
+  var out=[];
+  for(var j=i+1;j<entradas.length;j++){
+    if(entradas[j].dir===">")break;
+    if(entradas[j].dir==="<")out.push(entradas[j].txt);
+  }
+  return out.join("\n");
+}
+function auditarTerritorio(){
+  fetch("http://127.0.0.1:8080/informe").then(function(r){return r.text();}).then(function(txt){
+    var entradas=parsearInforme(txt);
+    var halladas=[];
+    entradas.forEach(function(e,i){
+      if(e.dir!==">")return;
+      var cmd=e.txt.trim();
+      REGLAS.forEach(function(rg){
+        if(rg.re.test(cmd)&&rg.ok(salidaDe(entradas,i))) halladas.push(rg.id);
+      });
+    });
+    consolidar(halladas);
+  }).catch(function(){ toastLocal("AUDITOR: el puente no responde (¿bash levantar_puente.sh?)"); });
+}
+function consolidar(ids){
+  if(!ids.length){ toastLocal("AUDITOR: sin novedades exitosas en el territorio."); return; }
+  var v=leerViaje(); var nuevas=[];
+  ids.forEach(function(id){ if(v.hechas.indexOf(id)<0){ v.hechas.push(id); nuevas.push(id); } });
+  if(!nuevas.length){ toastLocal("AUDITOR: todo lo resuelto ya estaba consolidado."); return; }
+  var rangoAntes=v.rango;
+  v.rango=calcRango(v.hechas);
+  v.intencion=Math.min(100,(v.intencion||0)+nuevas.length*5);
+  guardarViaje(v);
+  nuevas.forEach(function(id){
+    var m=null; MISIONES_GUIA.forEach(function(x){if(x.id===id)m=x;});
+    toastLocal("🟢 CONSOLIDADA DESDE EL TERRITORIO: "+(m?m.t:id));
+  });
+  if(v.rango>rangoAntes) toastLocal("🛡 RANGO ACTUALIZADO: ["+v.rango+"] "+RANGOS[v.rango]);
+  blip(220,0.4,0.06);
+  renderGuia();
+}
+
+setBadge();
+setTimeout(boot,600);
+</script>
+</body>
+</html>

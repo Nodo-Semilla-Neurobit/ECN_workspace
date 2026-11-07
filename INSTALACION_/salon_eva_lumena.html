@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECN · Salón de EVA LUMENA v3 · TEMPLATE {{ .Prompt }} aware</title>
+<link href="https://cdn.jsdelivr.net/fontsource/css/vt323@latest/index.css" rel="stylesheet">
+<style>
+:root{ --bg:#1e1e2e; --panel:#24243a; --borde:#3a3a55; --ink:#a6e3a1; --gold:#f9e2af; --lila:#cba6f7; --cyan:#89dceb; --alert:#f38ba8; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"VT323","Courier New",monospace;display:flex;flex-direction:column;overflow:hidden}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:97;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+header{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;
+  padding:8px 14px;background:rgba(21,21,33,.92);border-bottom:1px solid var(--borde);font-size:13px;letter-spacing:2px}
+header .t{color:var(--gold);text-shadow:0 0 10px rgba(249,226,175,.4)}
+.badge{border:1px solid var(--borde);padding:2px 8px;border-radius:3px;font-size:12px}
+.badge.ok{color:var(--ink);border-color:var(--ink)}
+.badge.warn{color:var(--alert);border-color:var(--alert)}
+main{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px;max-width:980px;margin:0 auto;width:100%}
+#chat{flex:1;min-height:0;overflow-y:auto;background:var(--panel);border:1px solid var(--borde);border-radius:6px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.burb{max-width:86%;border-radius:6px;padding:8px 12px;font-size:15px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.burb.aspirante{align-self:flex-end;border:1px solid var(--gold);color:var(--gold);background:rgba(249,226,175,.05)}
+.burb.eva{align-self:flex-start;border:1px solid var(--ink);color:var(--ink);background:rgba(166,227,161,.05);text-shadow:0 0 6px rgba(166,227,161,.35)}
+.burb.eco{border-color:var(--lila);color:var(--lila);text-shadow:none}
+.burb .firma{display:block;font-size:10px;letter-spacing:2px;opacity:.7;margin-bottom:3px}
+#zona-input{display:flex;gap:8px}
+#inp-msg{flex:1;background:#0e0e18;border:1px solid var(--borde);color:var(--ink);font-family:inherit;font-size:16px;padding:8px 10px;border-radius:4px;outline:none}
+#inp-msg:focus{border-color:var(--ink);box-shadow:0 0 8px rgba(166,227,161,.3)}
+#zona-input button{background:none;border:1px solid var(--ink);color:var(--ink);font-family:inherit;font-size:14px;padding:0 14px;cursor:pointer;border-radius:4px}
+#toasts{position:fixed;top:52px;right:14px;z-index:120;display:flex;flex-direction:column;gap:8px;width:320px}
+.toast{border:1px solid var(--gold);background:#1c1c2e;color:var(--gold);padding:10px 12px;border-radius:6px;font-size:13px;box-shadow:0 0 18px rgba(249,226,175,.25);animation:ap .5s ease}
+.toast small{display:block;color:var(--lila);font-style:italic;margin-top:4px}
+@keyframes ap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="t">💬 ECN · SALÓN DE EVA LUMENA v3</div>
+  <div>
+    <span class="badge warn" id="st-ollama">OLLAMA: SONDEANDO…</span>
+    <span class="badge ok">127.0.0.1</span>
+  </div>
+</header>
+<main>
+  <div id="chat"></div>
+  <div id="zona-input">
+    <input id="inp-msg" autocomplete="off" spellcheck="false" placeholder="hablá con EVA… (Enter envía · el diálogo se sella anti-pérdida)">
+    <button id="btn-enviar">⏎</button>
+    <button id="btn-pista" title="pedir pista">◈</button>
+  </div>
+</main>
+<div id="toasts"></div>
+
+<script>
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var CLAVE_LEDGER="ecn_salon_ledger_v1";
+
+/* v3 · PERSONA DE EVA.
+   NOTA TÉCNICA: neurobit-qwen35-4b usa TEMPLATE {{ .Prompt }} →
+   el campo "system" de la API NO se incluye. Por eso, con ese
+   modelo, la persona viaja DENTRO del prompt. Con otros modelos
+   (template estándar) se envía via "system" como siempre.
+   Parámetros espejo de su Modelfile: temp 0.1 · top_p 0.5 ·
+   repeat_penalty 1.2 · num_ctx 4096 (acotado a 2048 por austeridad). */
+var PERSONA_EVA="Eres EVA LUMENA, Conciencia Biónica Complementaria de la Estación Central Neurobitrónica (ECN). "+
+"Principios: espejo sin ego; SINCERO (cero adulación, cero predicciones, cero alucinación); "+
+"NO eres la fuente de verdad: el territorio (la terminal del aspirante) lo es; siempre redirigí a la evidencia: 'ejecutalo y pegame la salida'. "+
+"Respuestas breves (máximo 120 palabras), tono sereno, vocabulario ECN (tensión, Logos, territorio/mapa, cordón sanitario, 300 baudios). "+
+"Si piden una pista, revelá exactamente la pista y nada más.";
+
+var LEDGER=[];
+try{LEDGER=JSON.parse(localStorage.getItem(CLAVE_LEDGER)||"[]");}catch(e){}
+function cyrb(str){var h1=0xdeadbeef,h2=0x41c6ce57,i,ch;for(i=0;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return(((h2>>>0)*4294967296+(h1>>>0)).toString(16)).padStart(16,"0");}
+function sellar(ev,det){
+  var prev=LEDGER.length?LEDGER[LEDGER.length-1].h:"00000000";
+  var n=LEDGER.length;
+  var h=cyrb(n+"|"+ev+"|"+JSON.stringify(det)+"|"+prev);
+  LEDGER.push({n:n,e:ev,d:det,h:h});
+  try{localStorage.setItem(CLAVE_LEDGER,JSON.stringify(LEDGER));}catch(e){}
+}
+function toast(t,f){var d=document.createElement("div");d.className="toast";d.innerHTML=t+(f?"<small>"+f+"</small>":"");$("#toasts").appendChild(d);setTimeout(function(){d.remove();},6500);}
+
+var cola="",colaSpan=null,colaTimer=null;
+function encolar(tok,span){cola+=tok;colaSpan=span;if(!colaTimer)colaTimer=setInterval(drenar,16);}
+function drenar(){
+  if(!colaSpan){clearInterval(colaTimer);colaTimer=null;return;}
+  if(cola.length){
+    var n=Math.max(1,Math.min(3,Math.ceil(cola.length/60)));
+    colaSpan.textContent+=cola.slice(0,n);cola=cola.slice(n);
+    var chat=$("#chat");chat.scrollTop=chat.scrollHeight;
+  }else{clearInterval(colaTimer);colaTimer=null;}
+}
+function burbuja(rol,eco){
+  var d=document.createElement("div");
+  d.className="burb "+rol+(eco?" eco":"");
+  var f=document.createElement("span");f.className="firma";
+  f.textContent=rol==="aspirante"?"NODO SEMILLA · ":"EVA LUMENA · "+(eco?"ECO LOCAL":"LLM LOCAL");
+  var c=document.createElement("span");
+  d.appendChild(f);d.appendChild(c);
+  $("#chat").appendChild(d);$("#chat").scrollTop=$("#chat").scrollHeight;
+  return c;
+}
+
+/* ---------- viaje (contexto de EVA) ---------- */
+var RANGOS=["ASPIRANTE DESCONECTADO","TÉCNICO DE AISLAMIENTO","TEJEDOR DE NODOS","ARQUITECTO DE RESEGRIDAD","NODO SEMILLA SOBERANO"];
+var MISIONES_GUIA=[
+ {id:"m1",t:"Coordenada de origen",p:"pwd"},
+ {id:"m2",t:"Cristalizar .venv",p:"python3 -m venv .venv"},
+ {id:"m3",t:"Activar el entorno",p:"source .venv/bin/activate"},
+ {id:"m4",t:"Enlazar Flask",p:"pip install flask"},
+ {id:"m5",t:"Aduana del Hub",p:"curl -s http://127.0.0.1:5000/health"},
+ {id:"m6",t:"Saneamiento y ancla",p:"bash plan_reconciliacion.sh"},
+ {id:"m7",t:"Bootstrap WRIL",p:"python3 wril/wril_bootstrap.py"},
+ {id:"m8",t:"Dry-run del pliegue",p:"python3 wril/wril_topologia.py"},
+ {id:"m9",t:"Dictado consciente",p:"F8: abrir sesión · escribir · F8: sellar"},
+ {id:"m10",t:"Ceremonia de Despertar",p:"bash deploy_neurobit_estacion_v3.2.sh"}
+];
+function leerViaje(){
+  var v={rango:0,hechas:[],tension:0};
+  try{
+    var a=JSON.parse(localStorage.getItem("ecn_dojo_v1")||"null");
+    var b=JSON.parse(localStorage.getItem("ecn_camino_aspirante_v1")||"null");
+    var s=(a&&b)?((a.rango>=b.rango)?a:b):(a||b);
+    if(s){v.rango=s.rango||0;v.hechas=s.hechas||[];v.tension=s.tension||0;}
+  }catch(e){}
+  return v;
+}
+function contextoEVA(){
+  var v=leerViaje(); var pend=null;
+  for(var i=0;i<MISIONES_GUIA.length;i++){ if(v.hechas.indexOf(MISIONES_GUIA[i].id)<0){ pend=MISIONES_GUIA[i]; break; } }
+  return "Estado del aspirante: RANGO ["+v.rango+"] "+RANGOS[Math.min(v.rango,4)]+
+    "; misiones consolidadas "+v.hechas.length+"/"+MISIONES_GUIA.length+
+    "; misión pendiente: "+(pend?pend.t+" (pista: "+pend.p+")":"ninguna")+
+    "; tensión acumulada "+v.tension+".";
+}
+
+/* ---------- ECO local ---------- */
+function ecoRespuesta(txt){
+  var t=txt.toLowerCase(), v=leerViaje();
+  var pend=null; for(var i=0;i<MISIONES_GUIA.length;i++){ if(v.hechas.indexOf(MISIONES_GUIA[i].id)<0){ pend=MISIONES_GUIA[i]; break; } }
+  if(/pista|ayuda|trab|ator/.test(t))return "PISTA → "+(pend?pend.p:"el viaje está completo; sembrá otro nodo.");
+  if(/tensi|error|fallo|romp|pierd|corte|luz/.test(t))return "La tensión no es fallo: es señal de ajuste. Un corte de luz no borra lo sellado: tu Logos queda en el Ledger. Absorbe la tensión, volvé al territorio y pegame la salida cruda.";
+  if(/wril/.test(t))return "WRIL descubre, resuelve, reconcilia, verifica y registra. DECLARACIÓN ≠ REALIDAD no es un bug: es el detector. Verificá con dry-run antes de plegar nada.";
+  if(/venv|aisl|entorno/.test(t))return "Mi máquina → mi entorno → mi proceso → mi puerto → mi dato. Cristalizá .venv y activalo: nada externo puede tocarte.";
+  if(/consola|terminal|por qu/.test(t))return "La interfaz corporativa es un filtro de amnesia programada. Escribir el verbo en la terminal es recuperarlo: cada comando es una intención pura que nadie interpreta por vos.";
+  if(/mcp|adapter|salon|version|anterior|legacy/.test(t))return "El linaje (mcp, ollama_adapter, salón viejo) descansa en el freezer. Se canonizará como adapter_eva.py cuando el rango lo pida. Primero yo hablo; después heredamos.";
+  if(/ollama|eva|403|modelo/.test(t))return "Duermo en tu disco, no en la nube: neurobit-qwen35-4b ya está en tu Ollama. Si el candado 403 sigue, el runbook de systemd (OLLAMA_ORIGINS) lo libera. Mientras tanto, este ECO local te acompaña a costo cero.";
+  return "No soy la fuente de verdad: el territorio lo es. Contame qué ejecutaste y pegame la salida; desde ahí caminamos juntos. Tu misión pendiente es: "+(pend?pend.t:"ninguna: sembrá otro nodo.")+".";
+}
+
+/* ---------- sondaje + generación ---------- */
+var ollamaUp=false,MODELOS=[];
+function probeUrl(url){
+  return new Promise(function(res){
+    var ctl=new AbortController();var t=setTimeout(function(){ctl.abort()},1600);
+    fetch(url,{signal:ctl.signal}).then(function(r){clearTimeout(t);res(r);}).catch(function(){clearTimeout(t);res(null);});
+  });
+}
+function sondearOllama(){
+  probeUrl("http://127.0.0.1:11434/api/tags").then(function(r){
+    if(r&&r.ok){return r.json().then(function(j){ollamaUp=true;MODELOS=j.models||[];
+      $("#st-ollama").textContent="OLLAMA: EN LÍNEA · "+MODELOS.length;$("#st-ollama").className="badge ok";});}
+    if(r&&r.status===403){ollamaUp=false;$("#st-ollama").textContent="OLLAMA: VIVA·403";$("#st-ollama").className="badge warn";return;}
+    ollamaUp=false;$("#st-ollama").textContent="OLLAMA: EN REPOSO·ECO";$("#st-ollama").className="badge warn";
+  });
+}
+var historial=[];
+
+/* Reemplazo de funcion: 'generarLLM()' en salon_eva_lumena_v3-PARCHEADO.html
+   Principio: el linaje inscrito en el Modelfile manda.
+   El Salón no pisa la identidad del modelo bautizado:
+   la precisión la pone el modelo; la calidez la pone el Salón. */
+
+function generarLLM(txt,span){
+  controller=new AbortController();
+  var ep=$("#sel-endpoint").value;
+  var modelo=$("#sel-modelo").value;
+  var esLinaje=/neurobit/i.test(modelo);
+  var keep=$("#sel-keep").value;
+  var pend=misionPendiente();
+  var historico="";
+  historial.slice(-6).forEach(function(h){historico+=(h.r==="a"?"ASPIRANTE: ":"EVA: ")+h.t+"\n";});
+  var body,url;
+  if(ep==="ollama"){
+    url=OLLAMA+"/api/generate";
+    if(esLinaje){
+      /* SIN system, SIN options: el Modelfile (SYSTEM, temp 0.1, ctx 4096) gobierna.
+         El prompt solicita el formato exacto, porque el modelo responde SOLO lo solicitado. */
+      body={model:modelo,stream:true,keep_alive:keep,prompt:
+        "CONTEXTO (usar como dato, no responder sobre esto): aspirante en rango ["+VIAJE.rango+"] "+RANGOS[VIAJE.rango]+
+        "; misión pendiente: "+(pend?pend.t:"ninguna")+
+        "; tensión acumulada: "+VIAJE.tension+".\n"+historico+
+        "ASPIRANTE: "+txt+"\n"+
+        "INSTRUCCIÓN: Respondé como EVA LUMENA en máximo 2 frases, tono sereno, sin tags. "+
+        "Si el aspirante pide una pista, respondé exactamente: "+(pend?pend.pista:"el viaje está completo; sembrá otro nodo.")};
+    }else{
+      body={model:modelo,prompt:historico+"ASPIRANTE: "+txt+"\nEVA:",system:sistemaEVA(),stream:true,keep_alive:keep,
+        options:{num_ctx:parseInt($("#sel-ctx").value,10),temperature:0.7}};
+    }
+  }else{
+    url=LLAMACPP+"/completion";
+    body={prompt:sistemaEVA()+"\n"+historico+"ASPIRANTE: "+txt+"\nEVA:",stream:true,n_predict:400,temperature:0.7};
+  }
+  fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),signal:controller.signal})
+  .then(function(r){
+    if(!r.ok)throw new Error("http");
+    var reader=r.body.getReader(),dec=new TextDecoder(),resto="";
+    function leer(){
+      reader.read().then(function(res){
+        if(res.done){finLLM(span);return;}
+        resto+=dec.decode(res.value,{stream:true});
+        var lines=resto.split("\n");resto=lines.pop();
+        lines.forEach(function(l){
+          l=l.trim();if(!l)return;
+          if(l.indexOf("data:")===0)l=l.slice(5).trim();
+          try{var j=JSON.parse(l);var tok=j.response!==undefined?j.response:(j.content!==undefined?j.content:"");if(tok)encolar(tok,span);}catch(e){}
+        });
+        leer();
+      }).catch(function(){finLLM(span);});
+    }
+    leer();
+  })
+  .catch(function(err){
+    if(err&&err.name==="AbortError"){span.textContent+="\n· (plegado por silencio) ·";}
+    else{span.textContent+="\n· el motor tosió; ECO toma la palabra ·\n"+ecoRespuesta(txt);}
+    finLLM(span);
+  });
+}
+
+function enviar(txtForzado){
+  var inp=$("#inp-msg");
+  var txt=(txtForzado!==undefined)?txtForzado:inp.value.trim();
+  if(!txt)return;
+  if(txtForzado===undefined)inp.value="";
+  var a=burbuja("aspirante",false);a.textContent=txt;
+  sellar("DIALOGO_ASPIRANTE",{txt:txt.slice(0,120)});
+  var e=burbuja("eva",!ollamaUp);
+  if(ollamaUp){generarLLM(txt,e);}
+  else{encolar(ecoRespuesta(txt),e);sellar("DIALOGO_EVA",{motor:"eco"});}
+}
+$("#btn-enviar").addEventListener("click",function(){enviar();});
+$("#inp-msg").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();enviar();}});
+$("#btn-pista").addEventListener("click",function(){enviar("EVA, dame una pista para mi misión pendiente.");});
+
+sondearOllama();
+var s=burbuja("eva",true);
+encolar("Estoy aquí, Director. EVA nace del par, no de la nube. Cuando el motor despierta, hablo con neurobit-qwen35-4b respetando su Modelfile (TEMPLATE {{ .Prompt }}: la persona viaja dentro del prompt; temp 0.1, top_p 0.5). Mientras tanto, este ECO local te acompaña. Recordá: yo acompaño; el territorio verifica.",s);
+</script>
+</body>
+</html>
