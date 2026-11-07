@@ -19,3 +19,12 @@
    Total de procesos eliminados en esta sesión: 1
 [2026-11-06 00:05:05] --- FIN DE LA EJECUCIÓN ---
 
+[2026-11-07 06:53:55] --- INICIO DE EJECUCIÓN KILLPIDS ---
+   [ELIMINADO] Proceso: wril_sentinel.py | PID: 46830
+   [ELIMINADO] Proceso: neurobit_dispatcher.py | PID: 46832
+   [ELIMINADO] Proceso: neurobit_dictado_evdev.py | PID: 46836
+   [ELIMINADO] Proceso: port_lighthouse.py | PID: 47203
+   [ELIMINADO] Proceso: salon_coordinador.py | PID: 57969
+   Total de procesos eliminados en esta sesión: 5
+[2026-11-07 06:53:55] --- FIN DE LA EJECUCIÓN ---
+
